@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://entities/doors/rail_hinge.res" type="ArrayMesh" id=1]
+
+[node name="spatial" type="Spatial"]
+
+[node name="mesh" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0344141, 0 )
+mesh = ExtResource( 1 )
+skeleton = NodePath("")
+material/0 = null

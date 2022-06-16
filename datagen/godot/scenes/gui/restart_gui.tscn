@@ -1,0 +1,50 @@
+[gd_scene format=2]
+
+[node name="GUI" type="Control"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_top = -75.0
+margin_right = 150.0
+margin_bottom = 75.0
+mouse_filter = 1
+
+[node name="Panel" type="Panel" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -150.0
+margin_top = -75.0
+margin_right = 150.0
+margin_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="yes" type="Button" parent="Panel"]
+margin_left = 30.0
+margin_top = 100.0
+margin_right = 90.0
+margin_bottom = 130.0
+rect_pivot_offset = Vector2( 40, 21 )
+text = "Yes (Y)"
+
+[node name="no" type="Button" parent="Panel"]
+margin_left = 210.0
+margin_top = 100.0
+margin_right = 270.0
+margin_bottom = 130.0
+rect_pivot_offset = Vector2( 40, 21 )
+text = "No (B)"
+
+[node name="Label" type="Label" parent="Panel"]
+anchor_right = 1.0
+margin_left = 30.0
+margin_top = 30.0
+margin_right = -30.0
+margin_bottom = 44.0
+text = "Are you sure you want to restart?"
+align = 1
+autowrap = true

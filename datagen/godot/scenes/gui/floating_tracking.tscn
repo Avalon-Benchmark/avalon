@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://scenes/gui/floating_gui.gd" type="Script" id=1]
+[ext_resource path="res://scenes/gui/text_panel.tscn" type="PackedScene" id=3]
+
+[node name="floating_tracking" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="text_panel" parent="." instance=ExtResource( 3 )]
+width = 240
+height = 120
+text = "Headset or controller not being tracked. Please re-enable tracking to continue."

@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://scenery/flower_pink.res" type="ArrayMesh" id=1]
+
+[node name="flower_pink" type="Spatial"]
+
+[node name="flower_pink_140f" type="MeshInstance" parent="."]
+mesh = ExtResource( 1 )
+material/0 = null

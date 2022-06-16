@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://scenes/gui/text_select.gd" type="Script" id=1]
+[ext_resource path="res://scenes/gui/text_panel.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/sign_arrow.tscn" type="PackedScene" id=3]
+[ext_resource path="res://scenes/sign.tscn" type="PackedScene" id=6]
+
+[node name="selectable_sign" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="text_panel" parent="." instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.02 )
+
+[node name="prev" parent="." instance=ExtResource( 3 )]
+transform = Transform( -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, -0.75, 0, -0.03 )
+
+[node name="next" parent="." instance=ExtResource( 3 )]
+transform = Transform( -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0, 1, 0.75, 0, -0.03 )
+
+[node name="sign" parent="." instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.05 )

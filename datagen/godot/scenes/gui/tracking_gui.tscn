@@ -1,0 +1,19 @@
+[gd_scene format=2]
+
+[node name="GUI" type="Control"]
+margin_right = 240.0
+margin_bottom = 120.0
+mouse_filter = 1
+
+[node name="Panel" type="Panel" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Label" type="Label" parent="Panel"]
+margin_left = 40.0
+margin_top = 25.0
+margin_right = 200.0
+margin_bottom = 90.0
+text = "Headset or controller not being tracked. Please re-enable tracking to continue."
+align = 1
+autowrap = true

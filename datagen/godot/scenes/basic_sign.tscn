@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://scenes/gui/text_panel.tscn" type="PackedScene" id=1]
+[ext_resource path="res://scenes/sign.tscn" type="PackedScene" id=2]
+[ext_resource path="res://scenes/basic_sign.gd" type="Script" id=3]
+
+[node name="basic_sign" type="Spatial"]
+script = ExtResource( 3 )
+
+[node name="text_panel" parent="." instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.02 )
+width_in_real_world_units = 1.5
+
+[node name="sign" parent="." instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.05 )

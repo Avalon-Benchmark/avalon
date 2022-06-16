@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://entities/animals/animal_template.tscn" type="PackedScene" id=1]
+[ext_resource path="res://entities/animals/predators/natural_weapon.gd" type="Script" id=2]
+
+[node name="predator" instance=ExtResource( 1 )]
+edible_when = "NEVER"
+grabbable_when = "DEAD"
+
+[node name="floor_ray" parent="movement_controller" index="1"]
+cast_to = Vector3( 0, -4, 0 )
+
+[node name="natural_weapon" type="Area" parent="." index="4"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5 )
+script = ExtResource( 2 )
+
+[node name="collision_shape" type="CollisionShape" parent="natural_weapon" index="0"]

@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://items/sphere_marker.gd" type="Script" id=2]
+
+[sub_resource type="SphereMesh" id=1]
+
+[sub_resource type="SpatialMaterial" id=2]
+resource_local_to_scene = true
+albedo_color = Color( 1, 0.0313726, 0.0313726, 1 )
+
+[node name="sphere_marker" type="MeshInstance"]
+mesh = SubResource( 1 )
+material/0 = SubResource( 2 )
+script = ExtResource( 2 )

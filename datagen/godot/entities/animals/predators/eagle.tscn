@@ -1,0 +1,59 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://entities/animals/predators/eagle.gd" type="Script" id=1]
+[ext_resource path="res://entities/animals/predators/predator_template.tscn" type="PackedScene" id=2]
+[ext_resource path="res://entities/animals/predators/eagle.res" type="ArrayMesh" id=3]
+[ext_resource path="res://entities/animals/predators/eagle_flying.res" type="ArrayMesh" id=4]
+[ext_resource path="res://entities/animals/predators/eagle_dead.res" type="ArrayMesh" id=5]
+
+[sub_resource type="BoxShape" id=7]
+extents = Vector3( 2.5, 0.563, 0.5 )
+
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 1, 0.563, 1 )
+
+[sub_resource type="BoxShape" id=5]
+extents = Vector3( 0.76, 0.55, 0.75 )
+
+[node name="eagle" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+primary_domain = "AIR"
+
+[node name="wing_collision_shape" type="CollisionShape" parent="." index="0"]
+shape = SubResource( 7 )
+disabled = true
+
+[node name="collision_shape" parent="." index="1"]
+transform = Transform( 0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0 )
+shape = SubResource( 4 )
+
+[node name="alive_mesh" parent="." index="2"]
+transform = Transform( -2.813, 0, 0, 0, 2.813, 0, 0, 0, -2.813, 0, -0.05, 0 )
+mesh = ExtResource( 4 )
+
+[node name="dead_mesh" parent="." index="3"]
+transform = Transform( -2.813, 0, 0, 0, 2.813, 0, 0, 0, -2.813, 0, -0.05, 0 )
+mesh = ExtResource( 5 )
+skeleton = NodePath("../alive_mesh")
+material/0 = null
+
+[node name="stationary_mesh" type="MeshInstance" parent="." index="4"]
+visible = false
+mesh = ExtResource( 3 )
+material/0 = null
+
+[node name="collision_shape" parent="movement_controller" index="0"]
+transform = Transform( 0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, 0, 0 )
+shape = SubResource( 4 )
+
+[node name="floor_ray" parent="movement_controller" index="1"]
+cast_to = Vector3( 0, -10, 0 )
+
+[node name="natural_weapon" parent="." index="6"]
+transform = Transform( 0.707107, 0, 0.707107, 0, 1, 0, -0.707107, 0, 0.707107, 0, -0.15, -0.5 )
+
+[node name="collision_shape" parent="natural_weapon" index="0"]
+shape = SubResource( 5 )
+
+[node name="visibility_notifier" type="VisibilityNotifier" parent="." index="7"]
+aabb = AABB( -0.5, -0.5, -0.5, 1, 1, 1 )

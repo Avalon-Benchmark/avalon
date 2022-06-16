@@ -1,0 +1,31 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://entities/animals/prey/rabbit.gd" type="Script" id=1]
+[ext_resource path="res://entities/animals/animal_template.tscn" type="PackedScene" id=2]
+[ext_resource path="res://entities/animals/prey/rabbit.res" type="ArrayMesh" id=3]
+[ext_resource path="res://entities/animals/prey/rabbit_dead.res" type="ArrayMesh" id=4]
+
+[sub_resource type="BoxShape" id=5]
+resource_local_to_scene = true
+margin = 0.001
+extents = Vector3( 0.6, 0.9, 0.9 )
+
+[node name="rabbit" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+primary_domain = "GROUND"
+
+[node name="collision_shape" parent="." index="0"]
+shape = SubResource( 5 )
+
+[node name="alive_mesh" parent="." index="1"]
+transform = Transform( -3, 0, -4.52987e-07, 0, 3.75, 0, 4.52987e-07, 0, -3, 0, -0.9, 0.075 )
+mesh = ExtResource( 3 )
+
+[node name="dead_mesh" parent="." index="2"]
+transform = Transform( -3, 0, -4.52987e-07, 0, 3.75, 0, 4.52987e-07, 0, -3, 0, -0.9, 0.075 )
+mesh = ExtResource( 4 )
+skeleton = NodePath("../alive_mesh")
+material/0 = null
+
+[node name="collision_shape" parent="movement_controller" index="0"]
+shape = SubResource( 5 )

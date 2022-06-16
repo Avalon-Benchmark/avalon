@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="CylinderShape" id=1]
+radius = 10.0
+height = 40.0
+
+[node name="territory" type="Area"]
+
+[node name="collision_shape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )

@@ -1,0 +1,30 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://items/food/cherry.res" type="ArrayMesh" id=1]
+[ext_resource path="res://items/food/food.gd" type="Script" id=2]
+
+[sub_resource type="PhysicsMaterial" id=3]
+bounce = 0.75
+absorbent = true
+
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 0.3, 1.3, 0.1 )
+
+[sub_resource type="SphereShape" id=5]
+radius = 0.65
+
+[node name="cherry" type="RigidBody"]
+physics_material_override = SubResource( 3 )
+script = ExtResource( 2 )
+
+[node name="mesh" type="MeshInstance" parent="."]
+transform = Transform( 12, 0, 0, 0, 12, 0, 0, 0, 12, 0, 0, 0 )
+mesh = ExtResource( 1 )
+material/0 = null
+
+[node name="stem_collision_shape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.84732, 0 )
+shape = SubResource( 4 )
+
+[node name="collision_shape_2" type="CollisionShape" parent="."]
+shape = SubResource( 5 )

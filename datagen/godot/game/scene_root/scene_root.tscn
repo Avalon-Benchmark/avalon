@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://game/camera/tracking_camera_controller.gd" type="Script" id=1]
+[ext_resource path="res://scenes/health_bar.tscn" type="PackedScene" id=2]
+
+[node name="SceneRoot" type="Spatial"]
+
+[node name="GeneratorRoot" type="Node" parent="."]
+
+[node name="camera_controller" type="Node" parent="."]
+script = ExtResource( 1 )
+tracked_node = "physical_head"
+
+[node name="health_bar" parent="." instance=ExtResource( 2 )]
+max_value = 10.0
+value = 1.0

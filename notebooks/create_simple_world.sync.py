@@ -1,0 +1,51 @@
+# %%
+from pathlib import Path
+
+import numpy as np
+from scipy import stats
+
+from common.log_utils import enable_debug_logging
+from datagen.world_creation.heightmap import get_oculus_export_config
+from datagen.world_creation.items import CANONICAL_FOOD_HEIGHT_ON_TREE
+from datagen.world_creation.items import FOOD_TREE_VISIBLE_HEIGHT
+from datagen.world_creation.tasks.eat import add_food_tree_for_simple_task
+from datagen.world_creation.tasks.task_worlds import WorldType
+from datagen.world_creation.tasks.task_worlds import create_world_for_skill_scenario
+from datagen.world_creation.tasks.utils import export_skill_world
+
+enable_debug_logging()
+
+# %%
+
+difficulty = 0.5
+size_in_meters = 50.0
+world_type = WorldType.CONTINENT
+
+base = get_oculus_export_config()
+
+
+export_configs = [
+    base,
+]
+
+for i, export_config in enumerate(export_configs):
+    rand = np.random.default_rng(0)
+
+    world, locations = create_world_for_skill_scenario(
+        rand,
+        difficulty,
+        CANONICAL_FOOD_HEIGHT_ON_TREE,
+        stats.norm(size_in_meters, size_in_meters / 5),
+        world_type=world_type,
+        export_config=export_config,
+        visibility_height=FOOD_TREE_VISIBLE_HEIGHT,
+    )
+
+    add_food_tree_for_simple_task(world, locations)
+    world.add_spawn(rand, difficulty, locations.spawn, locations.goal)
+
+    output_path = Path(f"/tmp/profiling_levels/level_{export_config.name}")
+    output_path.mkdir(parents=True, exist_ok=True)
+    export_skill_world(output_path, rand, world)
+
+# %%

@@ -1,0 +1,81 @@
+[gd_scene load_steps=19 format=2]
+
+[ext_resource path="res://entities/animals/predators/bee.tscn" type="PackedScene" id=1]
+[ext_resource path="res://entities/animals/predators/wolf.tscn" type="PackedScene" id=2]
+[ext_resource path="res://entities/animals/predators/eagle.tscn" type="PackedScene" id=3]
+[ext_resource path="res://entities/animals/predators/alligator.tscn" type="PackedScene" id=4]
+[ext_resource path="res://entities/animals/predators/snake.tscn" type="PackedScene" id=5]
+[ext_resource path="res://entities/animals/predators/hawk.tscn" type="PackedScene" id=6]
+[ext_resource path="res://entities/animals/predators/bear.tscn" type="PackedScene" id=7]
+[ext_resource path="res://entities/animals/predators/jaguar.tscn" type="PackedScene" id=8]
+[ext_resource path="res://entities/animals/predators/hippo.tscn" type="PackedScene" id=9]
+[ext_resource path="res://entities/animals/prey/turtle.tscn" type="PackedScene" id=10]
+[ext_resource path="res://entities/animals/prey/rabbit.tscn" type="PackedScene" id=11]
+[ext_resource path="res://entities/animals/prey/deer.tscn" type="PackedScene" id=12]
+[ext_resource path="res://entities/animals/prey/crow.tscn" type="PackedScene" id=13]
+[ext_resource path="res://entities/animals/prey/squirrel.tscn" type="PackedScene" id=14]
+[ext_resource path="res://entities/animals/prey/pigeon.tscn" type="PackedScene" id=15]
+[ext_resource path="res://entities/animals/prey/mouse.tscn" type="PackedScene" id=16]
+[ext_resource path="res://entities/animals/prey/frog.tscn" type="PackedScene" id=17]
+[ext_resource path="res://game/player/scenes/physical_player.tscn" type="PackedScene" id=18]
+
+[node name="animals" type="Spatial"]
+
+[node name="predators" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2 )
+
+[node name="bee" parent="predators" instance=ExtResource( 1 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 4, 0 )
+
+[node name="snake" parent="predators" instance=ExtResource( 5 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 0, 0 )
+
+[node name="hawk" parent="predators" instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0 )
+
+[node name="eagle" parent="predators" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 4, 0 )
+
+[node name="alligator" parent="predators" instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0 )
+
+[node name="wolf" parent="predators" instance=ExtResource( 2 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0 )
+
+[node name="jaguar" parent="predators" instance=ExtResource( 8 )]
+
+[node name="bear" parent="predators" instance=ExtResource( 7 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0, 0 )
+
+[node name="hippo" parent="predators" instance=ExtResource( 9 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 0 )
+
+[node name="prey" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0, -4 )
+
+[node name="frog" parent="prey" instance=ExtResource( 17 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0 )
+
+[node name="mouse" parent="prey" instance=ExtResource( 16 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0 )
+
+[node name="pigeon" parent="prey" instance=ExtResource( 15 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 4, 0 )
+
+[node name="crow" parent="prey" instance=ExtResource( 13 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 4, 0 )
+
+[node name="squirrel" parent="prey" instance=ExtResource( 14 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 0 )
+
+[node name="turtle" parent="prey" instance=ExtResource( 10 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 0 )
+
+[node name="rabbit" parent="prey" instance=ExtResource( 11 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0 )
+
+[node name="deer" parent="prey" instance=ExtResource( 12 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0 )
+
+[node name="physical_player" parent="." instance=ExtResource( 18 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, -8.5 )

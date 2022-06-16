@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://items/log.gd" type="Script" id=1]
+[ext_resource path="res://items/log.res" type="ArrayMesh" id=2]
+
+[sub_resource type="CylinderShape" id=1]
+radius = 0.7
+height = 6.4
+
+[node name="log" type="RigidBody"]
+script = ExtResource( 1 )
+
+[node name="collision_shape" type="CollisionShape" parent="."]
+transform = Transform( -4.37114e-08, 1, -4.37114e-08, 0, -4.37114e-08, -1, -1, -4.37114e-08, 1.91069e-15, 0, 0, 0 )
+shape = SubResource( 1 )
+
+[node name="mesh" type="MeshInstance" parent="."]
+transform = Transform( 2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0 )
+mesh = ExtResource( 2 )
+material/0 = null

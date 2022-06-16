@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://entities/doors/crossbeam_rotate.res" type="ArrayMesh" id=1]
+
+[node name="spatial" type="Spatial"]
+
+[node name="mesh" type="MeshInstance" parent="."]
+transform = Transform( -0.95, 1.88745e-07, 0, -1.43446e-07, -1.25, 0, 0, 0, 1.9, -0.525338, 0, -0.0320641 )
+mesh = ExtResource( 1 )
+material/0 = null

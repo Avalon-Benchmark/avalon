@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://entities/animals/predators/bee.gd" type="Script" id=1]
+[ext_resource path="res://entities/animals/predators/predator_template.tscn" type="PackedScene" id=2]
+[ext_resource path="res://entities/animals/predators/bee.res" type="ArrayMesh" id=3]
+[ext_resource path="res://entities/animals/predators/bee_dead.res" type="ArrayMesh" id=4]
+
+[sub_resource type="BoxShape" id=3]
+extents = Vector3( 0.6, 0.825, 0.975 )
+
+[sub_resource type="BoxShape" id=4]
+extents = Vector3( 0.7, 0.75, 0.75 )
+
+[node name="bee" instance=ExtResource( 2 )]
+script = ExtResource( 1 )
+primary_domain = "AIR"
+player_detection_radius = 6.0
+attack_damage = 0.25
+
+[node name="collision_shape" parent="." index="0"]
+shape = SubResource( 3 )
+
+[node name="alive_mesh" parent="." index="1"]
+transform = Transform( -4.688, 0, 0, 0, 4.688, 0, 0, 0, -4.688, 0, -0.2, -0.1 )
+mesh = ExtResource( 3 )
+
+[node name="dead_mesh" parent="." index="2"]
+transform = Transform( -4.688, 0, 0, 0, 4.688, 0, 0, 0, -4.688, 0, -0.2, -0.1 )
+mesh = ExtResource( 4 )
+skeleton = NodePath("../alive_mesh")
+material/0 = null
+
+[node name="natural_weapon" parent="." index="4"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.15, -0.3 )
+
+[node name="collision_shape" parent="natural_weapon" index="0"]
+shape = SubResource( 4 )
+
+[node name="collision_shape" parent="movement_controller" index="0"]
+shape = SubResource( 3 )

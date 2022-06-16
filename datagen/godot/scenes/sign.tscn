@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://navigation/sign.res" type="ArrayMesh" id=1]
+
+[sub_resource type="BoxShape" id=22]
+extents = Vector3( 1, 0.3, 0.05 )
+
+[node name="sign" type="StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1 )
+
+[node name="collision_shape" type="CollisionShape" parent="."]
+shape = SubResource( 22 )
+
+[node name="menu_plank_01_big" type="MeshInstance" parent="."]
+transform = Transform( 1.6, 0, 0, 0, 1.2, 0, 0, 0, 1, 0, 0, 0 )
+mesh = ExtResource( 1 )
+material/0 = null

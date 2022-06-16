@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://navigation/sign_post.res" type="ArrayMesh" id=1]
+
+[node name="sign_post" type="Spatial"]
+
+[node name="menu_wooden_pillar" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 2.19002, 0, 0, 0, 1, 0, 0, 0 )
+mesh = ExtResource( 1 )
+material/0 = null

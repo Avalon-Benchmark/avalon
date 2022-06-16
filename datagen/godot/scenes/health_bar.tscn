@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://game/player/player_health_bar.gd" type="Script" id=1]
+
+[node name="health_bar" type="ProgressBar"]
+anchor_right = 1.0
+margin_bottom = 18.0
+value = 100.0
+percent_visible = false
+script = ExtResource( 1 )
+
+[node name="hit_point_label" type="Label" parent="."]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_top = -7.0
+margin_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 1
+align = 1
+valign = 1

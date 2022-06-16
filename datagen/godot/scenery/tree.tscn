@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=2]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 0.454902, 0.133333, 0, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+material = SubResource( 1 )
+size = Vector3( 0.2, 2, 0.2 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.0156863, 0.796078, 0, 1 )
+
+[sub_resource type="CylinderMesh" id=4]
+material = SubResource( 3 )
+top_radius = 0.0
+bottom_radius = 2.0
+height = 1.5
+radial_segments = 4
+rings = 1
+
+[sub_resource type="BoxShape" id=5]
+extents = Vector3( 0.1, 2.25, 0.1 )
+
+[node name="tree" type="RigidBody"]
+mode = 1
+
+[node name="trunk" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.970925, 0 )
+mesh = SubResource( 2 )
+material/0 = null
+
+[node name="leaves" type="MeshInstance" parent="trunk"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.13783, 0 )
+mesh = SubResource( 4 )
+material/0 = null
+
+[node name="leaves_2" type="MeshInstance" parent="trunk"]
+transform = Transform( 1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 1.6324, 0 )
+mesh = SubResource( 4 )
+material/0 = null
+
+[node name="collision_shape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0 )
+shape = SubResource( 5 )

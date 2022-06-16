@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://entities/animals/movement_controller.gd" type="Script" id=1]
+[ext_resource path="res://entities/animals/animal.gd" type="Script" id=2]
+
+[sub_resource type="PhysicsMaterial" id=5]
+
+[sub_resource type="CubeMesh" id=2]
+size = Vector3( 1, 1, 1 )
+
+[node name="animal" type="RigidBody"]
+physics_material_override = SubResource( 5 )
+contacts_reported = 10
+contact_monitor = true
+script = ExtResource( 2 )
+is_behaving_like_item = false
+
+[node name="collision_shape" type="CollisionShape" parent="."]
+
+[node name="alive_mesh" type="MeshInstance" parent="."]
+mesh = SubResource( 2 )
+material/0 = null
+
+[node name="dead_mesh" type="MeshInstance" parent="."]
+visible = false
+
+[node name="movement_controller" type="KinematicBody" parent="."]
+collision/safe_margin = 0.01
+script = ExtResource( 1 )
+
+[node name="collision_shape" type="CollisionShape" parent="movement_controller"]
+
+[node name="floor_ray" type="RayCast" parent="movement_controller"]
+enabled = true
+cast_to = Vector3( 0, -2, 0 )

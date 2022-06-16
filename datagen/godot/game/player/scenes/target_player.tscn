@@ -1,0 +1,21 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://game/player/scenes/hand.tscn" type="PackedScene" id=2]
+[ext_resource path="res://game/player/player_hand.gd" type="Script" id=3]
+
+[node name="target_player" type="Spatial"]
+
+[node name="target_head" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+
+[node name="target_left_hand" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1.5, -0.5 )
+script = ExtResource( 3 )
+
+[node name="hand" parent="target_left_hand" instance=ExtResource( 2 )]
+
+[node name="target_right_hand" type="Spatial" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.5, -0.5 )
+script = ExtResource( 3 )
+
+[node name="hand" parent="target_right_hand" instance=ExtResource( 2 )]

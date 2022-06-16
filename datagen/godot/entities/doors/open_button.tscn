@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://entities/doors/button_red.res" type="ArrayMesh" id=1]
+[ext_resource path="res://entities/doors/button_green.res" type="ArrayMesh" id=2]
+
+[node name="spatial" type="Spatial"]
+
+[node name="red_mesh" type="MeshInstance" parent="."]
+transform = Transform( 0.9, 0, 0, 0, -5.68248e-08, -0.9, 0, 1.3, -3.93403e-08, 0, 0, -0.09 )
+mesh = ExtResource( 1 )
+skeleton = NodePath("")
+material/0 = null
+
+[node name="green_mesh" type="MeshInstance" parent="."]
+transform = Transform( 0.9, 0, 0, 0, -5.68248e-08, -0.9, 0, 1.3, -3.93403e-08, 0, 0, -0.09 )
+visible = false
+mesh = ExtResource( 2 )
+skeleton = NodePath("../red_mesh")
+material/0 = null

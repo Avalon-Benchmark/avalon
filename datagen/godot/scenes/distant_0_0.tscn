@@ -1,0 +1,4 @@
+[gd_scene load_steps=1 format=2]
+
+[node name="DistantData" type="Spatial"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )

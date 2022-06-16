@@ -1,0 +1,70 @@
+# ~/.bashrc: executed by bash(1) for non-login shells
+
+SHELL_ID=$(printf '%(%Y-%m-%d.%H.%M.%S)T.%08d' -2 $BASHPID)
+
+case $- in
+    *i*)
+        BASH_INTERACTIVE=1
+    ;;
+    *)
+        BASH_INTERACTIVE=0
+    ;;
+esac
+
+if [[ $BASH_INTERACTIVE == 1 ]]
+then
+    mkdir -p "${HOME}/.bash_history_per_shell"
+
+    HISTFILE="${HOME}/.bash_history_per_shell/${SHELL_ID}"
+    HISTSIZE='10000'
+    HISTFILESIZE=''
+
+    HISTCONTROL='ignorespace'
+    HISTIGNORE='history:ls:ll'
+
+    PROMPT_COMMAND="history -a; history 1 | cut -c 8- >> ~/.bash_history"
+
+    history -r ~/.bash_history
+
+    shopt -s histappend
+    shopt -s checkwinsize
+
+    if [[ -x /usr/bin/dircolors ]]
+    then
+        eval "$(dircolors -b)"
+
+        alias ls='ls --color=auto'
+        alias grep='grep --color=auto'
+        alias fgrep='fgrep --color=auto'
+        alias egrep='egrep --color=auto'
+    fi
+
+    alias ll='ls -alF'
+    alias la='ls -A'
+    alias l='ls -CF'
+
+    if [[ -f ~/.bash_aliases ]]
+    then
+        source ~/.bash_aliases
+    fi
+
+    if [[ -f /usr/share/bash-completion/bash_completion ]]
+    then
+        source /usr/share/bash-completion/bash_completion
+    fi
+fi
+
+case "$TERM" in
+    xterm*|kitty*)
+        PS1='\[\033]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\] \[\033[01;34m\]\w\[\033[00m\] \$ '
+    ;;
+    *)
+        PS1='\u@\h:\w\$ '
+    ;;
+esac
+
+####
+
+export PATH=/opt/venv/bin:$PATH
+
+####

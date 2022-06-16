@@ -1,0 +1,64 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://scenes/teleporter/teleport_button.gd" type="Script" id=1]
+[ext_resource path="res://shaders/BasicColor.shader" type="Shader" id=2]
+[ext_resource path="res://navigation/sign_post.tscn" type="PackedScene" id=3]
+
+[sub_resource type="BoxShape" id=17]
+extents = Vector3( 0.2, 0.2, 0.2 )
+
+[sub_resource type="SphereMesh" id=18]
+radius = 0.15
+height = 0.3
+
+[sub_resource type="ShaderMaterial" id=19]
+resource_local_to_scene = true
+shader = ExtResource( 2 )
+shader_param/specular = 0.7
+shader_param/metallic = 0.1
+shader_param/roughness = 0.5
+shader_param/color1 = Color( 0.752941, 0.890196, 0.878431, 1 )
+shader_param/color2 = Color( 0, 0, 0, 1 )
+
+[sub_resource type="BoxShape" id=14]
+extents = Vector3( 0.1, 0.65, 0.1 )
+
+[sub_resource type="ShaderMaterial" id=16]
+shader = ExtResource( 2 )
+shader_param/specular = 0.5
+shader_param/metallic = 0.0
+shader_param/roughness = 1.0
+shader_param/color1 = Color( 0, 0, 0, 1 )
+shader_param/color2 = Color( 0, 0, 0, 1 )
+
+[sub_resource type="CubeMesh" id=15]
+material = SubResource( 16 )
+size = Vector3( 0.4, 1.2, 0.4 )
+
+[node name="teleporter_button" type="Spatial"]
+
+[node name="button" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0 )
+script = ExtResource( 1 )
+entity_id = 0
+
+[node name="collision_shape" type="CollisionShape" parent="button"]
+shape = SubResource( 17 )
+
+[node name="mesh_instance" type="MeshInstance" parent="button"]
+mesh = SubResource( 18 )
+material/0 = SubResource( 19 )
+
+[node name="pillar" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0 )
+
+[node name="collision_shape" type="CollisionShape" parent="pillar"]
+shape = SubResource( 14 )
+
+[node name="post" parent="pillar" instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 0.75, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="mesh_instance" type="MeshInstance" parent="pillar"]
+visible = false
+mesh = SubResource( 15 )
+material/0 = null

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://scenery/bush.res" type="ArrayMesh" id=1]
+
+[node name="bush" type="Spatial"]
+
+[node name="bush_01_77f" type="MeshInstance" parent="."]
+transform = Transform( 0.688128, 0, 0, 0, 0.688128, 0, 0, 0, 0.688128, 9.863, 0, 13.6257 )
+mesh = ExtResource( 1 )
+material/0 = null
