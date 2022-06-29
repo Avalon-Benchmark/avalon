@@ -39,6 +39,8 @@ var is_spawning_player := false
 var last_food_frame := INF
 var is_food_gone := false
 
+var _is_quitting: bool = false
+
 # TODO clean up scene management
 # for the human player
 var initial_scene_path = "res://scenes/entry.tscn"
@@ -274,6 +276,9 @@ func _input_event(event: InputEvent):
 
 
 func _iteration(delta: float) -> bool:
+	if _is_quitting:
+		return true
+
 	if Input.is_action_pressed("ui_cancel"):
 		handle_quit()
 
@@ -335,6 +340,9 @@ func _idle(_delta):
 	if OS.has_feature("zero_delay_physics"):
 		PhysicsServer.flush_queries()
 
+	if _is_quitting:
+		return true
+
 	# move tracking camera, after physics has been done
 	camera_controller.do_physics(_delta)
 
@@ -345,6 +353,9 @@ func _idle(_delta):
 
 
 func _post_draw(_arg):
+	if _is_quitting:
+		return
+
 	if not is_player_human():
 		_blocking_physics_process()
 
@@ -632,6 +643,19 @@ func handle_quit():
 	ClassBuilder.clear()
 
 	paused = true
+	_is_quitting = true
+	# it is possible this is overkill but so far doesn't seem so
+	var possibly_dangling_references = [
+		input_collector,
+		rng,
+		recorder,
+		visual_effect_handler,
+	]
+	for ref in possibly_dangling_references:
+		if ref:
+			ref.unreference()
+			ref = null
+
 	quit()
 
 
