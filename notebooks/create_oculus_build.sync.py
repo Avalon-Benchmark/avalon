@@ -1,13 +1,20 @@
 # %%
+import os
 from pathlib import Path
 
-from common.imports import tqdm
-from common.log_utils import enable_debug_logging
-from contrib.utils import FILESYSTEM_ROOT
-from datagen.generate_apks import generate_apk
-from datagen.generate_apks import generate_apks
-from datagen.generate_worlds import generate_worlds
-from datagen.world_creation.constants import AvalonTask
+from loguru import logger
+
+from avalon.common.imports import tqdm
+from avalon.common.log_utils import enable_debug_logging
+from avalon.contrib.utils import FILESYSTEM_ROOT
+from avalon.contrib.utils import TEMP_DIR
+from avalon.datagen.generate_apks import add_apk_version_to_server
+from avalon.datagen.generate_apks import add_worlds_to_server
+from avalon.datagen.generate_apks import generate_apk
+from avalon.datagen.generate_apks import generate_apks
+from avalon.datagen.generate_apks import upload_apk_to_server
+from avalon.datagen.generate_worlds import generate_worlds
+from avalon.datagen.world_creation.constants import AvalonTask
 
 enable_debug_logging()
 
@@ -24,10 +31,10 @@ else:
 
 assert APK_VERSION != "", "Run `git rev-parse HEAD` and set the APK version to be the most recent git hash."
 
-print("APK_VERSION", APK_VERSION)
+logger.info(f"{APK_VERSION}=")
 
 worlds_path = Path(f"{FILESYSTEM_ROOT}/avalon/worlds/{APK_VERSION}")
-worlds_path.mkdir(exist_ok=True, parents=True)
+worlds_path.mkdir(parents=True, exist_ok=True)
 
 # %%
 
@@ -55,17 +62,18 @@ tasks = [
 ]
 
 # %%
+practice_worlds = generate_worlds(
+    base_output_path=worlds_path,
+    tasks=tasks,
+    num_worlds_per_task=10,
+    start_seed=10000,
+    is_practice=True,
+    min_difficulty=0.0,
+    is_recreating=True,
+    is_generating_for_human=True,
+    num_workers=64,
+)
 
-if RELEASE_BUILD:
-    practice_worlds = generate_worlds(
-        base_output_path=worlds_path,
-        tasks=tasks,
-        num_worlds_per_task=2,
-        start_seed=10000,
-        is_practice=True,
-        min_difficulty=0.5,
-        is_recreating=True,
-    )
 
 # %%
 
@@ -78,19 +86,31 @@ if RELEASE_BUILD:
         is_practice=False,
         min_difficulty=0.0,
         is_recreating=True,
+        is_generating_for_human=False,
+        num_workers=64,
     )
+else:
+    actual_worlds = []
 
 # %%
 
-godot_path = Path("datagen/godot").absolute()
+if RELEASE_BUILD:
+    # makes an API request to the server to create new directories for the worlds
+    #   NOTE: does not copy the worlds
+    if len(practice_worlds) > 0:
+        add_worlds_to_server(practice_worlds)
+    if len(actual_worlds) > 0:
+        add_worlds_to_server(actual_worlds)
 
-tmp_path = Path(f"/tmp/avalon/apks")
-tmp_path.mkdir(exist_ok=True, parents=True)
+# make sure this apk version is valid
+add_apk_version_to_server(APK_VERSION)
 
-output_path = Path(f"/opt/avalon/apks")
-output_path.mkdir(exist_ok=True, parents=True)
+# %%
 
-apk_script = str(Path("scripts/apk.sh").absolute())
+godot_path = Path("datagen/godot")
+tmp_path = Path(f"{TEMP_DIR}/avalon/apks")
+output_path = Path(f"{FILESYSTEM_ROOT}/avalon/apks")
+apk_script = f"{os.getcwd()}/scripts/apk.sh"
 
 participant_ids = ["your_participant_ids_here"]
 
@@ -124,10 +144,11 @@ else:
         )
         output_apks.append(out)
 
-# %%
-
-print("APK content hashes, excluding android/config.json:")
+logger.info("APK content hashes, excluding android/config.json:")
 for output in output_apks:
-    print(f"{output['apk_hash']} {output['apk_file']}")
+    logger.info(f"{output['apk_hash']} {output['apk_file']}")
+
+    if RELEASE_BUILD:
+        upload_apk_to_server(output["apk_file"])
 
 # %%

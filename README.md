@@ -6,14 +6,17 @@ A future release (with additional docs, tests, and examples) will be made at a l
 
 # Getting started
 
-The easiest way to get started is to create a docker container. 
+## Docker startup (recommended)
+
+For running examples and training models,
+the easiest way to get started is to create a docker container:
 
 ```bash
-# build the docker image for PPO
+# build the docker image for PPO (https://openai.com/blog/openai-baselines-ppo/)
 docker build -f ./docker/Dockerfile . --tag=avalon/ppo
 
-# optionally, use the following to build an image that can be used to run torchbeast 
-docker build -f ./torchbeast_docker/Dockerfile . --tag=avalon/torchbeast
+# optionally, use the following to build an image that can be used to run torchbeast (https://github.com/facebookresearch/torchbeast)
+docker build -f ./docker_torchbeast/Dockerfile . --tag=avalon/torchbeast
 
 # start the docker container and forward ports for a jupyter notebook
 # to enable wandb, add `-e WANDB_API_KEY=<your wandb key>`
@@ -27,14 +30,26 @@ To start training PPO, run the following command:
 docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabilities=compute,utility,graphics"' avalon/ppo ./scripts/ppo.sh
 ```
 
+## Installing locally
+
+Alternatively, the requirements in `docker/20_requirements.txt` and `docker/21_requirements.txt` can be manually installed locally:
+```sh
+pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 -r 20_requirements.txt -r 21_requirements.txt
+```
+You will also need to pull out the packages that are pip installed in `docker/41_pip_extras.sh`.
+
+
 ## Using avalon via the OpenAI Gym interface
 
 Running Avalon is as simple as the following:
 ```python
-from datagen.env_helper import create_env
-from datagen.env_helper import create_vr_benchmark_config
-from datagen.env_helper import display_video
-from datagen.godot_env import VRActionType
+# From notebooks/overview.ipynb
+# Simple random sampling with the standard gym interface
+from avalon.datagen.env_helper import create_env
+from avalon.datagen.env_helper import create_vr_benchmark_config
+from avalon.datagen.env_helper import display_video
+from avalon.datagen.godot_env import VRActionType
+
 
 config = create_vr_benchmark_config()
 action_type = VRActionType
@@ -43,19 +58,15 @@ env = create_env(config, action_type)
 
 observations = [env.reset()]
 
-for i in range(10):
+for _ in range(10):
     random_action = action_space.sample()
-    observations.append(env.step(random_action))
+    observation, _reward, _is_done, _log = env.step(random_action)
+    observations.append(observation)
 
 display_video(observations)
 ```
 
 For a full example on how to create random worlds, take actions as an agent, and display the resulting observations, see [gym_interface_example](./notebooks/gym_interface_example.sync.ipynb).
-
-## Installing locally
-
-Alternatively, the requirements in `20_requirements.txt` and `21_requirements.txt` can be manually installed locally. 
-You will also need to pull out the packages that are pip installed in `20_pip_torch` and `41_pip_extras.sh`.
 
 # Notebooks
 

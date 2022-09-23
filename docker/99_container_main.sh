@@ -7,7 +7,7 @@ DATA=/mnt/private
 
 mkdir -p ~/.ipython/profile_default/
 cat > ~/.ipython/profile_default/ipython_config.py << EOF
-c.InteractiveShellApp.exec_lines = ["import os; os.chdir('${CODE}')", "import common.hacks"]
+c.InteractiveShellApp.exec_lines = ["import os; os.chdir('${CODE}')", "import avalon.common.hacks"]
 EOF
 
 sudo mkdir -m 777 "${DATA}"

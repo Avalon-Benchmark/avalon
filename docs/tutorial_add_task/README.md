@@ -55,24 +55,25 @@ so we find it best to copy the `godot` subdirectory to a new location:
 The contents of that subdirectory have everything to play the world directly in Godot on your machine. It's also where we'll generate all our worlds. Remember - if you do change something in the `godot` subdirectory that you want to keep, you'll need to sync it over again.
 
 Here's a simple script to generate a world with a specified task, seed and difficulty:
+
 ```python
 # generate.py - you can place this file in the root of the avalon folder for now.
-from pathlib import Path  
-  
-import numpy as np  
-  
-from datagen.world_creation.configs.export import get_mouse_and_keyboard_export_config  
-from datagen.world_creation.constants import AvalonTask  
-from datagen.world_creation.world_generator import _GENERATION_FUNCTION_BY_TASK  
-  
-  
-def create(output_path, task, difficulty, seed):  
-    rand = np.random.default_rng(seed)  
-    generation_function = _GENERATION_FUNCTION_BY_TASK[task]  
-    generation_function(rand, difficulty, output_path, export_config=get_mouse_and_keyboard_export_config())  
-  
-  
-if __name__ == "__main__":  
+from pathlib import Path
+
+import numpy as np
+
+from avalon.datagen.world_creation.configs.export import get_mouse_and_keyboard_export_config
+from avalon.datagen.world_creation.constants import AvalonTask
+from avalon.datagen.world_creation.world_generator import GENERATION_FUNCTION_BY_TASK
+
+
+def create(output_path, task, difficulty, seed):
+    rand = np.random.default_rng(seed)
+    generation_function = GENERATION_FUNCTION_BY_TASK[task]
+    generation_function(rand, difficulty, output_path, export_config=get_mouse_and_keyboard_export_config())
+
+
+if __name__ == "__main__":
     create(Path("/tmp/taskgen/"), AvalonTask.EAT, 0.5, 12345)
 ```
 

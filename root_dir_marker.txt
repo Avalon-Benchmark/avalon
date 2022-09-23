@@ -1,1 +1,0 @@
-This file is used to identify ROOT_DIR.

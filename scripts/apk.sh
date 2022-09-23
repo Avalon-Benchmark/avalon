@@ -19,6 +19,13 @@ EOF
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 5A6166F945641E7AC11907E00D8B4D5E07191FA9
 sudo apt-get update
 sudo apt-get install -y openjdk-11-jdk-headless
+popd
+fi
+
+
+if [[ ! -f "$OCULUS_BASE/android.keystore" ]]
+then
+pushd "$OCULUS_BASE"
 ARGS=(
     -genkeypair
     -keystore   android.keystore
@@ -27,7 +34,7 @@ ARGS=(
     -validity   9990
     -keyalg     RSA
 )
-keytool "${ARGS[@]}" -alias godot -dname CN=Godot,O=Android,C=US
+/usr/bin/keytool "${ARGS[@]}" -alias godot -dname CN=Godot,O=Android,C=US
 popd
 fi
 
@@ -68,11 +75,8 @@ export/android/android_sdk_path = "$ANDROID_SDK"
 EOF
 wget  'https://mmap.monster/godot/templates/android_debug.apk'
 wget  'https://mmap.monster/godot/templates/android_release.apk'
-wget  'https://mmap.monster/godot/templates/openxr_swapchain_fix.zip'
-wget  'https://github.com/GodotVR/godot_openxr/releases/download/1.2.0/godot-openxr.zip'
-unzip ./openxr_swapchain_fix.zip | wc -l
-unzip ./godot-openxr.zip | wc -l
-cp ./openxr_swapchain_fix/*.so ./godot_openxr_1.2.0/addons/godot-openxr/bin/android/
+wget  'https://github.com/GodotVR/godot_openxr/releases/download/1.3.0/godot-openxr.zip'
+unzip *.zip | wc -l
 rm -f *.zip
 popd
 fi
@@ -86,7 +90,7 @@ fi
 if [[ ! -d './addons/godot-openxr' ]]
 then
 mkdir -p './addons'
-rsync -av "$EDITOR_BASE/godot_openxr_1.2.0/addons/godot-openxr" './addons/' --exclude assets --exclude scenes
+rsync -av "$EDITOR_BASE/godot_openxr_1.3.0/addons/godot-openxr" './addons/' --exclude assets --exclude scenes
 fi
 
 if [[ ! -f './export_presets.cfg' ]]

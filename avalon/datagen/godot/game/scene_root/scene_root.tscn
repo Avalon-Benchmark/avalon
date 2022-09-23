@@ -1,0 +1,5 @@
+[gd_scene format=2]
+
+[node name="scene_root" type="Spatial"]
+
+[node name="world" type="Node" parent="."]

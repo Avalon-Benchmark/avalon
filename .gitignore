@@ -138,6 +138,7 @@ dmypy.json
 .vscode/.*
 .vscode/settings.json
 .vscode/tasks.json
+.devcontainer.json
 
 # media files
 *.mp3
@@ -169,6 +170,12 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+bashenv.sh
+bashenv_secrets.sh
+automaton/testenv.sh
+my_science_vars.sh
+controller_vars.sh
+
 _ignore_pickle/
 .idea
 
@@ -176,5 +183,38 @@ _ignore_pickle/
 current_git_hash
 current_git_diff
 
+# for our custom caching code
+build_cache.config
+build_graph.json
+generated_experiment_command.sh
+.cache_usage
+
 # Managing local python version with asdf
 .tool-versions
+
+# Managing git-secrets
+.gitsecret/keys/random_seed
+!*.secret
+.gitsecret/paths/mapping.cfg
+
+# Preventing changes to secrets from being committed while still keeping them in the repo
+science/secrets/*
+
+# Excluding secrets from being uploaded to github
+secrets.tar.gz
+
+# this gets made every time, annoying
+.gitsecret/keys/pubring.kbx~
+
+# Shared VSCode settings
+.vscode_shared
+
+# generated scenes
+standalone/ballworld/datagen/godot/*scn
+standalone/ballworld/datagen/godot/meta.json
+
+# export apk
+standalone/ballworld/datagen/godot/*.apk
+standalone/*/datagen/godot/export_presets.cfg
+
+standalone/avalon/datagen/godot/playback/

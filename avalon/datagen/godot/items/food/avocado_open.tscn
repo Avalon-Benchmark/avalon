@@ -1,0 +1,24 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://items/food/avocado_open.res" type="ArrayMesh" id=1]
+[ext_resource path="res://items/food/avocado.gd" type="Script" id=3]
+
+[sub_resource type="PhysicsMaterial" id=7]
+bounce = 0.75
+absorbent = true
+
+[sub_resource type="CapsuleShape" id=8]
+radius = 0.4
+height = 0.35
+
+[node name="avocado" type="RigidBody"]
+physics_material_override = SubResource( 7 )
+script = ExtResource( 3 )
+
+[node name="open_mesh" type="MeshInstance" parent="."]
+transform = Transform( 5.5, 0, 0, 0, 5.5, 0, 0, 0, 5.5, 0, 0.04, 0.02 )
+mesh = ExtResource( 1 )
+material/0 = null
+
+[node name="collision_shape" type="CollisionShape" parent="."]
+shape = SubResource( 8 )

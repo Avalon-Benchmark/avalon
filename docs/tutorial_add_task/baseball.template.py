@@ -4,17 +4,18 @@ from typing import Tuple
 import attr
 import numpy as np
 
-from datagen.world_creation.configs.building import BuildingConfig
-from datagen.world_creation.configs.export import ExportConfig
-from datagen.world_creation.configs.task import IndoorTaskConfig
-from datagen.world_creation.indoor.building import Building
-from datagen.world_creation.indoor.building import BuildingAestheticsConfig
-from datagen.world_creation.indoor.task_generator import CANONICAL_BUILDING_LOCATION
-from datagen.world_creation.indoor.task_generator import BuildingTaskGenerator
-from datagen.world_creation.indoor.task_generator import IndoorTaskParams
-from datagen.world_creation.indoor.task_generator import create_building_for_skill_scenario
-from datagen.world_creation.indoor.task_generator import make_indoor_task_world
-from datagen.world_creation.worlds.export import export_world
+from avalon.datagen.world_creation.configs.building import BuildingConfig
+from avalon.datagen.world_creation.configs.export import ExportConfig
+from avalon.datagen.world_creation.configs.task import IndoorTaskConfig
+from avalon.datagen.world_creation.indoor.building import Building
+from avalon.datagen.world_creation.indoor.building import BuildingAestheticsConfig
+from avalon.datagen.world_creation.indoor.building import BuildingTask
+from avalon.datagen.world_creation.indoor.task_generator import CANONICAL_BUILDING_LOCATION
+from avalon.datagen.world_creation.indoor.task_generator import BuildingTaskGenerator
+from avalon.datagen.world_creation.indoor.task_generator import IndoorTaskParams
+from avalon.datagen.world_creation.indoor.task_generator import create_building_for_skill_scenario
+from avalon.datagen.world_creation.indoor.task_generator import make_indoor_task_world
+from avalon.datagen.world_creation.worlds.export import export_world
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
@@ -45,7 +46,7 @@ class BaseballTaskGenerator(BuildingTaskGenerator):
         rand: np.random.Generator,
         difficulty: float,
         radius: float,
-        allowed_auxiliary_tasks=tuple(),
+        allowed_auxiliary_tasks: Tuple[BuildingTask, ...] = tuple(),
         aesthetics: BuildingAestheticsConfig = BuildingAestheticsConfig(),
     ) -> BuildingConfig:
         """

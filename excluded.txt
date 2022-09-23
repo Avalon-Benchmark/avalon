@@ -1,2 +1,5 @@
-train.py
-notebooks/scratchpad.sync.py
+notebooks/create_human_scores.sync.py
+notebooks/avalon_results.sync.py
+notebooks/create_skill_worlds.sync.py
+avalon/server/**/*.py
+avalon/agent/torchbeast/**/*.py

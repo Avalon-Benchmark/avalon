@@ -1,37 +1,39 @@
 from itertools import product
 from pathlib import Path
 from typing import Tuple
+from typing import cast
 
 import attr
 import numpy as np
 
-from common.utils import only
-from datagen.world_creation.configs.building import BuildingConfig
-from datagen.world_creation.configs.export import ExportConfig
-from datagen.world_creation.configs.task import IndoorTaskConfig
-from datagen.world_creation.constants import AGENT_HEIGHT
-from datagen.world_creation.constants import FOOD_HOVER_DIST
-from datagen.world_creation.constants import MAX_JUMP_HEIGHT_METERS
-from datagen.world_creation.constants import STANDING_REACH_HEIGHT
-from datagen.world_creation.entities.tools.weapons import LargeStick
-from datagen.world_creation.geometry import BuildingTile
-from datagen.world_creation.geometry import local_to_global_coords
-from datagen.world_creation.indoor.builders import DefaultHallwayBuilder
-from datagen.world_creation.indoor.builders import HouseLikeRoomBuilder
-from datagen.world_creation.indoor.builders import RectangleFootprintBuilder
-from datagen.world_creation.indoor.building import Building
-from datagen.world_creation.indoor.building import BuildingAestheticsConfig
-from datagen.world_creation.indoor.constants import Azimuth
-from datagen.world_creation.indoor.task_generator import CANONICAL_BUILDING_LOCATION
-from datagen.world_creation.indoor.task_generator import BuildingTaskGenerator
-from datagen.world_creation.indoor.task_generator import IndoorTaskParams
-from datagen.world_creation.indoor.task_generator import add_food_island
-from datagen.world_creation.indoor.task_generator import create_building_for_skill_scenario
-from datagen.world_creation.indoor.task_generator import make_indoor_task_world
-from datagen.world_creation.indoor.task_generator import rectangle_dimensions_within_radius
-from datagen.world_creation.indoor.tiles import decide_tiles_by_distance
-from datagen.world_creation.worlds.difficulty import normal_distrib_range
-from datagen.world_creation.worlds.export import export_world
+from avalon.common.utils import only
+from avalon.datagen.world_creation.configs.building import BuildingConfig
+from avalon.datagen.world_creation.configs.export import ExportConfig
+from avalon.datagen.world_creation.configs.task import IndoorTaskConfig
+from avalon.datagen.world_creation.constants import AGENT_HEIGHT
+from avalon.datagen.world_creation.constants import FOOD_HOVER_DIST
+from avalon.datagen.world_creation.constants import MAX_JUMP_HEIGHT_METERS
+from avalon.datagen.world_creation.constants import STANDING_REACH_HEIGHT
+from avalon.datagen.world_creation.entities.tools.weapons import LargeStick
+from avalon.datagen.world_creation.geometry import BuildingTile
+from avalon.datagen.world_creation.geometry import local_to_global_coords
+from avalon.datagen.world_creation.indoor.builders import DefaultHallwayBuilder
+from avalon.datagen.world_creation.indoor.builders import HouseLikeRoomBuilder
+from avalon.datagen.world_creation.indoor.builders import RectangleFootprintBuilder
+from avalon.datagen.world_creation.indoor.building import Building
+from avalon.datagen.world_creation.indoor.building import BuildingAestheticsConfig
+from avalon.datagen.world_creation.indoor.building import BuildingTask
+from avalon.datagen.world_creation.indoor.constants import Azimuth
+from avalon.datagen.world_creation.indoor.task_generator import CANONICAL_BUILDING_LOCATION
+from avalon.datagen.world_creation.indoor.task_generator import BuildingTaskGenerator
+from avalon.datagen.world_creation.indoor.task_generator import IndoorTaskParams
+from avalon.datagen.world_creation.indoor.task_generator import add_food_island
+from avalon.datagen.world_creation.indoor.task_generator import create_building_for_skill_scenario
+from avalon.datagen.world_creation.indoor.task_generator import make_indoor_task_world
+from avalon.datagen.world_creation.indoor.task_generator import rectangle_dimensions_within_radius
+from avalon.datagen.world_creation.indoor.tiles import decide_tiles_by_distance
+from avalon.datagen.world_creation.worlds.difficulty import normal_distrib_range
+from avalon.datagen.world_creation.worlds.export import export_world
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
@@ -69,7 +71,7 @@ class BaseballTaskGenerator(BuildingTaskGenerator):
         rand: np.random.Generator,
         difficulty: float,
         radius: float,
-        allowed_auxiliary_tasks=tuple(),
+        allowed_auxiliary_tasks: Tuple[BuildingTask, ...] = tuple(),
         aesthetics: BuildingAestheticsConfig = BuildingAestheticsConfig(),
     ) -> BuildingConfig:
         """
@@ -100,9 +102,9 @@ class BaseballTaskGenerator(BuildingTaskGenerator):
             rand,
             difficulty,
         )
-        plinth_tile = tuple(rand.choice(room.get_tile_positions()))
-        viable_bat_tiles = list(product(range(1, room.width - 1), range(1, room.length - 1)))
-        viable_bat_tiles = [tile for tile in viable_bat_tiles if tile != plinth_tile]
+        plinth_tile = cast(Tuple[int, int], tuple(rand.choice(room.get_tile_positions())))
+        all_viable_bat_tiles = list(product(range(1, room.width - 1), range(1, room.length - 1)))
+        viable_bat_tiles = [tile for tile in all_viable_bat_tiles if tile != plinth_tile]
         bat_tile = only(decide_tiles_by_distance(viable_bat_tiles, plinth_tile, difficulty, rand))
         viable_spawn_tiles = [tile for tile in viable_bat_tiles if tile != bat_tile]
         spawn_tile = only(decide_tiles_by_distance(viable_spawn_tiles, bat_tile, difficulty, rand))

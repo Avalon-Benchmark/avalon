@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://game/player/vr_human_player.gd" type="Script" id=1]
+[ext_resource path="res://game/player/scenes/target_player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://game/player/scenes/hand.tscn" type="PackedScene" id=3]
+[ext_resource path="res://game/player/scenes/physical_player.tscn" type="PackedScene" id=4]
+
+[sub_resource type="SpatialMaterial" id=1]
+albedo_color = Color( 0.921569, 1, 0, 1 )
+
+[node name="player" type="Spatial"]
+script = ExtResource( 1 )
+
+[node name="arvr_origin" type="ARVROrigin" parent="."]
+
+[node name="arvr_camera" type="ARVRCamera" parent="arvr_origin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )
+cull_mask = 524285
+current = true
+near = 0.01
+far = 1024.0
+
+[node name="arvr_left_hand" type="ARVRController" parent="arvr_origin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.5, 1.5, -0.5 )
+
+[node name="hand" parent="arvr_origin/arvr_left_hand" instance=ExtResource( 3 )]
+transform = Transform( 0.996195, 0.0871557, 0, -0.084186, 0.96225, -0.258819, -0.0225576, 0.257834, 0.965926, 0, -0.05, 0.1 )
+
+[node name="arvr_right_hand" type="ARVRController" parent="arvr_origin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 1.5, -0.5 )
+controller_id = 2
+
+[node name="hand" parent="arvr_origin/arvr_right_hand" instance=ExtResource( 3 )]
+transform = Transform( 0.996195, 0.0871557, 0, -0.084186, 0.96225, -0.258819, -0.0225576, 0.257834, 0.965926, 0, -0.05, 0.1 )
+
+[node name="arvr_origin_debug_shape" type="CSGCylinder" parent="arvr_origin"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0 )
+visible = false
+radius = 0.1
+height = 0.1
+material = SubResource( 1 )
+
+[node name="target_player" parent="." instance=ExtResource( 2 )]
+
+[node name="physical_player" parent="." instance=ExtResource( 4 )]

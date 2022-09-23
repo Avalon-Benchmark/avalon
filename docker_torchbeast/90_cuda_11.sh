@@ -18,7 +18,7 @@ function apt-get {
 }
 
 
-apt-get install cuda-compiler-11-1 cuda-libraries-dev-11-1 cuda-nvml-dev-11-1 cuda-nvtx-11-1
+apt-get install cuda-compiler-11-3 cuda-libraries-dev-11-3 cuda-nvml-dev-11-3 cuda-nvtx-11-3
 apt-get clean
 
-update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.1 111
+update-alternatives --install /usr/local/cuda cuda /usr/local/cuda-11.3 113

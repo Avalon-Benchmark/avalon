@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://game/player/mouse_keyboard_human_player.gd" type="Script" id=1]
+[ext_resource path="res://game/player/scenes/target_player.tscn" type="PackedScene" id=2]
+[ext_resource path="res://game/camera/tracking_camera.gd" type="Script" id=3]
+[ext_resource path="res://game/player/scenes/physical_player.tscn" type="PackedScene" id=4]
+[ext_resource path="res://scenes/health_bar.tscn" type="PackedScene" id=5]
+
+[node name="player" type="Node"]
+script = ExtResource( 1 )
+
+[node name="camera" type="Camera" parent="."]
+keep_aspect = 0
+cull_mask = 524285
+fov = 90.0
+near = 0.01
+far = 1024.0
+script = ExtResource( 3 )
+
+[node name="target_player" parent="." instance=ExtResource( 2 )]
+
+[node name="physical_player" parent="." instance=ExtResource( 4 )]
+
+[node name="health_bar" parent="." instance=ExtResource( 5 )]
+max_value = 10.0
+value = 1.0

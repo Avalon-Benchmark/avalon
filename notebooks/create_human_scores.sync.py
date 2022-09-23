@@ -2,201 +2,243 @@
 import gzip
 import json
 import shutil
+import tarfile
+from collections import OrderedDict
 from collections import defaultdict
 from multiprocessing import Pool
 from pathlib import Path
-from typing import Tuple
+from typing import Dict
+from typing import List
+from typing import NamedTuple
 
-from common.imports import tqdm
-from common.log_utils import enable_debug_logging
-from contrib.s3_utils import SimpleS3Client
-from contrib.utils import TEMP_DIR
-from datagen.human_playback import DEFAULT_AVAILABLE_FEATURES
-from datagen.human_playback import get_observations_from_human_recording
+from avalon.common.imports import tqdm
+from avalon.common.log_utils import enable_debug_logging
+from avalon.common.log_utils import logger
+from avalon.contrib.s3_utils import SimpleS3Client
+from avalon.contrib.utils import FILESYSTEM_ROOT
+from avalon.datagen.env_helper import create_env
+from avalon.datagen.env_helper import get_action_type_from_config
+from avalon.datagen.godot_env import AvalonObservationType
+from avalon.datagen.godot_env import GoalProgressResult
+from avalon.datagen.godot_env import GodotGoalEvaluator
+from avalon.datagen.human_playback import get_observations_from_human_recording
+from avalon.datagen.human_playback import get_oculus_playback_config
+from avalon.datagen.world_creation.constants import AvalonTask
+from avalon.datagen.world_creation.world_generator import GenerateWorldParams
 
 enable_debug_logging()
+
+# %%
+
+
+class ScoreResult(NamedTuple):
+    world_id: str
+    user_id: str
+    score: float
+    is_error: bool
+    is_reset: bool
+
+
+class HumanScores(NamedTuple):
+    score_by_world_id: Dict[str, Dict[str, float]]
+    resets_by_user_id: Dict[str, List[str]]
+    uncaught_errors: List[BaseException]
+    expected_errors: List[ScoreResult]
+
+
+class InvalidEpisode(Exception):
+    pass
+
+
+class PathDoesNotExit(Exception):
+    pass
+
+
+class UnexpectedPath(Exception):
+    pass
+
+
+VALID_APK_VERSIONS = [
+    "6a88384c83e5a103cb2a10d4561315297d5019d2",
+    "974025deded7ebe9c39d95d472048ec267d6caad",
+    "d217981d161e790ac702b46ecfa8286bea153d54",
+    "df9b06e74922efb57bc582931588d08e015f5036",
+]
+
+
+def get_human_score(
+    world_params: GenerateWorldParams, observations: List[AvalonObservationType]
+) -> GoalProgressResult:
+    goal_evaluator = GodotGoalEvaluator()
+    goal_evaluator.reset(observations[0], world_params)
+    for obs in observations[1:]:
+        progress = goal_evaluator.calculate_goal_progress(obs)
+        if progress.is_done:
+            return progress
+
+    raise InvalidEpisode("is_done flag never set to True")
+
+
+def _read_gzip_path_if_path_does_not_exist(path: Path) -> Path:
+    gzip_path = Path(f"{path}.gz")
+    if gzip_path.exists() and not path.exists():
+        with gzip.open(str(gzip_path), "rb") as f_in:
+            with open(path, "wb") as f_out:
+                shutil.copyfileobj(f_in, f_out)
+    return path
+
+
+def get_human_score_from_data(
+    user_path: Path, world_id: str, user_id: str, selected_features: OrderedDict
+) -> ScoreResult:
+    task, seed, difficulty = world_id.split("__")
+
+    is_reset = (user_path / "reset.marker").exists()
+
+    if is_reset:
+        return ScoreResult(
+            world_id=world_id,
+            user_id=user_id,
+            score=0.0,
+            is_error=False,
+            is_reset=True,
+        )
+    user_path_with_apk_versions = [user_path / x for x in VALID_APK_VERSIONS if (user_path / x).exists()]
+    if len(user_path_with_apk_versions) > 1:
+        raise UnexpectedPath(f"Found multiple paths {user_path_with_apk_versions}")
+
+    if len(user_path_with_apk_versions) == 0:
+        logger.error(
+            f"No sub-path in {user_path} that matches {VALID_APK_VERSIONS}. Either run just started or something went wrong."
+        )
+        return ScoreResult(world_id=world_id, user_id=user_id, score=0.0, is_error=True, is_reset=False)
+
+    user_path_with_apk_version = user_path_with_apk_versions[0]
+
+    observations_path = _read_gzip_path_if_path_does_not_exist(user_path_with_apk_version / "observations.out")
+    if not observations_path.exists():
+        raise PathDoesNotExit(str(observations_path))
+
+    human_observations = get_observations_from_human_recording(
+        observations_path=observations_path,
+        selected_features=selected_features,
+    )
+
+    world_params = GenerateWorldParams(
+        task=AvalonTask[task.upper()], difficulty=float(difficulty), seed=int(seed), index=0, output=""
+    )
+    try:
+        progress = get_human_score(world_params, human_observations)
+    except InvalidEpisode as e:
+        logger.error(e)
+        return ScoreResult(world_id=world_id, user_id=user_id, score=0.0, is_error=True, is_reset=False)
+
+    return ScoreResult(
+        world_id=world_id,
+        user_id=user_id,
+        score=progress.log["score"],
+        is_error=False,
+        is_reset=False,
+    )
+
+
+def get_all_human_scores(root_path: Path) -> HumanScores:
+    score_by_world_id: Dict[str, Dict[str, float]] = defaultdict(dict)
+    resets_by_user_id: Dict[str, List[str]] = defaultdict(list)
+    uncaught_errors: List[BaseException] = []
+    expected_errors: List[ScoreResult] = []
+
+    def on_done(result: ScoreResult):
+        if result.is_error:
+            expected_errors.append(result)
+        elif result.is_reset:
+            resets_by_user_id[result.user_id].append(result.world_id)
+        else:
+            score_by_world_id[result.world_id][result.user_id] = result.score
+
+    def on_error(error: BaseException):
+        logger.error("Evaluation failed!")
+        uncaught_errors.append(error)
+        raise error
+
+    num_processes = 20
+
+    pool_results = []
+
+    config = get_oculus_playback_config(is_using_human_input=False)
+    action_type = get_action_type_from_config(config)
+    env = create_env(config, action_type)
+    selected_features = env.observation_context.selected_features
+    env.close()
+
+    with Pool(processes=num_processes) as worker_pool:
+        requests = []
+        for world_path in list(root_path.iterdir()):
+            world_id = world_path.name
+            if (
+                (world_path / "ignored.marker").exists()
+                or world_id.startswith("practice")
+                or world_id.startswith("worlds")
+                or world_id.startswith("versions")
+            ):
+                continue
+            for user_path in world_path.iterdir():
+                user_id = user_path.name
+                if (user_path / "crash").exists():
+                    continue
+
+                task_name, seed, difficulty = world_id.split("__")
+                cleaned_world_id = f"{task_name}__{int(seed)}__{difficulty}"
+
+                request = worker_pool.apply_async(
+                    get_human_score_from_data,
+                    kwds={
+                        "user_path": user_path,
+                        "world_id": cleaned_world_id,
+                        "user_id": user_id,
+                        "selected_features": selected_features,
+                    },
+                    callback=on_done,
+                    error_callback=on_error,
+                )
+                requests.append(request)
+        for request in tqdm(requests):
+            request.wait()
+            if request._success:
+                pool_results.append(request.get())
+        worker_pool.close()
+        worker_pool.join()
+
+    return HumanScores(
+        score_by_world_id,
+        resets_by_user_id,
+        uncaught_errors,
+        expected_errors,
+    )
 
 
 # %%
 
 AVALON_BUCKET_NAME = "avalon-benchmark"
-OBSERVATION_KEY = "avalon__all_observations__935781fe-267d-4dcd-9698-714cc891e985.tar.gz"
-
 s3_client = SimpleS3Client(bucket_name=AVALON_BUCKET_NAME)
 
-output_path = Path(f"{TEMP_DIR}/avalon")
-output_path.mkdir(parents=True, exist_ok=True)
-
-observation_path = output_path / "observation"
-observation_path.mkdir(parents=True, exist_ok=True)
-
-s3_client.download_to_file(key=OBSERVATION_KEY, output_path=output_path / OBSERVATION_KEY)
-shutil.unpack_archive(output_path / OBSERVATION_KEY, observation_path, "gztar")
-
-assert observation_path.exists()
+tmp_path = Path(f"{FILESYSTEM_ROOT}/tmp/")
+key = "avalon_human_data__0908.tar.gz"
+tar_path = tmp_path / key
+s3_client.download_to_file(key=key, output_path=tar_path)
 
 # %%
 
-
-def get_starting_hit_points(task: str) -> float:
-    if task in ["survive", "find", "gather", "navigate"]:
-        return 3.0
-    elif task in ["stack", "carry", "explore"]:
-        return 2.0
-    else:
-        return 1.0
-
-
-def get_energy_cost_per_frame(starting_hit_points: float, task: str) -> float:
-    if task in ["survive", "find", "gather", "navigate"]:
-        return starting_hit_points / (15.0 * 60.0 * 10)
-    elif task in ["stack", "carry", "explore"]:
-        return starting_hit_points / (10.0 * 60.0 * 10)
-    else:
-        return starting_hit_points / (5.0 * 60.0 * 10)
-
-
-def get_human_playback_files_for_world_id(human_playback_path: Path) -> Tuple[Path, Path, Path, Path]:
-    paths = (
-        human_playback_path / "actions.out",
-        human_playback_path / "metadata.json",
-        human_playback_path / "observations.out",
-        human_playback_path / "human_inputs.out",
-    )
-
-    for raw_path in paths:
-        path = Path(f"{raw_path}.gz")
-        if path.exists():
-            with gzip.open(str(path), "rb") as f_in:
-                with open(raw_path, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-
-    return paths
-
-
-def get_human_score_from_observation(
-    world_id: str,
-    user_id: str,
-    user_path: Path,
-    is_using_energy_expenditure: bool = False,
-):
-    task = world_id.split("__")[0]
-
-    _, _, observations_path, _ = get_human_playback_files_for_world_id(human_playback_path=user_path)
-    observations_path = user_path / "observations.out"
-
-    if not observations_path.exists():
-        path = Path(f"{observations_path}.gz")
-        if path.exists():
-            with gzip.open(str(path), "rb") as f_in:
-                with open(observations_path, "wb") as f_out:
-                    shutil.copyfileobj(f_in, f_out)
-        else:
-            return dict(world_id=world_id, user_id=user_id, score=0.0, is_error=True, is_reset=False)
-
-    is_reset = (user_path / "reset.marker").exists()
-
-    human_observations = get_observations_from_human_recording(
-        observations_path=str(observations_path),
-        available_features=DEFAULT_AVAILABLE_FEATURES,
-    )
-
-    hit_points = get_starting_hit_points(task)
-    energy_cost = get_energy_cost_per_frame(hit_points, task)
-
-    # NOTE: not using energy expenditure because humans spend a lot of energy on long levels
-    total_energy_coefficient = 1e-4
-    body_kinetic_energy_coefficient = 0.0
-    body_potential_energy_coefficient = 0.0
-    head_potential_energy_coefficient = 0.0
-    left_hand_kinetic_energy_coefficient = 0.0
-    left_hand_potential_energy_coefficient = 0.0
-    right_hand_kinetic_energy_coefficient = 0.0
-    right_hand_potential_energy_coefficient = 0.0
-
-    # skip the first frame because there are extremely high energy costs
-    for obs in human_observations[1:]:
-        total_energy_expenditure = (
-            body_kinetic_energy_coefficient * obs.physical_body_kinetic_energy_expenditure.item()
-            + body_potential_energy_coefficient * obs.physical_body_potential_energy_expenditure.item()
-            + head_potential_energy_coefficient * obs.physical_head_potential_energy_expenditure.item()
-            + left_hand_kinetic_energy_coefficient * obs.physical_left_hand_kinetic_energy_expenditure.item()
-            + left_hand_potential_energy_coefficient * obs.physical_left_hand_potential_energy_expenditure.item()
-            + right_hand_kinetic_energy_coefficient * obs.physical_right_hand_kinetic_energy_expenditure.item()
-            + right_hand_potential_energy_coefficient * obs.physical_right_hand_potential_energy_expenditure.item()
-        )
-        total_energy_expenditure *= total_energy_coefficient
-
-        hit_points += obs.reward.item() - energy_cost
-
-        if is_using_energy_expenditure:
-            hit_points -= total_energy_expenditure
-
-        if obs.is_dead:
-            return dict(world_id=world_id, user_id=user_id, score=0.0, is_error=False, is_reset=is_reset)
-        if obs.is_food_present_in_world < 0.1:
-            return dict(world_id=world_id, user_id=user_id, score=hit_points, is_error=False, is_reset=is_reset)
-
-    return dict(world_id=world_id, user_id=user_id, score=max(0.0, hit_points), is_error=False, is_reset=is_reset)
-
+root_path = tmp_path / "avalon_human_data"
+tar = tarfile.open(tar_path)
+tar.extractall(path=root_path.parent)
+tar.close()
+tar_path.unlink()
 
 # %%
 
-score_by_world_id = defaultdict(dict)
-resets_by_user_id = defaultdict(list)
-all_errors = []
-
-
-def on_done(result):
-    if not result.get("is_error"):
-        world_id = result["world_id"]
-        user_id = result["user_id"]
-        score = result["score"]
-        score_by_world_id[world_id][user_id] = score
-        if result.get("is_reset"):
-            resets_by_user_id[user_id].append(world_id)
-
-
-def on_error(error: BaseException):
-    print("Evaluation failed!")
-    all_errors.append(error)
-    raise error
-
-
-num_processes = 20
-
-results = []
-
-with Pool(processes=num_processes) as worker_pool:
-    requests = []
-    for world_path in list(observation_path.iterdir()):
-        world_id = world_path.name
-        if (world_path / "ignored.marker").exists() or world_id.startswith("practice"):
-            continue
-        for user_path in world_path.iterdir():
-            user_id = user_path.name
-            if (user_path / "crash").exists():
-                continue
-
-            task_name, seed, difficulty = world_id.split("__")
-            cleaned_world_id = f"{task_name}__{int(seed)}__{difficulty}"
-
-            request = worker_pool.apply_async(
-                get_human_score_from_observation,
-                kwds={
-                    "world_id": cleaned_world_id,
-                    "user_id": user_id,
-                    "user_path": user_path,
-                },
-                callback=on_done,
-                error_callback=on_error,
-            )
-            requests.append(request)
-    for request in tqdm(requests):
-        request.wait()
-        if request._success:
-            results.append(request.get())
-    worker_pool.close()
-    worker_pool.join()
+results = get_all_human_scores(root_path)
 
 # %%
+
+json.dump(results.score_by_world_id, open(tmp_path / "human_scores.json", "w"))

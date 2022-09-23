@@ -1,0 +1,250 @@
+{
+  "snapshot_commit": "f637f83cc6adca9f2fbff74ba4bd40a5fb009d53",
+  "checksums": {
+    "frog_inactive": {
+      "scene": "34bc80c2491db9470c6c26e77c424331",
+      "video": "fc4eddd708e8f0bd0704ceda519cf4bc",
+      "debug_output": "b4ea09be1cb7d7340ced7d0a4c0f7193"
+    },
+    "turtle_inactive": {
+      "scene": "f8346abaff321217e42cf7ebc7e0ce70",
+      "video": "28bad901f71cd511e05e7a4c1192b621",
+      "debug_output": "1753ec6bcc91675739e8f53c2f82f730"
+    },
+    "mouse_inactive": {
+      "scene": "182436370f18f94ef58458a6dc3c62aa",
+      "video": "37cc848cf518bb38da4633a69be89113",
+      "debug_output": "17c3b0d811d15a616a3142746a2f0af4"
+    },
+    "rabbit_inactive": {
+      "scene": "8752fa93a82f6ef1351adf507bde75dc",
+      "video": "c4d2678d302cd06e3ca8b300315e3cef",
+      "debug_output": "67f9a87b98e92ade005eae41c46b4814"
+    },
+    "pigeon_inactive": {
+      "scene": "669955f5354915f2ace45027f5989d77",
+      "video": "446724211316a616f2d1b241e6fe2a84",
+      "debug_output": "e45209a5333db32a15b443d3209dacf1"
+    },
+    "squirrel_inactive": {
+      "scene": "4abb216d1579cd8898dde167648e037f",
+      "video": "6c31ca28b9bc516667274216121cb0ba",
+      "debug_output": "af58d24fa5d5c7967916fdac70b61a5b"
+    },
+    "crow_inactive": {
+      "scene": "0853bba3a885034ec540dad5db0295da",
+      "video": "7740e50d0703c166f8f4c8d3f077a241",
+      "debug_output": "794e72a4dcc04adca09a9afb2573d6f2"
+    },
+    "deer_inactive": {
+      "scene": "ffdc527992855fca7de5dca412e341f2",
+      "video": "75fa8e86e6cddee4a5fb508a76328e03",
+      "debug_output": "537831ce3fcd5b197ca1e2cd151774e4"
+    },
+    "bee_inactive": {
+      "scene": "708083aa5a4083a5213aa1a2deb2b666",
+      "video": "9d6a0dfe03d1d76548124a24b0e4a60e",
+      "debug_output": "8525375a53f84282ced250da1443b2a6"
+    },
+    "snake_inactive": {
+      "scene": "00eaa0bd791dce17d618b8fb50e698ac",
+      "video": "f3b8851e0d5487a0c326ef63f8de830e",
+      "debug_output": "7c7a39371b37a7b8f86d8359b1279278"
+    },
+    "hawk_inactive": {
+      "scene": "68e7a523d5a1def2e32c34dcfc211084",
+      "video": "7f50012ecc602df4a6470fc5b820bec0",
+      "debug_output": "2250089d039ba85fb5ea429a26a8cbc1"
+    },
+    "hippo_inactive": {
+      "scene": "c2a3abe9b2be9ccc71b885625d04a4f7",
+      "video": "f052c134c38465222915407e4fc0ee47",
+      "debug_output": "e006062a7e8ef38d1f715a62ba5040ce"
+    },
+    "alligator_inactive": {
+      "scene": "0c069743d92b4bf7c08c30e194338d7f",
+      "video": "de5423b076ab454927018bb1a5e8c7ce",
+      "debug_output": "b2876ddcebf3194bc2923e789c1b6f42"
+    },
+    "eagle_inactive": {
+      "scene": "06c52dd7cf329a98f06187aa615e5149",
+      "video": "d3a368a9b13678d903496513ce19be09",
+      "debug_output": "86cbf6b91ed9e94ceb8cffbfeb5cf7f0"
+    },
+    "wolf_inactive": {
+      "scene": "3147808e40a642e8b9fb927a4de35d22",
+      "video": "26f43f6779f6b35a2f655c682882a770",
+      "debug_output": "5ab3453423bf74da76cb39f199ef1718"
+    },
+    "jaguar_inactive": {
+      "scene": "b33973095f2a3e22fd91bd7f4ca6c225",
+      "video": "d09cf22fb80174aa3009ee62b667c32b",
+      "debug_output": "8e0745b642a38d8dc538797aaf96c3c1"
+    },
+    "bear_inactive": {
+      "scene": "ecb669a2e0e9cc366107d970cdafb839",
+      "video": "04b5921c5fa6df119f52e0785d3a6bd2",
+      "debug_output": "b5c46fb113041556878bdeff9ab09262"
+    },
+    "turtle_flee": {
+      "scene": "cb1649fdb5cbc753c5489478df1a2dfc",
+      "video": "e0f8bcb77fb50bd1958102932f7461cd",
+      "debug_output": "c46b9a44b05d27a4f5c34dc5f77c06e4"
+    },
+    "mouse_flee": {
+      "scene": "ed1458cd1ce5491b54989b307d8f9300",
+      "video": "b86e83dd213d5cb236c0fe5be4b217f8",
+      "debug_output": "d26305e08b01c270ec11edadb67f3fd8"
+    },
+    "rabbit_flee": {
+      "scene": "afad453eddb32977cfcdce7dee7e79ac",
+      "video": "e449c519ab201f671bcd935cc42966e8",
+      "debug_output": "5d4e6d819586b75776de2ef6fab1c07b"
+    },
+    "pigeon_flee": {
+      "scene": "a77560e17e8d4ed8fd74e473b04be418",
+      "video": "d53468e38e61d50e32e94c2a0adec9bf",
+      "debug_output": "1eff7d42a1bedc3a00f2b3a15f94fcae"
+    },
+    "squirrel_flee": {
+      "scene": "61b501ba346b48522b0165962be34af7",
+      "video": "1587f0e12058249a06974d8e20c3af39",
+      "debug_output": "c74d27a86603e0899bf18baa9f3497f9"
+    },
+    "crow_flee": {
+      "scene": "874ccbcf6fdc3e8ba775d0e67d34f208",
+      "video": "934f6c0cce04497bc4902a5f630b3783",
+      "debug_output": "1a859eedbfe8d9819f5f79f8543ac534"
+    },
+    "deer_flee": {
+      "scene": "f9e63fe5f6b95a86855f0febf24ab5de",
+      "video": "5fa8fa342029fa4e26ed906c941241f4",
+      "debug_output": "e9835baa5eb4b383c8f3e83a35aa55ad"
+    },
+    "bee_chase": {
+      "scene": "7d4a6c1c662156c6d2e0caebb3ba0839",
+      "video": "6b5817f02ac983e4857f5922f54fa067",
+      "debug_output": "7d4fd64dac0f6c6bafb9cc82781f818f"
+    },
+    "snake_avoid_then_chase": {
+      "scene": "615b0fcebb9297e92646f21e032153c4",
+      "video": "01549ae6ba487def64efb5fd0e971cd0",
+      "debug_output": "3fa2d4ddcdf5838fc3cf0cfc15a3e05a"
+    },
+    "hawk_chase": {
+      "scene": "9aae2b5fc007d98ccdc07d207587d605",
+      "video": "57823a6c7f702c5a76e67bfcf0b8a587",
+      "debug_output": "c2e73a263a3ce14ede30d5e76c5bcd43"
+    },
+    "hippo_avoid_then_chase": {
+      "scene": "a2be17bbe5a212e1df1be8519b5a2803",
+      "video": "626d2643e0db9bb86e6a7198d0be869a",
+      "debug_output": "faaf959234e7829d580a0dffc474f487"
+    },
+    "alligator_chase": {
+      "scene": "34c4d046b324d605ee22c63de9ec7603",
+      "video": "04aa47d6030dce70437f7c203f5f68db",
+      "debug_output": "d72c0b4e6db1238e14e4e797c5ea8b83"
+    },
+    "eagle_chase": {
+      "scene": "9977f7b9b7bd772a3948bac7141de366",
+      "video": "2ca3d5e14dcdfc93220d3cf3d66e285a",
+      "debug_output": "61842c23e6109d0823cfcce165de916e"
+    },
+    "wolf_chase": {
+      "scene": "4ce038d3a16cfa139da8a93992df6286",
+      "video": "25f48439e4bb935ab6b9a6cc0805b1cf",
+      "debug_output": "50e93cb488a2c06e313b4b9c213b1956"
+    },
+    "jaguar_chase": {
+      "scene": "27e1354157c6b34f6076d4116b98ed4f",
+      "video": "fd3a1fe6df12a38ecb363ebcaf96af09",
+      "debug_output": "d5db53187c0219ad912b48f7e4a18f20"
+    },
+    "bear_chase": {
+      "scene": "c3a650009ffa7d02b3353e81c75854af",
+      "video": "178ee0fd6c1f952b4b3a9752ddd4c54a",
+      "debug_output": "bce56d37a99f3323a5cec17c9ee27a8d"
+    },
+    "snake_killed_by_falling_rock": {
+      "scene": "1b8383e8308f2c54cd3b1c071a42d5ce",
+      "video": "57dea09d3a3f15e2898a656d068a5955",
+      "debug_output": "a20ec33047170ebe4e46a419a0eaf165"
+    },
+    "snake_unharmed_by_falling_stick": {
+      "scene": "28c94a1582a1c873b2d672ba680c1024",
+      "video": "ff8588c1979b95dbedf37cc166a7b00c",
+      "debug_output": "6e3da47ce55f82fa50ee11d434eef51d"
+    },
+    "snake_killed_with_stick": {
+      "scene": "962aa00f5d927e94c270f3696c81a314",
+      "video": "8d68b1a2f331dfb04ba383fb87cdc8c3",
+      "debug_output": "2998ecc8fa5aeda0078c5f079b5e427e"
+    },
+    "snake_killed_with_rock": {
+      "scene": "a39f4fb74c3c0b115b732fcfcb6ff1e9",
+      "video": "8282dd2885fc7bf6b790ab8334f9998d",
+      "debug_output": "bdc29dabf9d7ef4b751b63a9a5e01f05"
+    },
+    "snake_unharmed_by_thrown_stick": {
+      "scene": "786a66ecb2e9de66325092b7fcf1dc32",
+      "video": "9bc71996cfc4ba4e91a03f3af73e99bf",
+      "debug_output": "ab28c276e03726e7d555b73a2522adde"
+    },
+    "snake_unharmed_by_held_rock": {
+      "scene": "fa19dbeb5a923e41e6116bfcea033e54",
+      "video": "ec2c0c4f36e33a31d7c53ed0375a012c",
+      "debug_output": "493f9bb9214321255c5937cd99af5190"
+    },
+    "bear_climbs_in_pursuit": {
+      "scene": "b1fd746266c03b382f65f97422d01683",
+      "video": "289bb7a617e5e56b7bc42a9c44e0ade1",
+      "debug_output": "feda94746e2fa23d2355ead29bfc972d"
+    },
+    "jaguar_climbs_in_pursuit": {
+      "scene": "519f9898eb5fd637900fd2266f814e1c",
+      "video": "7b7ea77e915cbee728ea6890d3072e7e",
+      "debug_output": "4185adad92e7ae5fdb31cc1757461b3f"
+    },
+    "squirrel_climbs_in_flight": {
+      "scene": "6e6346df9eedeecd46f10f0b672db073",
+      "video": "214bc1571206f4a981c90b2e83c35659",
+      "debug_output": "77b971648fd512b40cdbda202b7dbdd9"
+    },
+    "mouse_climbs_in_flight": {
+      "scene": "ff3c3d45117e4d3d7f0b9d6343a30ffd",
+      "video": "58b64be45010b0e2d43c675e19bbc845",
+      "debug_output": "f8140d77f3a9083c9b7ff5f2553d9919"
+    },
+    "bear_climbs_down_when_deactivated": {
+      "scene": "b1fd746266c03b382f65f97422d01683",
+      "video": "5186027d912358e65bf202a8dd646d8d",
+      "debug_output": "ddd198623e1876af26fc293d87eb6123"
+    },
+    "jaguar_climbs_down_when_deactivated": {
+      "scene": "519f9898eb5fd637900fd2266f814e1c",
+      "video": "efa011d76cb6dc5e893fd5684ec9fcb8",
+      "debug_output": "7693cd0b0aefd024090c51c435e3735c"
+    },
+    "squirrel_climbs_down_when_deactivated": {
+      "scene": "6e6346df9eedeecd46f10f0b672db073",
+      "video": "87695889ea7359ff74d2fde1276c61ab",
+      "debug_output": "1c207435328716887e3a47796de60e3b"
+    },
+    "mouse_climbs_down_when_deactivated": {
+      "scene": "ff3c3d45117e4d3d7f0b9d6343a30ffd",
+      "video": "6765ef058224b3babc2460b15aedb327",
+      "debug_output": "cc7a9e449ff73ac1ba2660dca3f630d4"
+    },
+    "bear_sidesteps_trees": {
+      "scene": "bc4899732beb0e2bcdebe6af76592852",
+      "video": "2036143b7bc4328f9f66bd4028cc2b0c",
+      "debug_output": "a5c28b05d1875753370b1a016ec255d4"
+    },
+    "hawk_flies_over_pillars": {
+      "scene": "797e2a67c0ce33aeef8c7cf5d0d31176",
+      "video": "0d787a875825d850ba3b4cb3bf8efec6",
+      "debug_output": "2f8edf1ab5db512b46ce21ba52928129"
+    }
+  }
+}

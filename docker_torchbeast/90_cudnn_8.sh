@@ -18,5 +18,5 @@ function apt-get {
 }
 
 
-apt-get install libcudnn8=8.0.5.39-1+cuda11.1 libcudnn8-dev=8.0.5.39-1+cuda11.1
+apt-get install libcudnn8=8.2.1.32-1+cuda11.3 libcudnn8-dev=8.2.1.32-1+cuda11.3
 apt-get clean

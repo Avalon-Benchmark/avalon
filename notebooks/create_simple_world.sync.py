@@ -4,14 +4,14 @@ from pathlib import Path
 import numpy as np
 from scipy import stats
 
-from common.log_utils import enable_debug_logging
-from datagen.world_creation.heightmap import get_oculus_export_config
-from datagen.world_creation.items import CANONICAL_FOOD_HEIGHT_ON_TREE
-from datagen.world_creation.items import FOOD_TREE_VISIBLE_HEIGHT
-from datagen.world_creation.tasks.eat import add_food_tree_for_simple_task
-from datagen.world_creation.tasks.task_worlds import WorldType
-from datagen.world_creation.tasks.task_worlds import create_world_for_skill_scenario
-from datagen.world_creation.tasks.utils import export_skill_world
+from avalon.common.log_utils import enable_debug_logging
+from avalon.datagen.world_creation.configs.export import get_oculus_export_config
+from avalon.datagen.world_creation.entities.constants import CANONICAL_FOOD_HEIGHT_ON_TREE
+from avalon.datagen.world_creation.entities.constants import FOOD_TREE_VISIBLE_HEIGHT
+from avalon.datagen.world_creation.tasks.eat import add_food_tree_for_simple_task
+from avalon.datagen.world_creation.types import WorldType
+from avalon.datagen.world_creation.worlds.creation import create_world_for_skill_scenario
+from avalon.datagen.world_creation.worlds.export import export_world
 
 enable_debug_logging()
 
@@ -46,6 +46,6 @@ for i, export_config in enumerate(export_configs):
 
     output_path = Path(f"/tmp/profiling_levels/level_{export_config.name}")
     output_path.mkdir(parents=True, exist_ok=True)
-    export_skill_world(output_path, rand, world)
+    export_world(output_path, rand, world)
 
 # %%

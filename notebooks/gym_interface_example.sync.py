@@ -5,21 +5,18 @@ from pathlib import Path
 from typing import Any
 from typing import Dict
 
-import attr
 import numpy as np
 from matplotlib import pyplot as plt
 
-from common.log_utils import enable_debug_logging
-from datagen.env_helper import create_env
-from datagen.env_helper import create_vr_benchmark_config
-from datagen.env_helper import display_video
-from datagen.env_helper import get_null_vr_action
-from datagen.godot_env import VRActionType
-from datagen.world_creation.constants import AvalonTask
-from datagen.world_creation.heightmap import DebugVisualizationConfig
-from datagen.world_creation.heightmap import get_agent_export_config
-from datagen.world_creation.heightmap import get_oculus_export_config
-from datagen.world_creation.world_generator import _GENERATION_FUNCTION_BY_TASK
+from avalon.common.log_utils import enable_debug_logging
+from avalon.datagen.env_helper import create_env
+from avalon.datagen.env_helper import create_vr_benchmark_config
+from avalon.datagen.env_helper import display_video
+from avalon.datagen.env_helper import get_null_vr_action
+from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.world_creation.configs.export import get_agent_export_config
+from avalon.datagen.world_creation.constants import AvalonTask
+from avalon.datagen.world_creation.world_generator import GENERATION_FUNCTION_BY_TASK
 
 enable_debug_logging()
 
@@ -32,14 +29,13 @@ NUM_ACTIONS = 5
 RESOLUTION = 96
 
 env_seed = 0
-video_id = 0
 
 
 def create_world(output_path: Path, task: AvalonTask, difficulty: float, seed: int) -> Dict[str, Any]:
     start_time = time.time()
     rand = np.random.default_rng(seed)
     export_config = get_agent_export_config()
-    generation_function = _GENERATION_FUNCTION_BY_TASK[task]
+    generation_function = GENERATION_FUNCTION_BY_TASK[task]
     world_path = output_path / f"{task.value}__{seed}__{difficulty}"
     generation_function(rand, difficulty, world_path, export_config)
     end_time = time.time()
@@ -65,8 +61,7 @@ env = create_env(config, action_type)
 
 observations = [
     env.reset_nicely_with_specific_world(
-        seed=env_seed,
-        world_id=video_id,
+        episode_seed=env_seed,
         world_path=str(result["world_path"] / "main.tscn"),
     )
 ]
@@ -83,7 +78,7 @@ display_video(observations, size=(RESOLUTION, RESOLUTION))
 # %%
 # display the first few frames as images
 for obs in observations:
-    plt.imshow(obs.rgbd[:,:,:3][::-1])
+    plt.imshow(obs.rgbd[:, :, :3][::-1])
     plt.show()
 
 # %%
