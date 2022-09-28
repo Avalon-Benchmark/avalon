@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import tarfile
+import time
 from collections import defaultdict
 from pathlib import Path
 from threading import Thread
@@ -138,13 +139,15 @@ def load_worlds_from_s3(data_key: str, target_path: Path, bucket_name: str = TEM
     return episode_count
 
 
-def test(params: Params, model: Algorithm, log: bool = True):
+def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional[Dict[str, float]] = None):
     """Run evaluation for Godot."""
     params = attrs.evolve(params, env_params=attrs.evolve(params.env_params, mode="test"))
     # We have to pull env_params out to make mypy happy - type narrowing doesn't seem to work on instance attributes
     env_params = params.env_params
     assert isinstance(env_params, GodotEnvironmentParams)
     assert env_params.env_index == 0
+
+    start_time = time.monotonic()
 
     if env_params.fixed_worlds_s3_key:
         # Load worlds from S3, if we have that enabled
@@ -233,7 +236,10 @@ def test(params: Params, model: Algorithm, log: bool = True):
     logger.debug("finished rollout, shutting down workers")
     player.shutdown()
 
-    test_log: dict[str, float] = {}
+    end_time = time.monotonic()
+    test_log: dict[str, float] = {"test_time": end_time - start_time}
+    if log_extra is not None:
+        test_log.update(log_extra)
     total_episodes_logged = 0
     all_successes: list[float] = []
     for task, success_by_difficulty_bin in success_by_task_and_difficulty_bin.items():
