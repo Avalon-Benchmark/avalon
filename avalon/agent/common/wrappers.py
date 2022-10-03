@@ -183,7 +183,7 @@ class DiscreteActionToIntWrapper(gym.ActionWrapper):
 
 
 class OneHotDiscrete(gym.spaces.Discrete):
-    def sample(self, mask: Optional[NDArray]) -> NDArray:
+    def sample(self, mask: Optional[NDArray] = None) -> NDArray:
         assert mask is None
         sample = self.np_random.randint(self.n)
         return F.one_hot(torch.from_numpy(sample), num_classes=self.n).numpy()
@@ -195,7 +195,7 @@ class OneHotMultiDiscrete(gym.spaces.MultiDiscrete):
         self.max_categories = max(nvec)
         super().__init__(nvec=nvec, dtype=dtype)
 
-    def sample(self, mask: Optional[NDArray]) -> NDArray:
+    def sample(self, mask: Optional[NDArray] = None) -> NDArray:
         assert mask is None
         sample = super().sample()
         return F.one_hot(torch.from_numpy(sample), num_classes=self.max_categories).numpy()

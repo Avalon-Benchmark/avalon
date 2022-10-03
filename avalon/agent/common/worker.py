@@ -90,9 +90,9 @@ class AsyncRolloutManager:
         except KeyboardInterrupt:
             pass
         except Exception as e:
-            logger.error("exception in AsyncGamePlayer process")
-            logger.error(e)
-            logger.trace(traceback.format_exc())
+            logger.warning("exception in AsyncGamePlayer process")
+            logger.warning(e)
+            logger.warning(traceback.format_exc())
             # This basically just gets eaten
             raise
 
@@ -166,15 +166,15 @@ class AsyncRolloutManager:
                 except Exception as e:
                     if self.params.debug:
                         raise
-                    logger.info("caught exception in async worker, will try to reset.")
-                    logger.debug(e)
-                    logger.trace(traceback.format_exc())
+                    logger.warning("caught exception in async worker, will try to reset.")
+                    logger.warning(e)
+                    logger.warning(traceback.format_exc())
                     # capture_exception(e)
                     try:
                         player.shutdown()
                     except Exception as e2:
-                        logger.debug(e2)
-                        logger.trace(traceback.format_exc())
+                        logger.warning(e2)
+                        logger.warning(traceback.format_exc())
                     break
 
 
@@ -456,9 +456,9 @@ class EnvironmentContainer:
                     self.get_result()
                 self.parent_conn.send(("close", None))
             except BrokenPipeError:
-                logger.debug("tried to close EnvironmentContainerProcess but pipe was already broken")
+                logger.warning("tried to close EnvironmentContainerProcess but pipe was already broken")
             except EOFError:
-                logger.debug("tried to close EnvironmentContainerProcess but got EOF error.")
+                logger.warning("tried to close EnvironmentContainerProcess but got EOF error.")
         else:
             self.worker.shutdown()
 
@@ -512,12 +512,12 @@ class EnvironmentContainerProcess:
                 self.env.close()
             except TimeoutError as e:
                 capture_exception(e)
-                logger.debug(f"env did not close cleanly due to a TimeoutError: {e}")
-                logger.trace(traceback.format_exc())
+                logger.warning(f"env did not close cleanly due to a TimeoutError: {e}")
+                logger.warning(traceback.format_exc())
             except Exception as e:
                 capture_exception(e)
-                logger.debug(f"worker failed to shutdown with error {e}")
-                logger.trace(traceback.format_exc())
+                logger.warning(f"worker failed to shutdown with error {e}")
+                logger.warning(traceback.format_exc())
 
     def run(self) -> None:
         """The worker entrypoint, will wait for commands from the main
