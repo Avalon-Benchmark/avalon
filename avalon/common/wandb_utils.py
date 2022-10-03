@@ -80,7 +80,7 @@ def get_wandb_run_by_name(project: str, experiment_name: str) -> Run:
     return run
 
 
-def get_wandb_run_by_uuid(project: str, uuid: str) -> Run:
+def get_wandb_run_by_suggestion_uuid(project: str, uuid: str) -> Run:
     """Set a configuration attribute `uuid` to a unique string, adn this function will fetch that run for you."""
     api = wandb.Api()
 
@@ -88,11 +88,11 @@ def get_wandb_run_by_uuid(project: str, uuid: str) -> Run:
         raise ProjectDoesNotExist()
 
     # this will get the most recent run, this could be a potential issue if you have experiments with the same name
-    runs: Runs = api.runs(path=f"{WANDB_ORGANIZATION}/{project}", filters={"config.uuid": uuid})
+    runs: Runs = api.runs(path=f"{WANDB_ORGANIZATION}/{project}", filters={"config.suggestion_uuid": uuid})
     if len(runs) == 0:
-        raise RunDoesNotExist(f"Could not find uuid `{uuid}` in project `{project}`.")
+        raise RunDoesNotExist(f"Could not find suggestion_uuid `{uuid}` in project `{project}`.")
     if len(runs) != 1:
-        logger.warning(f"INFO: Multiple runs found with the same uuid {uuid}. Using the most recent run.")
+        logger.warning(f"INFO: Multiple runs found with the same suggestion_uuid {uuid}. Using the most recent run.")
     run: Run = runs[0]
     return run
 

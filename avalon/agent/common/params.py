@@ -43,7 +43,7 @@ class Params:
     log_freq_scalar: int = 1
     log_freq_media: int = 250
     group: Optional[str] = None
-    uuid: str = ""  # for use by BONES and friends
+    suggestion_uuid: str = ""  # for use by BONES and friends
 
     # environment
     env_params: EnvironmentParams = EnvironmentParams()
