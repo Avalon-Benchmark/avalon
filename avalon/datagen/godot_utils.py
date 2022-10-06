@@ -11,7 +11,7 @@ from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.s3_utils import download_tar_from_s3_and_unpack
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.contrib.utils import run_local_command
-from avalon.datagen.godot_env import GodotEnvReplay
+from avalon.datagen.godot_env.replay import GodotEnvReplay
 
 GODOT_TEXTURES_PATH = Path(".") / "datagen" / "godot" / "Textures"
 

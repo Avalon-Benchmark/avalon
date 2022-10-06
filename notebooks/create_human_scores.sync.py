@@ -18,9 +18,9 @@ from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.datagen.env_helper import create_env
 from avalon.datagen.env_helper import get_action_type_from_config
-from avalon.datagen.godot_env import AvalonObservationType
-from avalon.datagen.godot_env import GoalProgressResult
-from avalon.datagen.godot_env import GodotGoalEvaluator
+from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.goals import GoalProgressResult
+from avalon.datagen.godot_env.goals import GodotGoalEvaluator
 from avalon.datagen.human_playback import get_observations_from_human_recording
 from avalon.datagen.human_playback import get_oculus_playback_config
 from avalon.datagen.world_creation.constants import AvalonTask

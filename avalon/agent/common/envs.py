@@ -10,7 +10,6 @@ import numpy as np
 from gym.wrappers import TimeLimit
 from loguru import logger
 
-import avalon.agent.godot.godot_gym
 from avalon.agent.common import wrappers
 from avalon.agent.common.params import DmcEnvironmentParams
 from avalon.agent.common.params import EnvironmentParams

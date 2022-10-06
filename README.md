@@ -48,7 +48,7 @@ Running Avalon is as simple as the following:
 from avalon.datagen.env_helper import create_env
 from avalon.datagen.env_helper import create_vr_benchmark_config
 from avalon.datagen.env_helper import display_video
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import VRActionType
 
 
 config = create_vr_benchmark_config()

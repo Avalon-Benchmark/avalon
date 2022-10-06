@@ -21,13 +21,13 @@ from loguru import logger
 from avalon.agent.godot.godot_gym import create_base_benchmark_config
 from avalon.common.visual_utils import visualize_tensor_as_video
 from avalon.datagen.generate import wait_until_true
-from avalon.datagen.godot_env import AttrsAction
-from avalon.datagen.godot_env import AttrsObservation
-from avalon.datagen.godot_env import AvalonObservationType
-from avalon.datagen.godot_env import GodotEnv
-from avalon.datagen.godot_env import MouseKeyboardActionType
-from avalon.datagen.godot_env import NullGoalEvaluator
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import AttrsAction
+from avalon.datagen.godot_env.actions import MouseKeyboardActionType
+from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.goals import NullGoalEvaluator
+from avalon.datagen.godot_env.godot_env import GodotEnv
+from avalon.datagen.godot_env.observations import AttrsObservation
+from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_env.replay import get_action_type_from_config as _get_action_type_from_config
 from avalon.datagen.godot_generated_types import AgentPlayerSpec
 from avalon.datagen.godot_generated_types import AvalonSimSpec

@@ -6,10 +6,10 @@ from avalon.contrib.testing_utils import fixture
 from avalon.contrib.testing_utils import temp_path_
 from avalon.contrib.testing_utils import use
 from avalon.datagen.env_helper import create_vr_benchmark_config
-from avalon.datagen.godot_env import AvalonObservationType
-from avalon.datagen.godot_env import GodotEnv
-from avalon.datagen.godot_env import NullGoalEvaluator
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.goals import NullGoalEvaluator
+from avalon.datagen.godot_env.godot_env import GodotEnv
+from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_generated_types import AvalonSimSpec
 
 AvalonEnv = GodotEnv[AvalonObservationType, VRActionType]

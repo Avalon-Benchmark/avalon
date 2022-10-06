@@ -13,7 +13,7 @@ from avalon.datagen.env_helper import create_env
 from avalon.datagen.env_helper import create_vr_benchmark_config
 from avalon.datagen.env_helper import display_video
 from avalon.datagen.env_helper import get_null_vr_action
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.world_creation.configs.export import get_agent_export_config
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.world_generator import GENERATION_FUNCTION_BY_TASK

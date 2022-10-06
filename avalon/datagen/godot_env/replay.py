@@ -19,7 +19,7 @@ from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.goals import GoalProgressResult
 from avalon.datagen.godot_env.goals import NullGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.godot_env import GodotEnvActionLog
+from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_env.observations import ObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE

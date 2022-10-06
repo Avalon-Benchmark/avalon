@@ -21,7 +21,7 @@ from avalon.datagen.avalon_godot_tests.scenario import ScenarioObservations
 from avalon.datagen.avalon_godot_tests.scenario import get_vr_action
 from avalon.datagen.avalon_godot_tests.scenario import read_human_recorded_actions
 from avalon.datagen.avalon_godot_tests.test_animal_behaviors import verify_observations
-from avalon.datagen.godot_env import DebugCameraAction
+from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.world_creation.entities.altar import Altar
 from avalon.datagen.world_creation.entities.constants import FOOD_TREE_BASE_HEIGHT
 from avalon.datagen.world_creation.entities.food import FOODS as _FOODS

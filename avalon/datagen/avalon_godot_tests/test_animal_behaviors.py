@@ -20,8 +20,8 @@ from avalon.datagen.avalon_godot_tests.scenario import Scenario
 from avalon.datagen.avalon_godot_tests.scenario import ScenarioObservations
 from avalon.datagen.avalon_godot_tests.scenario import get_vr_action
 from avalon.datagen.avalon_godot_tests.scenario import read_human_recorded_actions
-from avalon.datagen.godot_env import DebugCameraAction
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import DebugCameraAction
+from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.world_creation.entities.animals import ALL_PREDATOR_CLASSES
 from avalon.datagen.world_creation.entities.animals import ALL_PREY_CLASSES
 from avalon.datagen.world_creation.entities.animals import Alligator

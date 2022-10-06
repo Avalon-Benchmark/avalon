@@ -25,11 +25,11 @@ from avalon.common.utils import file_checksum
 from avalon.datagen.env_helper import DebugLogLine
 from avalon.datagen.env_helper import get_debug_json_logs
 from avalon.datagen.env_helper import observation_video_tensor
-from avalon.datagen.godot_env import AvalonObservationType
-from avalon.datagen.godot_env import DebugCameraAction
-from avalon.datagen.godot_env import GodotEnv
-from avalon.datagen.godot_env import GodotEnvActionLog
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import DebugCameraAction
+from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.godot_env import GodotEnv
+from avalon.datagen.godot_env.action_log import GodotEnvActionLog
+from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.world_creation.configs.export import ExportConfig
 from avalon.datagen.world_creation.configs.export import get_agent_export_config

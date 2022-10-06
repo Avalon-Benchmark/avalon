@@ -29,14 +29,14 @@ from numpy import typing as npt
 
 from avalon.common.errors import SwitchError
 from avalon.datagen.env_helper import create_env
-from avalon.datagen.godot_env import AttrsAction
-from avalon.datagen.godot_env import AvalonObservationType
-from avalon.datagen.godot_env import GodotEnvActionLog
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.action_log import GodotEnvActionLog
+from avalon.datagen.godot_env.actions import AttrsAction
+from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.actions import _from_bytes
 from avalon.datagen.godot_env.actions import _to_bytes
 from avalon.datagen.godot_env.observations import FAKE_TYPE_IMAGE
 from avalon.datagen.godot_env.observations import NP_DTYPE_MAP
+from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_env.observations import FeatureSpecDict
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import CLOSE_MESSAGE

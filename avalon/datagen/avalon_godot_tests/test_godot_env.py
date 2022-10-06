@@ -10,21 +10,21 @@ import pytest
 from _pytest.logging import LogCaptureFixture
 from loguru import logger
 
+from avalon.contrib.testing_utils import fixture
+from avalon.contrib.testing_utils import integration_test
+from avalon.contrib.testing_utils import use
 from avalon.datagen.avalon_godot_tests.conftest import AvalonEnv
 from avalon.datagen.avalon_godot_tests.conftest import godot_env_
 from avalon.datagen.avalon_godot_tests.scenario import get_vr_action
 from avalon.datagen.errors import GodotError
 from avalon.datagen.generate import InteractiveGodotProcess
 from avalon.datagen.generate import wait_until_true
-from avalon.datagen.godot_env import VRActionType
 from avalon.datagen.godot_env._bridge import GodotEnvBridge
 from avalon.datagen.godot_env._bridge import _BridgeKillSwitch
+from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.actions import _to_bytes
 from avalon.datagen.godot_generated_types import READY_LOG_SIGNAL
 from avalon.datagen.godot_utils import create_env_from_artifacts
-from avalon.contrib.testing_utils import fixture
-from avalon.contrib.testing_utils import integration_test
-from avalon.contrib.testing_utils import use
 
 
 def assert_eventually_true(

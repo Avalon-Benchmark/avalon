@@ -18,8 +18,8 @@ from avalon.common.log_utils import enable_debug_logging
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
-from avalon.datagen.godot_env import GodotEnv
-from avalon.datagen.godot_env import VRActionType
+from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.godot_env import GodotEnv
 
 EVAL_TEMP_PATH = "/tmp/avalon_eval"
 
