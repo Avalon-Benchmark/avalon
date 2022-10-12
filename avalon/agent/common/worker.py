@@ -442,10 +442,10 @@ class EnvironmentContainer:
         assert self.waiting_on_result is True
         if self.is_multiprocessing:
             result = self.parent_conn.recv()
-            self.waiting_on_result = False
         else:
             result = self.worker.step(self.current_action)
             self.current_action = None
+        self.waiting_on_result = False
         return result
 
     def close(self):

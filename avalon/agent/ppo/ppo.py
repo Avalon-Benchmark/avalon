@@ -35,6 +35,7 @@ from avalon.agent.ppo.params import PPOParams
 class PPOBatchSequenceData(BatchSequenceData):
     value: Tensor
     policy_prob: Tensor
+    policy_entropy: Tensor
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -52,18 +53,21 @@ class PPOStepData(StepData):
     batch_sequence_type = PPOBatchSequenceData  # type: ignore
     value: float
     policy_prob: float
+    policy_entropy: float
 
 
 @attr.s(auto_attribs=True, frozen=True)
 class PPOInferenceExtraInfo(AlgorithmInferenceExtraInfo):
     value: float
     policy_prob: float
+    policy_entropy: float
 
 
 @attr.s(auto_attribs=True, frozen=True)
 class PPOInferenceExtraInfoBatch(AlgorithmInferenceExtraInfoBatch):
     value: Tensor  # shape (batch, )
     policy_prob: Tensor  # shape (batch, )
+    policy_entropy: Tensor
 
 
 class PPO(Algorithm["PPOParams"]):
@@ -103,19 +107,28 @@ class PPO(Algorithm["PPOParams"]):
         # This should be a list (of len num_workers) of action dicts
         step_actions = dist.sample()
         step_policy_probs = dist.log_prob(step_actions)
+        policy_entropy = dist.entropy()
 
         # Store data for use in training
         step_actions = map_structure(lambda x: x.detach().cpu(), step_actions)
 
         step_values = step_values.detach().cpu()
         step_policy_probs = step_policy_probs.detach().cpu()
-        to_store = PPOInferenceExtraInfoBatch(value=step_values, policy_prob=step_policy_probs)
+        to_store = PPOInferenceExtraInfoBatch(
+            value=step_values, policy_prob=step_policy_probs, policy_entropy=policy_entropy
+        )
         return step_actions, to_store
 
     def train_step(self, rollouts: PPOBatchSequenceData, i: int) -> int:  # type: ignore
         # the observations have an extra frame at the end to use for value backup.
         final_observations: ObservationBatch = {k: v[:, -1] for k, v in rollouts.observation.items()}
         rollouts = attr.evolve(rollouts, observation=map_structure(lambda x: x[:, :-1], rollouts.observation))
+
+        if self.params.entropy_mode == "max" and self.params.entropy_coef != 0:
+            entropy_reward: Tensor = rollouts.policy_entropy * self.params.entropy_coef
+            wandb_lib.log_histogram("training/entropy_reward", entropy_reward, i)
+            wandb_lib.log_histogram("training/env_reward", rollouts.reward, i)
+            rollouts = attr.evolve(rollouts, reward=rollouts.reward + entropy_reward)
 
         with torch.no_grad():
             final_values = self.model(final_observations)[0].detach()
@@ -191,10 +204,13 @@ class PPO(Algorithm["PPOParams"]):
         # value_loss = value_loss.mean()
         # but sb3 uses a simpler method:
         value_loss = F.mse_loss(batch.reward_to_go, value_pred_clipped)
+        policy_entropy = torch.mean(dist_new.entropy())
 
-        entropy_loss = torch.mean(dist_new.entropy())
-
-        loss = ppo_loss + self.params.value_loss_coef * value_loss - self.params.entropy_coef * entropy_loss
+        loss = ppo_loss + self.params.value_loss_coef * value_loss
+        if self.params.entropy_mode == "regularized" and self.params.entropy_coef != 0:
+            entropy_loss = -1 * self.params.entropy_coef * policy_entropy
+            loss += entropy_loss
+            wandb_lib.log_scalar("loss/entropy_loss", entropy_loss, i)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.params.clip_grad_norm)
         self.optim.step()
@@ -204,13 +220,12 @@ class PPO(Algorithm["PPOParams"]):
         wandb_lib.log_scalar("loss/clip_fraction", clip_fraction, i)
         wandb_lib.log_histogram("loss/ppo_loss", -1 * torch.min(a, b), i)
         wandb_lib.log_scalar("loss/value_loss", value_loss, i)
-        wandb_lib.log_scalar("loss/entropy_loss", -self.params.entropy_coef * entropy_loss, i)
         wandb_lib.log_scalar("loss/loss", loss, i)
         wandb_lib.log_histogram("training/value_pred", values_new, i)
         wandb_lib.log_histogram("training/advantage", advantages, i)
         wandb_lib.log_histogram("training/value_target", batch.reward_to_go, i)
         wandb_lib.log_histogram("training/prob_ratio", prob_ratio, i)
-        wandb_lib.log_scalar("policy/policy entropy", entropy_loss, i)
+        wandb_lib.log_scalar("policy/policy entropy", policy_entropy, i)
 
         # Log actions
         visualize_action_dists(self.action_space, dist_new, prefix="train_policy")

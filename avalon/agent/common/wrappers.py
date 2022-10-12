@@ -3,8 +3,11 @@
 # Will fix when we update gym to `>=0.26` or wait for the `1.0` release.
 
 import copy
+from collections import defaultdict
+from collections import deque
 from typing import Any
 from typing import Callable
+from typing import Deque
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -17,6 +20,7 @@ import numpy as np
 import torch
 from gym import Wrapper
 from gym import spaces
+from gym.spaces import Box
 from loguru import logger
 from nptyping import NDArray
 from numpy.typing import DTypeLike
@@ -356,3 +360,50 @@ class ActionRepeat(gym.Wrapper[GenericObservationType, GenericActionType]):
             total_reward += reward
             current_step += 1
         return obs, total_reward, done, info
+
+
+class DictFrameStack(gym.ObservationWrapper):
+    """Frame-stack all observations in a Dict space.
+
+    Shapes will be converted from (c, *) to (c * num_stack, *). So for images, this will only work with (c,h,w).
+    For the first steps after a reset, where there aren't `num_stack` prior steps,
+    the observation at t=0 will be repeated back in time to fill.
+    """
+
+    def __init__(self, env: gym.Env, num_stack: int):
+        super().__init__(env)
+        self._env = env
+        self.num_stack = num_stack
+
+        assert isinstance(env.observation_space, gym.spaces.Dict)
+        new_observation_space: dict[str, gym.Space] = {}
+        for k, space in env.observation_space.spaces.items():
+            if isinstance(space, gym.spaces.Box):
+                low = np.repeat(space.low, num_stack, axis=0)
+                high = np.repeat(space.high, num_stack, axis=0)
+                new_observation_space[k] = Box(low=low, high=high, dtype=space.dtype)
+            else:
+                assert False, (k, space)
+
+        self.observation_space = gym.spaces.Dict(new_observation_space)
+        self.history: dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
+
+    def add_to_history(self, obs: dict[str, NDArray]) -> None:
+        for k, v in obs.items():
+            self.history[k].append(v)
+
+    def reset(self, **kwargs):
+        self.history: dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
+        obs = self.env.reset(**kwargs)
+        # We'll initialize the buffer with copies of the first frame
+        [self.add_to_history(obs) for _ in range(self.num_stack - 1)]
+        return self.observation(obs)
+
+    def observation(self, obs: Dict[str, NDArray]) -> Dict[str, NDArray]:
+        self.add_to_history(obs)
+        out: dict[str, NDArray] = {}
+        for k, v in obs.items():
+            assert len(self.history[k]) == self.num_stack
+            # images should be chw, and scalars/vectors should be stacked on dim 0 also
+            out[k] = np.concatenate(self.history[k], axis=0)
+        return out

@@ -53,7 +53,7 @@ class ObservationModel(PPOModel):
         self.image_encoder = None
         if len(self.image_keys) > 0:
             img_size = assert_not_none(obs_space["rgbd"].shape)[1]
-            img_channels = 4
+            img_channels = assert_not_none(obs_space["rgbd"].shape)[0]
             self.image_encoder = ImpalaConvNet(
                 input_channels=img_channels, img_dim=img_size, out_dim=encoder_output_dim
             )
