@@ -24,6 +24,7 @@ class EnvironmentParams:
     pixel_obs_wrapper: bool = False
     elapsed_time_obs: bool = False  # include an observation of the elapsed time
     mode: str = "train"
+    frame_stack: int = 1
 
 
 @attr.s(auto_attribs=True, frozen=True)

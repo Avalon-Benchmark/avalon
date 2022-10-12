@@ -115,7 +115,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         assert env_params.task is not None
         assert env_params.action_repeat == 4
         assert env_params.time_limit == 27000
-        assert env_params.elapsed_time_obs == False
+        assert env_params.elapsed_time_obs is False
         # These are the settings from dreamerv2
         env = Atari(env_params.task, action_repeat=env_params.action_repeat, size=(64, 64), grayscale=True)
         if env_params.time_limit:
@@ -132,6 +132,8 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
     env = wrappers.NormalizeActions(env)
     env = wrappers.ScaleRewards(env, env_params.reward_scale)
     env = wrappers.ClipActionWrapper(env)
+    if env_params.frame_stack != 1:
+        env = wrappers.DictFrameStack(env, num_stack=env_params.frame_stack)
     # env = wrappers.NumpyToTorch(env)
     return env
 

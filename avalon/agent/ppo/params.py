@@ -39,7 +39,8 @@ class PPOParams(OnPolicyParams):
     clip_range: float = 0.2
     clip_range_vf: Optional[float] = None
     value_loss_coef: float = 0.5
-    entropy_coef: float = 0.0
+    entropy_mode: str = "regularized"  # can be "max" or "regularized", same meaning as in `garage` VPG
+    entropy_coef: float = 0.0  # entropy coef for use in either entropy mode. set to 0 to disable both.
 
     ppo_epochs: int = 10
     lr: float = 3e-4
