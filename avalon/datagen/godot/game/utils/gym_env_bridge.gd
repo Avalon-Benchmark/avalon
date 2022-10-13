@@ -12,6 +12,8 @@ var observation_pipe: File
 ## Whether an output_pipe_path was provided to enable observations
 var is_output_enabled := false
 
+var PERF_SIMPLE_AGENT: bool = ProjectSettings.get_setting("avalon/simple_agent")
+
 
 func _init(input_pipe_path: String, output_pipe_path: String):
 	action_pipe = File.new()
@@ -30,6 +32,9 @@ func _init(input_pipe_path: String, output_pipe_path: String):
 
 # Read a message and any additional data such as action or seed from pipe
 func read_message() -> Array:
+	if PERF_SIMPLE_AGENT:
+		return action_pipe.get_var()
+
 	var message = action_pipe.get_8()
 	# this will only happen when debugging!
 	if action_pipe.get_error() == ERR_FILE_EOF:
@@ -65,6 +70,10 @@ func write_available_features_response(data: Dictionary):
 		is_output_enabled,
 		"ERROR: Cannot write_available_features_response without a observation_pipe"
 	)
+	if PERF_SIMPLE_AGENT:
+		observation_pipe.store_var(data.keys())
+		observation_pipe.flush()
+		return
 
 	# write out feature count
 	observation_pipe.store_32(len(data))
@@ -98,6 +107,10 @@ func write_available_features_response(data: Dictionary):
 
 func write_step_result_to_pipe(data: Dictionary):
 	assert(is_output_enabled, "ERROR: Cannot write_step_result_to_pipe without a observation_pipe")
+	if PERF_SIMPLE_AGENT:
+		observation_pipe.store_var(data)
+		observation_pipe.flush()
+		return
 	for feature_name in data:
 		var entry = data[feature_name]
 		var value = entry[0]

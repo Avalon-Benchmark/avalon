@@ -27,5 +27,9 @@ func read_input_from_pipe(_action_pipe: StreamPeerBuffer) -> void:
 	HARD.assert(false, "Not implemented")
 
 
+func read_input_from_data(_action: PoolRealArray) -> void:
+	HARD.assert(false, "Not implemented")
+
+
 func to_byte_array(_player) -> PoolByteArray:
 	return HARD.assert(false, "Not implemented")

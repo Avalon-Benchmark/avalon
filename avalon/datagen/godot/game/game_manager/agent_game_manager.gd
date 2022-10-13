@@ -3,10 +3,16 @@ extends GameManager
 class_name AgentGameManager
 
 var env_bridge: GymEnvBridge
-var last_action: PoolByteArray
 var is_reply_requested := false
 var input_pipe_path: String
 var output_pipe_path: String
+
+var PERF_SIMPLE_AGENT: bool = ProjectSettings.get_setting("avalon/simple_agent")
+var PERF_ACTION_READ: bool = ProjectSettings.get_setting("avalon/action_read")
+var PERF_OBSERVATION_READ: bool = ProjectSettings.get_setting("avalon/observation_read")
+var PERF_OBSERVATION_WRITE: bool = ProjectSettings.get_setting("avalon/observation_write")
+var last_action = null
+var last_observation = null
 
 
 func _init(_root: Node, _avalon_spec, _input_pipe_path: String, _output_pipe_path: String).(
@@ -49,19 +55,29 @@ func spawn() -> void:
 
 func read_input_from_pipe() -> bool:
 	if env_bridge.is_output_enabled and is_reply_requested:
-		var interactive_observation = observation_handler.get_interactive_observation(
-			player, episode, frame, selected_features, true, true
-		)
-		env_bridge.write_step_result_to_pipe(interactive_observation)
+		var interactive_observation
+		if last_observation == null:
+			interactive_observation = observation_handler.get_interactive_observation(
+				player, episode, frame, selected_features, true, true
+			)
+			if not PERF_OBSERVATION_READ:
+				last_observation = interactive_observation
+		else:
+			interactive_observation = last_observation
+		if PERF_OBSERVATION_WRITE:
+			env_bridge.write_step_result_to_pipe(interactive_observation)
 
 	log_debug_info()
 
 	# process messages until we encounter one that requires a tick:
 	while true:
-		var decoded_message = env_bridge.read_message()
+		var decoded_message
+		if last_action == null:
+			decoded_message = env_bridge.read_message()
+		else:
+			decoded_message = last_action
 		match decoded_message:
-			[CONST.RESET_MESSAGE, var data, var episode_seed, var world_path, var starting_hit_points]:
-				last_action = data
+			[CONST.RESET_MESSAGE, var _data, var episode_seed, var world_path, var starting_hit_points]: # [tag, null action, int, string + \n, float]
 				episode = episode_seed
 				player.hit_points = starting_hit_points
 				advance_episode(world_path)
@@ -81,10 +97,14 @@ func read_input_from_pipe() -> bool:
 				for feature_name in feature_names:
 					selected_features[feature_name] = true
 			[CONST.ACTION_MESSAGE, var data]:
-				last_action = data
-				var stream = StreamPeerBuffer.new()
-				stream.data_array = data
-				input_collector.read_input_from_pipe(stream)
+				if not PERF_ACTION_READ:
+					last_action = decoded_message
+				if PERF_SIMPLE_AGENT:
+					input_collector.read_input_from_data(data)
+				else:
+					var stream = StreamPeerBuffer.new()
+					stream.data_array = data
+					input_collector.read_input_from_pipe(stream)
 				is_reply_requested = true
 				advance_frame()
 				return false
@@ -97,12 +117,10 @@ func read_input_from_pipe() -> bool:
 						avalon_spec.recording_options.resolution_y
 					)
 					camera_controller.add_debug_camera(size)
-
 				camera_controller.debug_view.read_and_apply_action(data)
 				is_reply_requested = true
 				advance_frame()
 				return false
-
 			[CONST.CLOSE_MESSAGE]:
 				print("CLOSE_MESSAGE received: exiting")
 				return true

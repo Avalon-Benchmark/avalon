@@ -65,6 +65,10 @@ const SELECTED_FEATURES_FOR_HUMAN_RECORDING := {
 	"hit_points": true,
 }
 
+var PERF_SIMPLE_AGENT: bool = ProjectSettings.get_setting("avalon/simple_agent")
+var PERF_FRAME_READ: bool = ProjectSettings.get_setting("avalon/frame_read")
+var PERF_FRAME_WRITE: bool = ProjectSettings.get_setting("avalon/frame_write")
+
 
 func _init(_root: Node, _camera_controller):
 	root = _root
@@ -79,6 +83,8 @@ func reset() -> void:
 
 func get_current_observation(player: Player, frame: int) -> Dictionary:
 	var observation = player.get_observation_and_reward()
+	if PERF_SIMPLE_AGENT:
+		return observation
 
 	if is_food_present_in_world():
 		last_food_frame = frame
@@ -111,6 +117,15 @@ func get_interactive_observation(
 	is_recording_images: bool = true
 ) -> Dictionary:
 	var current_observation = get_current_observation(player, frame)
+	if PERF_SIMPLE_AGENT:
+		var rgbd_data: PoolByteArray
+		if PERF_FRAME_READ:
+			rgbd_data = camera_controller.get_rgbd_data().data["data"]
+		if PERF_FRAME_WRITE:
+			current_observation[CONST.RGBD_FEATURE] = rgbd_data
+		else:
+			current_observation[CONST.RGBD_FEATURE] = null
+		return current_observation
 	return get_interactive_observation_from_current_observation(
 		current_observation,
 		episode,
@@ -132,7 +147,6 @@ func get_interactive_observation_from_current_observation(
 	var interactive_observation = _convert_to_interactive_observation(
 		current_observation, episode, frame, is_recording_images
 	)
-
 	if is_limiting_to_selected_features and len(selected_features) > 0:
 		return _limit_to_selected_features(interactive_observation, selected_features)
 	else:
