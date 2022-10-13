@@ -20,6 +20,8 @@ var z_tile_size: float
 var num_tiles_to_loaded_edge: int = 1
 var world_wall_dist: float
 
+var PERF_SHADOWS_ENABLED: bool = ProjectSettings.get_setting("avalon/shadows_enabled")
+
 
 func _ready():
 	# TODO: is weird that there are two sizes, we assume they are square
@@ -42,8 +44,13 @@ func _ready():
 		wall.add_child(collision)
 		self.add_child(wall)
 
+	var sun: DirectionalLight = get_parent().get_node("Sun")
+	sun.shadow_enabled = PERF_SHADOWS_ENABLED
+
 
 func _physics_process(_delta):
+	if (x_tile_count <= 1) and (z_tile_count <= 1):
+		return
 	# TODO call `player.get_position()`
 	var pos = get_tree().root.find_node("physical_body", true, false).global_transform.origin
 	var tile_pos = _pos_to_tile_pos(pos)
@@ -53,6 +60,8 @@ func _physics_process(_delta):
 
 
 func is_position_climbable(pos: Vector3) -> bool:
+	if climb_map.size() == 0:
+		return false
 	# TODO: move this logic somewhere that makes more sense
 	var bytes_per_row = int(floor(climb_map_x / 8.0))
 	if climb_map_x % 8 > 0:
@@ -107,7 +116,7 @@ func _get_desired_tiles(x_idx, z_idx):
 
 
 func on_tile_entered(x: int, z: int):
-	prints("Entering", x, z)
+	# prints("Entering", x, z)
 	var loaded_tiles = get_loaded_tiles()
 	var desired_tiles = _get_desired_tiles(x, z)
 

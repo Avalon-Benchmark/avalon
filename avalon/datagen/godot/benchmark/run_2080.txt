@@ -1,0 +1,19 @@
+cpu: Intel(R) Core(TM) i9-10980XE
+
+single:          
+GLES2 (basic) &    2,880 &    2,747 &    2,144 &      623 \\
+GLES2 (fancy) &    2,574 &    2,409 &    1,583 &      415 \\
+GLES3 (basic) &    2,557 &    2,385 &    2,066 &      735 \\
+GLES3 (fancy) &    2,203 &    2,033 &    1,506 &      519 \\
+
+multi:
+GLES2 (basic) &   10,157 &    9,854 &    5,886 &    1,218 \\
+GLES2 (fancy) &    8,452 &    7,811 &    3,545 &      562 \\
+GLES3 (basic) &    6,853 &    6,706 &    5,321 &    1,757 \\
+GLES3 (fancy) &    5,901 &    5,685 &    3,627 &      848 \\
+
+nproc:
+GLES2 (basic) &        5 &        5 &        4 &        3 \\
+GLES2 (fancy) &        5 &        4 &        4 &        3 \\
+GLES3 (basic) &        5 &        5 &        4 &        4 \\
+GLES3 (fancy) &        4 &        4 &        3 &        3 \\

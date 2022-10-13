@@ -19,7 +19,7 @@ def test_code_contains_no_print_statement():
     after the line with the print on it and it will be ignore by this linter
     """
     result = subprocess.run(
-        'grep -E -r --exclude-dir=contrib --exclude-dir=quarantine --exclude-dir=env --exclude-dir=venv --include="*.py" "(^|\s)print\\(" | grep -v -E "(tests?/|/test_|_test.py)" | grep -v "  # script"',
+        r'grep -E -r --exclude-dir=contrib --exclude-dir=quarantine --exclude-dir=env --exclude-dir=venv --include="*.py" "(^|\s)print\\(" | grep -v -E "(tests?/|/test_|_test.py)" | grep -v "  # script"',
         shell=True,
     )
     assert (

@@ -204,6 +204,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://game/utils/debug_logger.gd"
 }, {
+"base": "Reference",
+"class": "DebugTimer",
+"language": "GDScript",
+"path": "res://utils/debug_timer.gd"
+}, {
 "base": "Animal",
 "class": "Deer",
 "language": "GDScript",
@@ -814,6 +819,7 @@ _global_script_class_icons={
 "DebugCameraInputCollector": "",
 "DebugCameraView": "",
 "DebugLogger": "",
+"DebugTimer": "",
 "Deer": "",
 "Door": "",
 "DoorBody": "",
@@ -934,12 +940,24 @@ _global_script_class_icons={
 
 config/name="datagen"
 run/main_scene="res://game/scene_root/scene_root.tscn"
+config/project_settings_override="res://override_avalon.cfg"
 run/flush_stdout_on_print=true
 run/main_loop_type="SimLoop"
 
 [autoload]
 
 Globals="*res://game/utils/globals.gd"
+
+[avalon]
+
+action_read=true
+action_apply=true
+frame_read=true
+frame_write=true
+observation_read=true
+observation_write=true
+simple_agent=false
+shadows_enabled=true
 
 [compression]
 
@@ -971,10 +989,6 @@ enabled=PoolStringArray(  )
 [gdnative]
 
 singletons=[  ]
-
-[global]
-
-physic=false
 
 [input]
 

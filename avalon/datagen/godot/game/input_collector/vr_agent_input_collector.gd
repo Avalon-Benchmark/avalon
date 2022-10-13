@@ -97,3 +97,11 @@ func read_input_from_pipe(action_pipe: StreamPeerBuffer) -> void:
 	is_left_hand_grasping = action_pipe.get_float() == 1.0
 	is_right_hand_grasping = action_pipe.get_float() == 1.0
 	is_jumping = action_pipe.get_float() == 1.0
+
+func read_input_from_data(action: PoolRealArray) -> void:
+	head_delta_position_x = action[0]
+	head_delta_position_y = action[1]
+	head_delta_position_z = action[2]
+	head_delta_rotation_x = action[3]
+	head_delta_rotation_y = action[4]
+	head_delta_rotation_z = action[5]

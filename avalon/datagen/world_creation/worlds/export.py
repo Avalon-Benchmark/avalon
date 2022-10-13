@@ -297,6 +297,7 @@ def export_world_terrain(
 
         export_path = "."
         if is_exported_with_absolute_paths:
+            # TODO: fix the double quotes, update S3 checksum manifest
             export_path = f'"{str(output_folder)}"'
         if world.export_config.world_id is not None:
             export_path = f"res://worlds/{world.export_config.world_id}"

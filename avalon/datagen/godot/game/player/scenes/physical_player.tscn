@@ -55,9 +55,8 @@ disabled = true
 [node name="ground_ray" type="RayCast" parent="physical_body"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
 visible = false
- enabled = true
+enabled = true
 cast_to = Vector3( 0, -1.99, 0 )
-
 
 [node name="physical_head" type="RigidBody" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0 )

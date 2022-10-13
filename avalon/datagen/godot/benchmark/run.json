@@ -1,0 +1,60 @@
+{
+  "$type": "AvalonSimSpec",
+  "episode_seed": 0,
+  "dir_root": "/dev/shm/godot",
+  "recording_options": {
+    "$type": "RecordingOptionsSpec",
+    "user_id": null,
+    "apk_version": null,
+    "recorder_host": null,
+    "recorder_port": null,
+    "is_teleporter_enabled": false,
+    "resolution_x": 128,
+    "resolution_y": 128,
+    "is_recording_human_actions": false,
+    "is_remote_recording_enabled": false,
+    "is_adding_debugging_views": false,
+    "is_debugging_output_requested": false
+  },
+  "player": {
+    "$type": "VRAgentPlayerSpec",
+    "max_head_linear_speed": 0.3,
+    "max_head_angular_speed": {
+      "$type": "Vector3",
+      "x": 5.0,
+      "y": 10.0,
+      "z": 1.0
+    },
+    "max_hand_linear_speed": 1.0,
+    "max_hand_angular_speed": 15.0,
+    "jump_height": 1.5,
+    "arm_length": 1,
+    "starting_hit_points": 1.0,
+    "mass": 60.0,
+    "arm_mass_ratio": 0.05,
+    "head_mass_ratio": 0.08,
+    "standup_speed_after_climbing": 0.1,
+    "min_head_position_off_of_floor": 0.2,
+    "push_force_magnitude": 5.0,
+    "throw_force_magnitude": 3.0,
+    "starting_left_hand_position_relative_to_head": {
+      "$type": "Vector3",
+      "x": -0.5,
+      "y": -0.5,
+      "z": -0.5
+    },
+    "starting_right_hand_position_relative_to_head": {
+      "$type": "Vector3",
+      "x": 0.5,
+      "y": -0.5,
+      "z": -0.5
+    },
+    "minimum_fall_speed": 10.0,
+    "fall_damage_coefficient": 2.6e-05,
+    "num_frames_alive_after_food_is_gone": 20,
+    "eat_area_radius": 0.5,
+    "is_displaying_debug_meshes": false,
+    "is_human_playback_enabled": false,
+    "is_slowed_from_crouching": true
+  }
+}

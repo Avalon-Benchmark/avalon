@@ -5,8 +5,8 @@ class_name Player
 # player nodes
 var target_player: Spatial
 var target_head: Spatial
-var target_left_hand
-var target_right_hand
+var target_left_hand: Spatial
+var target_right_hand: Spatial
 var physical_player: Spatial
 var physical_body: PhysicsBody
 var physical_head: Spatial
@@ -99,6 +99,9 @@ var prev_physical_head_angular_velocity: Vector3
 var prev_physical_left_hand_angular_velocity: Vector3
 var prev_physical_right_hand_angular_velocity: Vector3
 
+var PERF_SIMPLE_AGENT: bool = ProjectSettings.get_setting("avalon/simple_agent")
+var PERF_ACTION_APPLY: bool = ProjectSettings.get_setting("avalon/action_apply")
+
 
 func _ready() -> void:
 	initialize()
@@ -165,6 +168,13 @@ func set_nodes_in_ready():
 	ground_ray.add_exception(physical_body)
 	ground_ray.add_exception(physical_left_hand)
 	ground_ray.add_exception(physical_right_hand)
+
+	if PERF_SIMPLE_AGENT:
+		climbing_ray.enabled = false
+		ground_ray.enabled = false
+		eat_area.monitoring = false
+		target_left_hand.visible = false
+		target_right_hand.visible = false
 
 	target_left_hand.global_transform.origin = (
 		starting_left_hand_position_relative_to_head
@@ -294,25 +304,27 @@ func set_spawn(spawn_transform: Transform):
 
 
 func apply_action(action: AvalonAction, delta: float):
+	if not PERF_ACTION_APPLY:
+		return
 	# head collision shape is actually part of your body -- make sure it get's moved so climbing will work
 	update_head_collision_shape()
 
 	# BEWARE: you must perform the following actions in this exact order or else things will not work
 	rotate_head(action, delta)
-	rotate_left_hand(action, delta)
-	rotate_right_hand(action, delta)
+	if not PERF_SIMPLE_AGENT:
+		rotate_left_hand(action, delta)
+		rotate_right_hand(action, delta)
 
 	# we MUST move our body before moving our hands, it determines how far our hands can actually move
 	move(action, delta)
 
-	move_left_hand(action, delta)
-	move_right_hand(action, delta)
-
-	do_left_hand_action(action)
-	do_right_hand_action(action)
-
-	# check to see if any food is being held near the agents mouth so it can nom nom nom
-	eat()
+	if not PERF_SIMPLE_AGENT:
+		move_left_hand(action, delta)
+		move_right_hand(action, delta)
+		do_left_hand_action(action)
+		do_right_hand_action(action)
+		# check to see if any food is being held near the agents mouth so it can nom nom nom
+		eat()
 
 	# set the velocity of the physical body so the physical body tries to move to where the fake body is
 	apply_action_to_physical_body(action, delta)
@@ -335,6 +347,9 @@ func apply_action_to_physical_body(_action: AvalonAction, delta: float):
 		)
 		/ delta
 	)
+
+	if PERF_SIMPLE_AGENT:
+		return
 
 	physical_left_hand.linear_velocity = (
 		(target_left_hand.transform.origin - physical_left_hand.transform.origin)
@@ -568,7 +583,10 @@ func move_body_out_of_terrain(_delta: float) -> void:
 
 
 func is_climbing():
-	return target_left_hand.is_grasping_heavy_thing() or target_right_hand.is_grasping_heavy_thing()
+	if PERF_SIMPLE_AGENT:
+		return false
+	else:
+		return target_left_hand.is_grasping_heavy_thing() or target_right_hand.is_grasping_heavy_thing()
 
 
 func move(action: AvalonAction, delta: float) -> void:
@@ -743,6 +761,9 @@ func _get_fall_damage() -> float:
 
 
 func _get_all_energy_expenditures() -> Dictionary:
+	if PERF_SIMPLE_AGENT:
+		return {}
+
 	# note: this must be called before `update_previous_transforms_and_velocities`!
 	var expenditure = {}
 
@@ -814,6 +835,12 @@ func _get_all_energy_expenditures() -> Dictionary:
 
 
 func _get_proprioceptive_observation() -> Dictionary:
+	if PERF_SIMPLE_AGENT:
+		return {
+			"physical_body": physical_body.transform,
+			"physical_head": physical_head.transform,
+		}
+
 	# note: this must be called before `update_previous_transforms_and_velocities`!
 	var data = {}
 
@@ -953,8 +980,6 @@ func _get_proprioceptive_observation() -> Dictionary:
 
 func update_previous_transforms_and_velocities(is_reset_for_spawn = false) -> void:
 	prev_target_head_global_transform = target_head.global_transform
-	prev_target_left_hand_global_transform = target_left_hand.global_transform
-	prev_target_right_hand_global_transform = target_right_hand.global_transform
 
 	if is_reset_for_spawn:
 		prev_physical_body_linear_velocity = Vector3.ZERO
@@ -963,20 +988,29 @@ func update_previous_transforms_and_velocities(is_reset_for_spawn = false) -> vo
 
 	prev_physical_body_global_transform = physical_body.global_transform
 	prev_physical_head_global_transform = physical_head.global_transform
+	prev_physical_head_linear_velocity = physical_head.linear_velocity
+	prev_physical_head_angular_velocity = physical_head.angular_velocity
+
+	if PERF_SIMPLE_AGENT:
+		return
+
+	prev_target_left_hand_global_transform = target_left_hand.global_transform
+	prev_target_right_hand_global_transform = target_right_hand.global_transform
+
 	prev_physical_left_hand_global_transform = physical_left_hand.global_transform
 	prev_physical_right_hand_global_transform = physical_right_hand.global_transform
 
-	prev_physical_head_linear_velocity = physical_head.linear_velocity
 	prev_physical_left_hand_linear_velocity = physical_left_hand.linear_velocity
 	prev_physical_right_hand_linear_velocity = physical_right_hand.linear_velocity
 
-	prev_physical_head_angular_velocity = physical_head.angular_velocity
 	prev_physical_left_hand_angular_velocity = physical_left_hand.angular_velocity
 	prev_physical_right_hand_angular_velocity = physical_right_hand.angular_velocity
 
 
 # NOTE: this must be called after a physics tick (so at the start of another tick)
 func get_observation_and_reward() -> Dictionary:
+	if PERF_SIMPLE_AGENT:
+		return current_observation
 	# we won't know what damage we've taken until after a physics tick
 	current_observation["hit_points_lost_from_enemies"] = _hit_points_lost_from_enemies
 	current_observation["hit_points_gained_from_eating"] = _hit_points_gained_from_eating

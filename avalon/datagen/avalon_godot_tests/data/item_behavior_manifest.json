@@ -1,14 +1,14 @@
 {
-  "snapshot_commit": "7cf0a56525c331dc93d0c58e47123be9c3b28ec2",
+  "snapshot_commit": "067e7bb40e0cb627d92c96ea01b7c72ceeb36fdd",
   "checksums": {
     "apple_fall_on_ground": {
       "scene": "0597efface8a5957da73443d51399aef",
-      "video": "51c598a137504f1f342123dcb64901ba",
+      "video": "a51692c029334a2554ef16006ec31a38",
       "debug_output": "55b5c6da3e60e82878c131e8edea51e5"
     },
     "apple_fall_on_rock": {
       "scene": "ff39033c6d2799af5cd4ff81680d7dcd",
-      "video": "88922f695dfc5e21f455af30b057a27d",
+      "video": "fe50905212889db68aafc98472765369",
       "debug_output": "6a30464df8ff5c5c14007d4961bf0130"
     },
     "apple_hit_with_rock": {
@@ -18,12 +18,12 @@
     },
     "banana_fall_on_ground": {
       "scene": "062658dd3a2d2db0e965020f78759a1c",
-      "video": "6b830359f05e9808c7206f0a766e4897",
+      "video": "2a912f1b63bfadc0a67e8f6a85dbba24",
       "debug_output": "b55389c891ec23c8b7e60ba2f051538f"
     },
     "banana_fall_on_rock": {
       "scene": "7d62dfc448e6ea0b9136765bdb149e88",
-      "video": "e7e87e915c2f6d19266238111ca78619",
+      "video": "24c2604519b10e1a1208ccc594b79a8e",
       "debug_output": "df918b018a7dcf42985ec65736abf92f"
     },
     "banana_hit_with_rock": {
@@ -33,12 +33,12 @@
     },
     "cherry_fall_on_ground": {
       "scene": "048ab0f213c2fbebbff1bc051ec5998d",
-      "video": "3e9953779d1058b63016a7a1b03d2837",
+      "video": "cefae93a26be592dcbef91a6166ff9ea",
       "debug_output": "b67a28d17aee5d72627edb3f9b9e4848"
     },
     "cherry_fall_on_rock": {
       "scene": "b4f901ddaf4ff074a41216c7b663bcb8",
-      "video": "5ec18e7bb913c04b7e29d3b39db81bdd",
+      "video": "e89ccd8dbe36c308b49133a4adef0456",
       "debug_output": "016bbc00ec263977f87180a8a9422484"
     },
     "cherry_hit_with_rock": {
@@ -48,12 +48,12 @@
     },
     "honeycomb_fall_on_ground": {
       "scene": "1908eb8fdd9226307d91cbc8064cb67e",
-      "video": "b1c435ba55dd7c8af45d446a6223a3e9",
+      "video": "259e66cf0e16c753c2c1cad89df0b9bc",
       "debug_output": "0571ed741ab698b1a664abd9084d4353"
     },
     "honeycomb_fall_on_rock": {
       "scene": "721b3cf5ead23c8c11cb4ca14643d1cf",
-      "video": "af6e43ddf12774a0e4e10023aa400858",
+      "video": "781bd082513494fbd39ee3527470c157",
       "debug_output": "a56112c13c98a64f397a194bfacfbe4d"
     },
     "honeycomb_hit_with_rock": {
@@ -63,12 +63,12 @@
     },
     "mulberry_fall_on_ground": {
       "scene": "e1ca46f5fa4de3f528cf14cdc9567526",
-      "video": "bc3baecc92a4951bb1d04fa6fd76d84d",
+      "video": "2b0092105d50fca1235111e7c777fff7",
       "debug_output": "edf3bcd1a17b5c7da93e2f444d0d0602"
     },
     "mulberry_fall_on_rock": {
       "scene": "0b5b21a27c78cb6d0e63a01a909c9bb3",
-      "video": "0b7b564f035fbbcb23f68b66325e601d",
+      "video": "720ccbc1528059292f19bcbffe0fdf7f",
       "debug_output": "884fa478ba5e4e2a6acc5d2dc2e34309"
     },
     "mulberry_hit_with_rock": {
@@ -78,27 +78,27 @@
     },
     "fig_fall_on_ground": {
       "scene": "6f79d40115d4dd0161c23400a79756cb",
-      "video": "469f9f1a83b07e1924484eacadfef7b9",
+      "video": "c015c8c7d0b9c6f28e3561d533eefd89",
       "debug_output": "6bc5fc11473ec1873f812695fa0ca3fa"
     },
     "fig_fall_on_rock": {
       "scene": "500a3a597d3d8f00e7e1c0172dbf4d3c",
-      "video": "06ea897e67b5e8b59ec6ac00e00b6d41",
+      "video": "fcd3e5886c575b649f4e4b3e3ab0dc65",
       "debug_output": "8267ed767027528b1b0f6d0e63a437dc"
     },
     "fig_hit_with_rock": {
       "scene": "c25842dab7537b4f2232f89eb620f7e3",
-      "video": "023f5e73105405ac71357828278122ad",
+      "video": "d6f082e369b45d31c8d138c7cc210e52",
       "debug_output": "6a07d062e197d5cd66765a37e8b747fa"
     },
     "orange_fall_on_ground": {
       "scene": "8f44033df858f2457cd70511edc7bc3a",
-      "video": "ec07826290897f072eef451194800519",
+      "video": "27a1744d516682c5dad9f3a89669b48e",
       "debug_output": "17a96104ef08f0b214f1e1560c571050"
     },
     "orange_fall_on_rock": {
       "scene": "19324af6f4ac85ae78709860778fa6f7",
-      "video": "f65a320672515fce5eacec1d83f2cf6f",
+      "video": "87941cec88371e4a4d5bd057091eeac3",
       "debug_output": "f72543d92d255c0c89b18fc97ac6c180"
     },
     "orange_hit_with_rock": {
@@ -108,12 +108,12 @@
     },
     "avocado_fall_on_ground": {
       "scene": "458a2d7c760e69997a75f167f1d2abb8",
-      "video": "4c9c7e8c68680ca6078d740d175f2614",
+      "video": "884bc08b6795d8204f97d0c274f3d2be",
       "debug_output": "858aa286c51a0fddb61b07d00f13e7cf"
     },
     "avocado_fall_on_rock": {
       "scene": "2d969da451c5660ac190aa7790075375",
-      "video": "0584c5f83176899f96cc234277c0cf85",
+      "video": "46814bcb54b71d11d3c2bd88a259345b",
       "debug_output": "5511381bbc3e5d32ecbf9b7ae5361e27"
     },
     "avocado_hit_with_rock": {
@@ -123,12 +123,12 @@
     },
     "coconut_fall_on_ground": {
       "scene": "17b1a7a1f2a5d855a59e3057f2fd4b72",
-      "video": "ee4dfc8564cf881cbac5855a9cab25cf",
+      "video": "5c09f7e916be1334096bded562af74aa",
       "debug_output": "e0f25ebba5723942c93555ee48de55ec"
     },
     "coconut_fall_on_rock": {
       "scene": "6fe9b35e8d8c9e644fb1ca1f25dbfaea",
-      "video": "32187a852b2aa0281b835d2600175705",
+      "video": "71c79e9d473bfa48b9a41430a42b140c",
       "debug_output": "5b88287de6fb495f7fd3c615170891a3"
     },
     "coconut_hit_with_rock": {
@@ -138,17 +138,17 @@
     },
     "avocado_fall_on_altar": {
       "scene": "2aa09b983fa21e53e5b11855c9ef1b47",
-      "video": "a3b9694a6c4b166a9dbde4d6f7d3bb9e",
+      "video": "d4a34f14401da5dacc214d598688cdf1",
       "debug_output": "8e0efebb4f5e1a7f53247f90a4feab6a"
     },
     "apple_grounded": {
       "scene": "a70f9a08b0bb61b7711cb78f6ef20800",
-      "video": "ff7adb3b0e16172294c49904a5fb2fda",
+      "video": "670b0e9dafbd952428fa425d6770e559",
       "debug_output": "4d4c48f4a96d808e60c8103f147f8529"
     },
     "banana_grounded": {
       "scene": "41d395a7e4bad97ae7625a622b51d38b",
-      "video": "7125920d98ddff42145ed0e941faeb00",
+      "video": "97fdad1bad19bedcbe7cf108429d8d2b",
       "debug_output": "c3c98b3dc2bd9551f31fad92e235be13"
     },
     "cherry_grounded": {
@@ -158,57 +158,57 @@
     },
     "mulberry_grounded": {
       "scene": "5ae583ffee0aeb08ac47fd71b3857811",
-      "video": "ee03e37d7490332ba9b7ebb8d1aedcaf",
+      "video": "ca6a9ec315ad66d226ec7d69ab7adaf6",
       "debug_output": "7248e46247446ba139fbc42ffc0c7784"
     },
     "fig_grounded": {
       "scene": "49f658ebbac2966f16a5e5a6e217be93",
-      "video": "7d1f90e0b07758d1f615944d20953795",
+      "video": "a93edd2ee7a292c43d1de011ebcc4ccf",
       "debug_output": "2c14e261043e871b9a4737dc580a3e4f"
     },
     "orange_grounded": {
       "scene": "d1e64b8f56404e83916f4182ba0d92c7",
-      "video": "17cea7e869ab5cb33767c9047e24eac7",
+      "video": "bb80848c41fc8997ff176458ae72ac61",
       "debug_output": "1ad241d0ad98b9ff6e7a13f4e44010df"
     },
     "avocado_grounded": {
       "scene": "8855d7540b65e60dc2db55ee6a30baf7",
-      "video": "c1d4430cc51967b14ba758088926774d",
+      "video": "69a7c1df06a70c04c6e6337301e3c512",
       "debug_output": "549d67b56390a5056edc6f74d85e8a1a"
     },
     "coconut_grounded": {
       "scene": "433551f2fde2be4399c4aeed0c09b2a8",
-      "video": "4e5b6bdccbf28502a7c04f208c986d52",
+      "video": "7bbb12b8c7359506a284b53feff7b002",
       "debug_output": "048bd5cb78e28e50b0c97f46bbc19c34"
     },
     "carrot_grounded": {
       "scene": "cc6ca08aefde0cfb49377dada358dd88",
-      "video": "746372e73d798ef95a524efe8f91881f",
+      "video": "1acfa112146f6d7943f47370bb25105f",
       "debug_output": "b852ce35fd7c5346c187c2caf58c2fe0"
     },
     "fig_goes_splat": {
       "scene": "49f658ebbac2966f16a5e5a6e217be93",
-      "video": "0af51058b49eff1b005b73a3314fa6f5",
+      "video": "ad0689491db2cc38f18f1b66e7fb3dd4",
       "debug_output": "3b7ba66688486cd56aefa0efdd92a211"
     },
     "banana_on_tree": {
       "scene": "6be6f9a01a5939fb6cc39dd88c725424",
-      "video": "6e9f33af76a608adfa6dea13174a171c",
+      "video": "cfd56daf7273048d7fedf4778db4fc73",
       "debug_output": "64835cff57592c77f83315e021df6436"
     },
     "mulberry_on_tree": {
       "scene": "7ac38160693211cc86d5504d9d765274",
-      "video": "3602946aee65e040c18d4855a7d16712",
+      "video": "cf137d44eef2492cb664961cd7bc07a7",
       "debug_output": "f4d8410b2105e6fcf5fe0ac9b27c6a9b"
     },
     "honeycomb_on_tree": {
       "scene": "211434678303eb1286091ef06de9e121",
-      "video": "1801c4cd19c7e43e76505042fa9d4bae",
+      "video": "6074cbbcff8d9349b37f37b2d00ff7a6",
       "debug_output": "33066a890986b94fcc9097933a8e6a59"
     },
     "honeycomb_gets_dirty": {
       "scene": "211434678303eb1286091ef06de9e121",
-      "video": "f64b0becc208e34955d34c414a1f8bff",
+      "video": "c75d21b58760af41587ff14343216bdb",
       "debug_output": "d4bb498bf6596073fbafb19c583e439f"
     }
   }
