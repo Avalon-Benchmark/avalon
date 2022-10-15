@@ -77,7 +77,7 @@ func read_input_from_pipe() -> bool:
 		else:
 			decoded_message = last_action
 		match decoded_message:
-			[CONST.RESET_MESSAGE, var _data, var episode_seed, var world_path, var starting_hit_points]: # [tag, null action, int, string + \n, float]
+			[CONST.RESET_MESSAGE, var _data, var episode_seed, var world_path, var starting_hit_points]:  # [tag, null action, int, string + \n, float]
 				episode = episode_seed
 				player.hit_points = starting_hit_points
 				advance_episode(world_path)

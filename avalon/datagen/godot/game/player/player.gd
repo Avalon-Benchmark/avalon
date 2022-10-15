@@ -586,7 +586,10 @@ func is_climbing():
 	if PERF_SIMPLE_AGENT:
 		return false
 	else:
-		return target_left_hand.is_grasping_heavy_thing() or target_right_hand.is_grasping_heavy_thing()
+		return (
+			target_left_hand.is_grasping_heavy_thing()
+			or target_right_hand.is_grasping_heavy_thing()
+		)
 
 
 func move(action: AvalonAction, delta: float) -> void:
