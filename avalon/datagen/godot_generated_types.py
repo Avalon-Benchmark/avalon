@@ -2,7 +2,7 @@
 # See generate_godot_code.py for details
 
 import attr
-from typing import Final
+from typing_extensions import Final
 from typing import Optional
 
 from avalon.datagen.godot_base_types import *

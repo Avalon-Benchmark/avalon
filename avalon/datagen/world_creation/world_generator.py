@@ -12,7 +12,7 @@ from random import Random
 from typing import Any
 from typing import ClassVar
 from typing import Dict
-from typing import Final
+from typing_extensions import Final
 from typing import Hashable
 from typing import List
 from typing import Optional

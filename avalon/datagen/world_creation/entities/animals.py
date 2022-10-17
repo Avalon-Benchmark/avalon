@@ -1,5 +1,5 @@
 from typing import ClassVar
-from typing import Final
+from typing_extensions import Final
 from typing import List
 from typing import Optional
 from typing import Type

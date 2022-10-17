@@ -1,4 +1,4 @@
-from typing import Final
+from typing_extensions import Final
 
 LARGEST_ANIMAL_SIZE: Final = 3.125
 STICK_LENGTH: Final = 4.0

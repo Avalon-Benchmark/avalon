@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Any
 from typing import Dict
-from typing import Final
+from typing_extensions import Final
 from typing import Iterable
 from typing import List
 from typing import Optional

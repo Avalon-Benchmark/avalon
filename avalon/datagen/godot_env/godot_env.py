@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Deque
 from typing import Dict
-from typing import Final
+from typing_extensions import Final
 from typing import Generic
 from typing import List
 from typing import Optional

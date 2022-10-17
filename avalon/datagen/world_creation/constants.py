@@ -1,7 +1,7 @@
 import math
 from enum import Enum
 from typing import Dict
-from typing import Final
+from typing_extensions import Final
 from typing import List
 from typing import Set
 from typing import Tuple

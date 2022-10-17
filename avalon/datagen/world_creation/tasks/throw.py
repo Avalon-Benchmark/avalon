@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Final
+from typing_extensions import Final
 from typing import List
 from typing import Type
 
