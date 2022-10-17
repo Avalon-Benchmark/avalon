@@ -419,6 +419,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://game/specs/MouseKeyboardAgentPlayerSpec.gd"
 }, {
+"base": "PopupPanel",
+"class": "MouseKeyboardHelpPanel",
+"language": "GDScript",
+"path": "res://scenes/gui/mouse_keyboard_help_panel.gd"
+}, {
 "base": "MouseKeyboardInputCollector",
 "class": "MouseKeyboardHumanInputCollector",
 "language": "GDScript",
@@ -862,6 +867,7 @@ _global_script_class_icons={
 "MouseKeyboardAgentInputCollector": "",
 "MouseKeyboardAgentPlayer": "",
 "MouseKeyboardAgentPlayerSpec": "",
+"MouseKeyboardHelpPanel": "",
 "MouseKeyboardHumanInputCollector": "",
 "MouseKeyboardHumanPlayer": "",
 "MouseKeyboardHumanPlayerSpec": "",
@@ -1064,28 +1070,6 @@ toggle_mouse_capture={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":67,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-toggle_free_movement={
-"deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":88,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
- ]
-}
-movement_speed_increase={
-"deadzone": 0.5,
-"events": [  ]
-}
-movement_speed_decrease={
-"deadzone": 0.5,
-"events": [  ]
-}
-move_toggle_rotation={
-"deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":82,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
- ]
-}
-toggle={
-"deadzone": 0.5,
-"events": [  ]
-}
 mouse_left={
 "deadzone": 0.5,
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
@@ -1114,6 +1098,7 @@ wheel_down={
 toggle_active_hand={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":72,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+, Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
 reset={
@@ -1129,6 +1114,7 @@ jump={
 grab={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":71,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+, Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
 eat={
@@ -1141,9 +1127,9 @@ crouch={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777218,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-save={
+toggle_help={
 "deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":89,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":true,"control":false,"meta":false,"command":false,"pressed":false,"scancode":0,"physical_scancode":47,"unicode":0,"echo":false,"script":null)
  ]
 }
 
