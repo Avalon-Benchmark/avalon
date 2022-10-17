@@ -1,46 +1,32 @@
-import os
 import shutil
 from collections import deque
-from io import BufferedReader
-from io import BufferedWriter
+from io import BufferedReader, BufferedWriter
 from pathlib import Path
-from typing import TYPE_CHECKING
-from typing import Deque
-from typing import Dict
-from typing import Final
-from typing import Generic
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import Type
+from typing import (TYPE_CHECKING, Deque, Dict, Final, Generic, List, Optional,
+                    Tuple, Type)
 
 import gym
 import numpy as np
-from loguru import logger
-from numpy import typing as npt
-from sentry_sdk import capture_exception
-
 from avalon.common.utils import only
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.datagen.errors import GodotError
 from avalon.datagen.generate import InteractiveGodotProcess
 from avalon.datagen.godot_env._bridge import GodotEnvBridge
 from avalon.datagen.godot_env.action_log import GodotEnvActionLog
-from avalon.datagen.godot_env.actions import ActionType
-from avalon.datagen.godot_env.actions import DebugCameraAction
-from avalon.datagen.godot_env.goals import GoalEvaluator
-from avalon.datagen.godot_env.goals import GoalProgressResult
-from avalon.datagen.godot_env.observations import FeatureDataDict
-from avalon.datagen.godot_env.observations import GodotObservationContext
-from avalon.datagen.godot_env.observations import ObservationType
+from avalon.datagen.godot_env.actions import ActionType, DebugCameraAction
+from avalon.datagen.godot_env.goals import GoalEvaluator, GoalProgressResult
+from avalon.datagen.godot_env.observations import (FeatureDataDict,
+                                                   GodotObservationContext,
+                                                   ObservationType)
 from avalon.datagen.godot_generated_types import SimSpec
-
 # Mapping of feature name to (data_type, shape).
-from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
-from avalon.datagen.world_creation.constants import AvalonTaskGroup
-from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
-from avalon.datagen.world_creation.world_generator import GenerateWorldParams
-from avalon.datagen.world_creation.world_generator import WorldGenerator
+from avalon.datagen.world_creation.constants import (STARTING_HIT_POINTS,
+                                                     AvalonTaskGroup)
+from avalon.datagen.world_creation.world_generator import (
+    BlockingWorldGenerator, GenerateWorldParams, WorldGenerator)
+from loguru import logger
+from numpy import typing as npt
+from sentry_sdk import capture_exception
 
 _DEFAULT_EPISODE_SEED: Final = 0
 
@@ -108,10 +94,9 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         self.is_godot_restarted_on_error = is_godot_restarted_on_error
         self.is_reset_called_already: bool = False  # :(
         self._latest_screen: Optional[npt.NDArray] = None
+        self._latest_episode_seed: int = 0
 
         self.is_error_log_checked_after_each_step = is_error_log_checked_after_each_step
-
-        self.episode_tracker = _EpisodeTracker(config.get_dir_root(), is_dev_flag_added)
 
         assert isinstance(self.config, SimSpec), "cannot establish godot pipe without fixed resolution"
 
@@ -190,6 +175,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         return self.seed_nicely(seed)
 
     def seed_nicely(self, episode_seed: int):
+        self._latest_episode_seed = episode_seed
         return self._bridge.seed(episode_seed)
 
     def step(self, action: Dict[str, np.ndarray]):
@@ -213,13 +199,29 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         observation = self._read_observation_reply(feature_data)
 
         goal_progress = self.goal_evaluator.calculate_goal_progress(observation)
-        self.episode_tracker.step_count_for_current_episode += 1
         return observation, goal_progress
 
     def debug_act(self, action: DebugCameraAction) -> ObservationType:
         assert isinstance(action, DebugCameraAction), f"Must pass `DebugCameraAction` objects to debug_act"
         feature_data = self._bridge.debug_act(action)
         return self._read_observation_reply(feature_data)
+
+    def save_snapshot(self) -> Path:
+        assert self.is_reset_called_already, "Cannot take a snapshot without starting a world (via reset)"
+        return Path(self._bridge.save_snapshot())
+
+    def load_snapshot(self, snapshot_path: Path) -> Tuple[ObservationType, GoalProgressResult]:
+        assert (
+            not snapshot_path.is_file()
+        ), f"snapshot_path {snapshot_path} should be the path to the directory returned from save_snapshot."
+        assert snapshot_path.exists(), f"cannot load snapshot_path {snapshot_path} because it doesn't exist."
+        self.is_reset_called_already = True
+        feature_data = self._bridge.load_snapshot(snapshot_path.as_posix())
+
+        observation = self._read_observation_reply(feature_data)
+
+        goal_progress = self.goal_evaluator.calculate_goal_progress(observation)
+        return observation, goal_progress
 
     def _read_observation_reply(self, feature_data: FeatureDataDict) -> ObservationType:
         self._latest_screen = feature_data["rgb"] if "rgb" in self.observation_context.selected_features else None
@@ -247,6 +249,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
 
         if episode_seed is None:
             episode_seed = _DEFAULT_EPISODE_SEED
+        self._latest_episode_seed = episode_seed
 
         # calls generate batch and creates a level (from somewhere?)
         world_params = self._get_world_params_by_id(world_id)
@@ -258,14 +261,10 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
 
         self._check_for_errors_and_collect_artifacts()
 
-        world_path = f"{world_params.output}/main.tscn"
-
         initial_state_features = self._bridge.reset(
-            self.action_type.get_null_action(), episode_seed, world_path, STARTING_HIT_POINTS
+            self.action_type.get_null_action(), episode_seed, world_params.main_scene_path, STARTING_HIT_POINTS
         )
         observation = self._read_observation_reply(initial_state_features)
-
-        self.episode_tracker.set_episode(episode_seed)
 
         self.goal_evaluator.reset(observation, world_params)
         return observation
@@ -274,6 +273,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
     def reset_nicely_with_specific_world(
         self, *, episode_seed: int, world_path: str, starting_hit_points: float = 1.0
     ) -> ObservationType:
+        assert world_path.endswith(".tscn"), f"{world_path} should be the "
         self._latest_screen = None
         self.is_reset_called_already = True
 
@@ -286,8 +286,6 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
 
         self.process.check_for_errors()
 
-        self.episode_tracker.set_episode(episode_seed)
-
         self.goal_evaluator.reset(observation, world_params=None)
         return observation
 
@@ -299,10 +297,18 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         self._bridge.after_close()
         self.world_generator.close()
 
+    def __del__(self) -> None:
+        try:
+            if self.is_running:
+                self.close()
+        except AttributeError:
+            # ignore errors from incomplete init
+            pass
+
     def cleanup(self):
         shutil.rmtree(self.config.dir_root, ignore_errors=True)
 
-    def get_action_log(self) -> GodotEnvActionLog[ActionType]:
+    def get_action_log(self) -> "GodotEnvActionLog[ActionType]":
         return GodotEnvActionLog.parse(self.process.action_record_path, self.action_type)
 
     def _check_for_errors_and_collect_artifacts(self):
@@ -356,33 +362,11 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         return GodotEnvReplay.from_env(self._spawn_fresh_copy_of_env(self.process.run_uuid), world_path)
 
     def _get_world_params_by_id(self, world_id: Optional[int]) -> GenerateWorldParams:
+        if world_id is not None:
+            already_generated = self.world_generator.load_already_generated_params(world_id)
+            if already_generated is not None:
+                return already_generated
         return only(self.world_generator.generate_batch(world_id, 1))
-
-
-class _TrackedEpisode:
-    def __init__(self, seed: int):
-        self.seed = seed
-        self.steps = 0
-
-
-# TODO: this can be removed
-class _EpisodeTracker:
-    def __init__(self, dir_root: str, is_dev_flag_enabled: bool):
-        if is_dev_flag_enabled:
-            # TODO awkward, now only applies to debug output
-            dir_root = dir_root.replace("/mnt/private/data/", "/tmp/godot/")
-        self._dir_root = dir_root
-        self.episodes: List[_TrackedEpisode] = []
-        self.step_count_for_current_episode = 0
-
-    def folder_for(self, episode_seed: int):
-        return os.path.join(self._dir_root, f"{episode_seed:06d}")
-
-    def set_episode(self, episode_seed: int):
-        if len(self.episodes) > 0:
-            self.episodes[-1].steps = self.step_count_for_current_episode
-        self.episodes.append(_TrackedEpisode(episode_seed))
-        self.step_count_for_current_episode = 0
 
 
 # utility method to get action type given an avalon config. Ideally, this should probably be in a utility class

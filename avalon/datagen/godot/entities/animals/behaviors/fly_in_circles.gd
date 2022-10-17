@@ -2,15 +2,17 @@ extends CyclingBehavior
 
 class_name FlyInCircles
 
-var fly_speed: float
-var loop_angle_increment: float
+export var fly_speed: float
+export var loop_angle_increment: float
 
 
-func _init(_fly_speed: float, _glide_steps: int, _turn_steps: int, _loop_angle_increment: float).(
-	_glide_steps, _turn_steps
-):
+func init(
+	_fly_speed: float, _glide_steps: int, _turn_steps: int, _loop_angle_increment: float
+) -> CyclingBehavior:
+	.init_super(_glide_steps, _turn_steps)
 	fly_speed = _fly_speed
 	loop_angle_increment = _loop_angle_increment
+	return self
 
 
 func do(animal: Animal, delta: float) -> Vector3:

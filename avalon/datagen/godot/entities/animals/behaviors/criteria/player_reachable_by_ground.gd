@@ -3,13 +3,15 @@ extends AbleToMakeHeadway
 
 class_name PlayerReachableByGround
 
-var out_of_reach_height: int
+export var out_of_reach_height: int
 
 
-func _init(_out_of_reach_height: int, _required_movement_distance: int, _give_up_after_hops: int).(
-	_required_movement_distance, _give_up_after_hops
-):
+func init(
+	_out_of_reach_height: int, _required_movement_distance: int, _give_up_after_hops: int = NAN
+) -> BehaviorCriteria:
+	HARD.assert(not is_nan(_give_up_after_hops), "must supply give_up_after_hops")
 	out_of_reach_height = _out_of_reach_height
+	return .init(_required_movement_distance, _give_up_after_hops)
 
 
 func is_matched_by(predator: Animal) -> bool:

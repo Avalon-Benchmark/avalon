@@ -487,5 +487,6 @@ def _turn_and_run(player_speed: float, frames: int, turn_frames: int = 2, degree
 def verify_observations(manifest: BehaviorManifest, observations: List[ScenarioObservations]):
     for obs in observations:
         name = obs.scenario.name
-        historical_checksums = manifest.checksums[name]
+        historical_checksums = manifest.get_checksums(name)
+
         assert obs._checksum_dict == historical_checksums, f"{name}'s checksums have changed! "

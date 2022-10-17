@@ -2,8 +2,7 @@ extends Area
 
 class_name NaturalWeapon
 
-var is_able_to_attack := false
-var _player: Player
+export var is_able_to_attack := false
 
 
 func _ready():
@@ -12,7 +11,7 @@ func _ready():
 
 
 func attack(damage: float):
-	_player.take_damage(damage)
+	Globals.get_player().take_damage(damage)
 
 
 func _on_body_entered(body: Node):
@@ -26,6 +25,4 @@ func _on_body_exited(body: Node):
 
 
 func is_player_body(body: Node) -> bool:
-	if _player == null:
-		_player = get_tree().root.find_node("player", true, false)
-	return body == _player.physical_body
+	return body == Globals.get_player().physical_body

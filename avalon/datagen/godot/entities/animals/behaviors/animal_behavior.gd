@@ -1,4 +1,4 @@
-extends Reference
+extends Node
 
 class_name AnimalBehavior
 
@@ -15,7 +15,11 @@ func reset() -> void:
 	pass
 
 
-func get_name():
+func describe():
+	return script_name()
+
+
+func script_name():
 	var path: Array = get_script().resource_path.split("/")
 	var file = path[len(path) - 1]
 	return file.split(".")[0]

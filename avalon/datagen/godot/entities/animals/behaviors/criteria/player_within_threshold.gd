@@ -2,11 +2,12 @@ extends BehaviorCriteria
 
 class_name PlayerWithinThreshold
 
-var distance_threshold: float
+export var distance_threshold: float
 
 
-func _init(_threshold: float):
+func init(_threshold: float) -> BehaviorCriteria:
 	distance_threshold = _threshold
+	return self
 
 
 func is_matched_by(animal: Animal) -> bool:

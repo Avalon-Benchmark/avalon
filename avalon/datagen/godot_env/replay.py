@@ -13,19 +13,21 @@ from numpy import typing as npt
 
 from avalon.common.errors import SwitchError
 from avalon.datagen.generate import get_first_run_action_record_path
+from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import ActionType
 from avalon.datagen.godot_env.actions import MouseKeyboardActionType
 from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.goals import GoalProgressResult
 from avalon.datagen.godot_env.goals import NullGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_env.observations import ObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import DEBUG_CAMERA_ACTION_MESSAGE
+from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import RENDER_MESSAGE
 from avalon.datagen.godot_generated_types import RESET_MESSAGE
+from avalon.datagen.godot_generated_types import SAVE_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import SEED_MESSAGE
 from avalon.datagen.godot_generated_types import AvalonSimSpec
 from avalon.datagen.godot_generated_types import MouseKeyboardAgentPlayerSpec
@@ -83,7 +85,7 @@ class GodotEnvReplay(Generic[ObservationType, ActionType]):
             f"{action_log.selected_features} logged in {action_log.path}"
         )
 
-    def __call__(self) -> Iterator[Union[Tuple[ObservationType, Optional[GoalProgressResult]], npt.NDArray]]:
+    def __call__(self) -> Iterator[Union[Tuple[ObservationType, Optional[GoalProgressResult]], npt.NDArray, Path]]:
         env = self.env
         action_log = self.action_log
         world_path = self.world_path
@@ -112,6 +114,11 @@ class GodotEnvReplay(Generic[ObservationType, ActionType]):
             elif message[0] == SEED_MESSAGE:
                 episode_id = message[1]
                 yield env.seed_nicely(episode_id)
+            elif message[0] == SAVE_SNAPSHOT_MESSAGE:
+                yield env.save_snapshot()
+            elif message[0] == LOAD_SNAPSHOT_MESSAGE:
+                snapshot_path = message[1]
+                yield env.load_snapshot(Path(snapshot_path))
             else:
                 raise SwitchError(f"Invalid replay message {message}")
 

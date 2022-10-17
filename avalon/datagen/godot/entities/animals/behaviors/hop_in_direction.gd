@@ -3,30 +3,32 @@ extends CyclingBehavior
 
 class_name HopInDirection
 
-var direction: int  # -1 towards, 1 away, 2 towards territoriy
-var hop_speed: Vector2
+export var direction: int  # -1 towards, 1 away, 2 towards territoriy
+export var hop_speed: Vector2
 
-var fixed_point := Vector3.INF
+export var fixed_point := Vector3.INF
 
-var readiness_threshold = deg2rad(15)
-var turn_speed: float
+export var readiness_threshold = deg2rad(15)
+export var turn_speed: float
 
-var last_remaining_rotation := INF
+export var last_remaining_rotation := INF
 
 
-func _init(
+func init(
 	_direction: int,
 	_hop_speed: Vector2,
 	_act_steps: int,
 	_rest_frames: int,
 	_turn_speed: float = 2.0,
 	_fixed_point = null
-).(_act_steps, _rest_frames):
+) -> CyclingBehavior:
+	.init_super(_act_steps, _rest_frames)
 	direction = _direction
 	hop_speed = _hop_speed
 	turn_speed = _turn_speed
 	if _fixed_point:
 		fixed_point = _fixed_point
+	return self
 
 
 func turn_until_ready_to_hop(animal: Animal, position: Vector3, delta: float) -> bool:
@@ -37,7 +39,7 @@ func turn_until_ready_to_hop(animal: Animal, position: Vector3, delta: float) ->
 
 
 func target_position(animal: Animal) -> Vector3:
-	return fixed_point if fixed_point != Vector3.INF else animal.get_player_position()
+	return fixed_point if is_fixed_point_set() else animal.get_player_position()
 
 
 func get_direction_velocity_multiplier() -> int:
@@ -76,7 +78,7 @@ func reset():
 	last_remaining_rotation = INF
 
 
-func get_name():
+func describe():
 	var dir = ""
 	match direction:
 		Animal.TOWARDS_PLAYER:
@@ -86,3 +88,7 @@ func get_name():
 		Animal.AWAY_FROM_PLAYER:
 			dir = "away from player"
 	return "hop %s" % dir
+
+
+func is_fixed_point_set() -> bool:
+	return fixed_point != Vector3.INF

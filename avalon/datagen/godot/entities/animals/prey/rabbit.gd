@@ -11,16 +11,25 @@ export var active_rest_frames := 3
 
 
 func _ready():
-	inactive_behavior = HopRandomly.new(
-		_rng_key("inactive"), inactive_movement_frequency, inactive_speed, inactive_movement_hops
+	set_inactive(
+		HopRandomly.new().init(
+			_rng_key("inactive"),
+			inactive_movement_frequency,
+			inactive_speed,
+			inactive_movement_hops
+		)
 	)
-	active_behavior = HopInDirection.new(
-		AWAY_FROM_PLAYER, active_flee_speed, active_flee_hops, active_rest_frames
+	set_active(
+		HopInDirection.new().init(
+			AWAY_FROM_PLAYER, active_flee_speed, active_flee_hops, active_rest_frames
+		)
 	)
-	avoid_ocean_behavior = AvoidOcean.new(_rng_key("avoid_ocean"), active_flee_hops, inactive_speed)
+	set_avoid_ocean(
+		AvoidOcean.new().init(_rng_key("avoid_ocean"), active_flee_hops, inactive_speed)
+	)
 
 
 func select_next_behavior() -> AnimalBehavior:
-	if is_player_in_detection_radius:
+	if _is_player_in_detection_radius:
 		return active_behavior
 	return inactive_behavior

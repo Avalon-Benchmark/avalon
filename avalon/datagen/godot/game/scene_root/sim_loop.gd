@@ -24,6 +24,8 @@ func _initialize() -> void:
 	var input_pipe_path = results[1]
 	var output_pipe_path = results[2]
 
+	HARD.print_debug_info()
+
 	if avalon_spec.player is HumanPlayerSpec and not avalon_spec.player.is_human_playback_enabled:
 		game_manager = HumanGameManager.new(root, avalon_spec)
 	elif avalon_spec.player is AgentPlayerSpec or avalon_spec.player.is_human_playback_enabled:
@@ -116,7 +118,7 @@ func load_avalon_spec_from_args():
 				HARD.stop("Unknown command line arg: '%s'", [arg])
 	HARD.assert(HARD.mode() or (len(config_paths) == 1), "No config file given")
 
-	var json_dict := Tools.path_read_json(config_paths[-1])
+	var json_dict := Tools.read_json_from_path(config_paths[-1])
 	var json_spec = ClassBuilder.get_object_from_json(json_dict, "/")
 	return [json_spec, input_pipe_path, output_pipe_path]
 

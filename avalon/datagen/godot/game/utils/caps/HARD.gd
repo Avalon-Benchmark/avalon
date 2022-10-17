@@ -4,7 +4,21 @@ class_name HARD
 
 
 static func mode() -> bool:
+	# TODO We could make this into an autoload singleton and set this statically.
+	# Is that worth it?
 	return Array(OS.get_cmdline_args()).has("--dev")
+
+
+static func is_setting_breakpoint_on_error() -> bool:
+	return mode() and Engine.is_editor_hint()
+
+
+static func print_debug_info() -> void:
+	if not mode():
+		return
+	print("DEBUG_INFO: Assertions and verbose logs enabled.")
+	if is_setting_breakpoint_on_error():
+		print("DEBUG_INFO: Editor detected. Will breakpoint instead of quit on error.")
 
 
 static func assert(condition, text: String = "assertion failed", args = null):
@@ -25,7 +39,7 @@ static func stop(text: String, args = null, stack_skip := 1):
 	printerr()
 	stackerr(stack_skip)
 	printerr()
-	if mode():
+	if is_setting_breakpoint_on_error():
 		breakpoint
 	else:
 		quit()

@@ -130,7 +130,9 @@ func GET_FILE(http_path: String, max_tries := 3, max_time := 90) -> PoolByteArra
 	return HARD.stop("request failed: %s", http_path)
 
 
-func POST_JSON(http_path: String, post_data: PoolByteArray, max_tries := 5, max_time := 30) -> Dictionary:
+func POST_JSON(
+	http_path: String, post_data: PoolByteArray, max_tries := 5, max_time := 30
+) -> Dictionary:
 	post_data = post_data.compress(File.COMPRESSION_GZIP)
 	var request: AvalonRequest
 	var response = null

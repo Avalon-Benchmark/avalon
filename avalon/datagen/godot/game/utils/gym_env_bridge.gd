@@ -16,6 +16,7 @@ var PERF_SIMPLE_AGENT: bool = ProjectSettings.get_setting("avalon/simple_agent")
 
 
 func _init(input_pipe_path: String, output_pipe_path: String):
+	print(CONST.BRIDGE_LOG_SIGNAL)
 	action_pipe = File.new()
 	HARD.assert(action_pipe.open(input_pipe_path, File.READ) == OK, "Could not open action pipe.")
 
@@ -40,7 +41,7 @@ func read_message() -> Array:
 	if action_pipe.get_error() == ERR_FILE_EOF:
 		return []
 	match message:
-		CONST.RENDER_MESSAGE, CONST.QUERY_AVAILABLE_FEATURES_MESSAGE, CONST.CLOSE_MESSAGE:
+		CONST.RENDER_MESSAGE, CONST.QUERY_AVAILABLE_FEATURES_MESSAGE, CONST.CLOSE_MESSAGE, CONST.SAVE_SNAPSHOT_MESSAGE:
 			return [message]
 		CONST.SEED_MESSAGE:
 			return [message, action_pipe.get_64()]
@@ -54,6 +55,9 @@ func read_message() -> Array:
 			var count := action_pipe.get_32()
 			var data := action_pipe.get_buffer(count)
 			return [message, data]
+		CONST.LOAD_SNAPSHOT_MESSAGE:
+			var snpashot_path := action_pipe.get_line()
+			return [message, snpashot_path]
 		CONST.RESET_MESSAGE:
 			var count := action_pipe.get_32()
 			var data := action_pipe.get_buffer(count)
@@ -68,7 +72,7 @@ func read_message() -> Array:
 func write_available_features_response(data: Dictionary):
 	assert(
 		is_output_enabled,
-		"ERROR: Cannot write_available_features_response without a observation_pipe"
+		"ERROR: Cannot write_available_features_response without an observation_pipe"
 	)
 	if PERF_SIMPLE_AGENT:
 		observation_pipe.store_var(data.keys())
@@ -106,7 +110,7 @@ func write_available_features_response(data: Dictionary):
 
 
 func write_step_result_to_pipe(data: Dictionary):
-	assert(is_output_enabled, "ERROR: Cannot write_step_result_to_pipe without a observation_pipe")
+	assert(is_output_enabled, "ERROR: Cannot write_step_result_to_pipe without an observation_pipe")
 	if PERF_SIMPLE_AGENT:
 		observation_pipe.store_var(data)
 		observation_pipe.flush()
@@ -115,12 +119,17 @@ func write_step_result_to_pipe(data: Dictionary):
 		var entry = data[feature_name]
 		var value = entry[0]
 		var data_type = entry[1]
-		write_value(value, data_type)
+		_write_value(value, data_type)
 	observation_pipe.flush()
 
 
-func write_value(value, data_type):
-	assert(is_output_enabled, "ERROR: Cannot write_value without a observation_pipe")
+func write_single_value(value):
+	assert(is_output_enabled, "ERROR: Cannot write_single_value without an observation_pipe")
+	_write_value(value, typeof(value))
+	observation_pipe.flush()
+
+
+func _write_value(value, data_type):
 	match data_type:
 		CONST.FAKE_TYPE_IMAGE:
 			observation_pipe.store_buffer(value.data.data)
@@ -142,13 +151,15 @@ func write_value(value, data_type):
 			observation_pipe.store_32(value)
 		TYPE_ARRAY:
 			for inner_value in value:
-				write_value(inner_value, typeof(inner_value))
+				_write_value(inner_value, typeof(inner_value))
+		TYPE_STRING:
+			observation_pipe.store_line(value)
 		_:
 			HARD.stop("`gym_env_bridge.write_value` Unknown data type: %s", data_type)
 
 
 func render_to_pipe(screen: Image):
-	assert(is_output_enabled, "ERROR: Cannot render_to_pipe without a observation_pipe")
+	assert(is_output_enabled, "ERROR: Cannot render_to_pipe without an observation_pipe")
 	screen.flip_y()
 	screen.convert(Image.FORMAT_RGB8)
 	observation_pipe.store_buffer(screen.data.data)

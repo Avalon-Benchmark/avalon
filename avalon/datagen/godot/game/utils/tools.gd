@@ -82,7 +82,9 @@ static func node_all_children(node: Node, type_filter: String = "") -> Array:
 	return children
 
 
-static func path_list(path: String, include_dir := true, sort := true, skip_hidden := true) -> PoolStringArray:
+static func path_list(
+	path: String, include_dir := true, sort := true, skip_hidden := true
+) -> PoolStringArray:
 	var diter := Directory.new()
 	var error := OK
 	var files := []
@@ -109,7 +111,7 @@ static func path_list(path: String, include_dir := true, sort := true, skip_hidd
 	return PoolStringArray(files)
 
 
-static func path_read_json(file_path: String) -> Dictionary:
+static func read_json_from_path(file_path: String) -> Dictionary:
 	var file = File.new()
 	var file_error = file.open(file_path, File.READ)
 	HARD.assert(file_error == OK, "cannot open json file at: %s", [file_path])
@@ -125,6 +127,13 @@ static func path_read_json(file_path: String) -> Dictionary:
 	)
 
 	return json.result
+
+
+static func write_json_to_path(file_path: String, data: Dictionary) -> void:
+	var file = File.new()
+	var file_error = file.open(file_path, File.WRITE)
+	HARD.assert(file_error == OK, "cannot open file for writing json at: %s", [file_path])
+	file.store_string(JSON.print(data))
 
 
 static func string_hash(string: String, type := HashingContext.HASH_MD5) -> int:
@@ -208,6 +217,7 @@ static func normalize(value: Vector3, value_min: float, value_max: float) -> Vec
 	# normalizes to be in a range of -1 to 1
 	return vec3_range_lerp(value, value_min, value_max, -1, 1)
 
+
 static func update_file_path(path: String) -> String:
 	if OS.get_name() == "OSX":
 		path = path.replace("/dev/shm/", "/tmp/")
@@ -216,17 +226,14 @@ static func update_file_path(path: String) -> String:
 		path = path.replace("/dev/shm/", "C:/local/temp/")
 		path = path.replace("/mnt/private/data/", "C:/local/temp/")
 		path = path.replace("/tmp/", "C:/local/temp/")
-	else:
-		# in linux, only mess with the paths if debugging
-		if HARD.mode():
-			path = path.replace("/mnt/private/data/", "/tmp/godot/")
 	return path
+
 
 static func file_create(current_path: String) -> String:
 	var path = update_file_path(current_path)
 	var path_dir = path.rsplit("/", true, 1)[0]
 
-	var directory = Directory.new();
+	var directory = Directory.new()
 	if not directory.file_exists(path):
 		var error := Directory.new().make_dir_recursive(path_dir)
 		HARD.assert(error == OK, 'cannot create directory: "%s"', path_dir)
@@ -288,6 +295,7 @@ static func get_new_hand_position(
 
 	return new_hand_position
 
+
 static func get_new_hand_position_while_climbing(
 	current_hand_position: Vector3,
 	relative_delta_hand_position: Vector3,
@@ -304,7 +312,8 @@ static func get_new_hand_position_while_climbing(
 	# constrain the hand to a sphere around the head with radius = `arm_length`
 	if new_hand_position_relative_to_head.length() >= arm_length:
 		new_hand_position_relative_to_head = (
-			new_hand_position_relative_to_head.normalized() * arm_length
+			new_hand_position_relative_to_head.normalized()
+			* arm_length
 		)
 
 	return new_hand_position_relative_to_head + head_position
@@ -355,7 +364,10 @@ static func is_terrain(node: Node) -> bool:
 static func is_tree(node: Node) -> bool:
 	if not is_instance_valid(node):
 		return false
-	return node.get_parent().name == "tree_collision_meshes" or node.name.begins_with("fruit_tree_normal")
+	return (
+		node.get_parent().name == "tree_collision_meshes"
+		or node.name.begins_with("fruit_tree_normal")
+	)
 
 
 static func is_static(node: Node) -> bool:
@@ -374,38 +386,56 @@ static func clamp_delta_rotation(current_rotation: float, delta_rotation: float,
 	var clamped_rotation = clamp(delta_rotation + current_rotation, -max_rotation, max_rotation)
 	return clamped_rotation - current_rotation
 
+
 # from https://github.com/binogure-studio/godot-uuid/blob/master/uuid.gd
 static func _get_random_int_for_uuid():
-  # Randomize every time to minimize the risk of collisions
-  randomize()
-  return randi() % 256
+	# Randomize every time to minimize the risk of collisions
+	randomize()
+	return randi() % 256
 
-static func _uuidbin():
-  # 16 random bytes with the bytes on index 6 and 8 modified
-  return [
-	_get_random_int_for_uuid(), _get_random_int_for_uuid(), _get_random_int_for_uuid(), _get_random_int_for_uuid(),
-	_get_random_int_for_uuid(), _get_random_int_for_uuid(), ((_get_random_int_for_uuid()) & 0x0f) | 0x40, _get_random_int_for_uuid(),
-	((_get_random_int_for_uuid()) & 0x3f) | 0x80, _get_random_int_for_uuid(), _get_random_int_for_uuid(), _get_random_int_for_uuid(),
-	_get_random_int_for_uuid(), _get_random_int_for_uuid(), _get_random_int_for_uuid(), _get_random_int_for_uuid(),
-  ]
 
 static func uuidv4():
-  # 16 random bytes with the bytes on index 6 and 8 modified
-  var b = _uuidbin()
+	# 16 random bytes with the bytes on index 6 and 8 modified
+	var bytes = [
+		# low
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		#
+		# mid
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		#
+		# hi
+		((_get_random_int_for_uuid()) & 0x0f) | 0x40,
+		_get_random_int_for_uuid(),
+		#
+		# clock
+		((_get_random_int_for_uuid()) & 0x3f) | 0x80,
+		_get_random_int_for_uuid(),
+		#
+		# clock
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+		_get_random_int_for_uuid(),
+	]
+	return "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x" % bytes
 
-  return '%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x' % [
-	# low
-	b[0], b[1], b[2], b[3],
 
-	# mid
-	b[4], b[5],
-
-	# hi
-	b[6], b[7],
-
-	# clock
-	b[8], b[9],
-
-	# clock
-	b[10], b[11], b[12], b[13], b[14], b[15]
-  ]
+static func set_owner_of_subtree(
+	owner: Node, current_children: Array, is_saving_scene_subnodes: bool = true
+) -> void:
+	for _node in current_children:
+		var node: Node = _node
+		node.set_owner(owner)
+		var is_packed_scene_root = not node.filename.empty()
+		if is_saving_scene_subnodes:
+			# Prevents 2x instantiation of subnodes
+			node.filename = ""
+		elif is_packed_scene_root:
+			continue
+		set_owner_of_subtree(owner, node.get_children(), is_saving_scene_subnodes)

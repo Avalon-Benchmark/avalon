@@ -2,31 +2,41 @@ extends AnimalBehavior
 
 class_name HopRandomly
 
-var remaining_rotation: float = 0
-var rotation_target  # Optional float radians
-var is_hopping = false
+export var remaining_rotation: float = 0
+export var rotation_target := NAN
+export var is_hopping := false
 
-var hop_speed: Vector2
-var hop_count: int
-var next_hop: int = 0
+export var hop_speed: Vector2
+export var hop_count: int
+export var next_hop: int = 0
+export var hop_frequency: float
 
-var rng_key: String
+export var rng_key: String
+
+export var turn_accuracy_threshold = deg2rad(7.5)
+
 var rotation_dist: UniformDistribution
 var hop_frequency_dist: ChoicesDistribution
 
-var turn_accuracy_threshold = deg2rad(7.5)
 
-
-func _init(_rng_key: String, hop_frequency: float, _hop: Vector2, _hop_count: int):
+func init(
+	_rng_key: String, _hop_frequency: float, _hop: Vector2, _hop_count: int
+) -> AnimalBehavior:
 	rng_key = _rng_key
-	hop_frequency_dist = ChoicesDistribution.new([false, true], [1 - hop_frequency, hop_frequency])
-	rotation_dist = UniformDistribution.new(deg2rad(-179), deg2rad(180))
+	hop_frequency = _hop_frequency
 	hop_speed = _hop
 	hop_count = _hop_count
+	_ready()
+	return self
+
+
+func _ready():
+	hop_frequency_dist = ChoicesDistribution.new([false, true], [1 - hop_frequency, hop_frequency])
+	rotation_dist = UniformDistribution.new(deg2rad(-179), deg2rad(180))
 
 
 func turn_until_ready_to_hop(animal: Animal) -> bool:
-	if rotation_target == null or remaining_rotation == 0:
+	if is_nan(rotation_target) or remaining_rotation == 0:
 		return true
 
 	animal.rotate_y(clamp_rotation(remaining_rotation))
@@ -89,5 +99,5 @@ func clamp_rotation(rotation: float, max_rotation: float = deg2rad(15)):
 
 
 func reset():
-	rotation_target = null
+	rotation_target = NAN
 	next_hop = 0

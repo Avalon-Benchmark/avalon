@@ -2,15 +2,16 @@ extends AnimalBehavior
 
 class_name CyclingBehavior
 
-var act_steps: int
-var rest_steps: int
+export var act_steps: int
+export var rest_steps: int
 
-var current_step := 0
+export var current_step := 0
 
 
-func _init(_act_steps: int, _rest_steps: int):
+func init_super(_act_steps: int, _rest_steps: int):
 	self.act_steps = _act_steps
 	self.rest_steps = _rest_steps
+	return self
 
 
 func step_behavior_cycle_forward():

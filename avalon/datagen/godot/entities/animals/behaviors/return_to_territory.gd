@@ -2,30 +2,44 @@ extends AnimalBehavior
 
 class_name ReturnToTerritoryBehavior
 
+export var territory_origin: Vector3
+export var territory_radius: float
+export var return_target_radius: float
+
+export var is_returning: bool = false
+
 var movement_behavior: AnimalBehavior
 
-var territory_origin: Vector3
-var territory_radius: float
-var return_target_radius: float
 
-var is_returning: bool = false
+func get_logic_nodes() -> Array:
+	return [movement_behavior]
 
 
-func _init(
+func init(
 	_movement_behavior,
 	_territory_origin: Vector3,
 	_territory_radius: float,
 	_return_target_radius: float
-):
-	HARD.assert(
-		_movement_behavior is FlyInDirection or _movement_behavior is HopInDirection,
-		"can only ReturnToTerritory with directed behaviors"
-	)
-	HARD.assert(_movement_behavior.direction == Animal.TOWARDS_TERRITORY)
+) -> AnimalBehavior:
 	movement_behavior = _movement_behavior
+	validate_movement_behavior()
 	territory_origin = _territory_origin
 	territory_radius = _territory_radius
 	return_target_radius = _return_target_radius
+	return self
+
+
+func _ready():
+	movement_behavior = LogicNodes.prefer_persisted(self, "movement_behavior", movement_behavior)
+	validate_movement_behavior()
+
+
+func validate_movement_behavior():
+	HARD.assert(
+		movement_behavior is FlyInDirection or movement_behavior is HopInDirection,
+		"can only ReturnToTerritory with directed behaviors"
+	)
+	HARD.assert(movement_behavior.direction == Animal.TOWARDS_TERRITORY)
 
 
 func get_territory_origin_at_elevation(position: Vector3) -> Vector3:
@@ -71,5 +85,5 @@ func reset():
 	movement_behavior.reset()
 
 
-func get_name():
-	return movement_behavior.get_name()
+func describe():
+	return movement_behavior.describe()

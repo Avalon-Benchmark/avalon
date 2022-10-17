@@ -9,27 +9,34 @@ enum { LEFT = -1, RIGHT = 1 }
 
 const FLY_STEPS = 50
 
-var rng_key: String
+export var rng_key: String
+export var turn_rotation_speed: float
+export var speed: Vector2
+
+export var turn_direction: int
+
+export var initially_seen_ocean := Vector3.INF
+export var is_turn_complete := false
+
+export var total_steps_away_from_seeing_ocean := 8
+export var last_seen_ocean_step := -1
+
 var left_or_right_dist: ChoicesDistribution
-var turn_rotation_speed: float
-var speed: Vector2
-
-var turn_direction: int
-
-var initially_seen_ocean := Vector3.INF
-var is_turn_complete := false
-
-var total_steps_away_from_seeing_ocean := 8
-var last_seen_ocean_step := -1
 
 
-func _init(_rng_key: String, movement_steps: int, _speed, _turn_rotation_speed: float = 1).(
-	movement_steps, 1
-):
+func init(
+	_rng_key: String, movement_steps: int, _speed, _turn_rotation_speed: float = 1
+) -> CyclingBehavior:
+	.init_super(movement_steps, 2)
 	rng_key = _rng_key
 	turn_rotation_speed = _turn_rotation_speed
-	left_or_right_dist = ChoicesDistribution.new([LEFT, RIGHT], [0.5, 0.5])
 	speed = _speed if _speed is Vector2 else Vector2(_speed, 0)
+	_ready()
+	return self
+
+
+func _ready():
+	left_or_right_dist = ChoicesDistribution.new([LEFT, RIGHT], [0.5, 0.5])
 
 
 func do(animal, delta: float) -> Vector3:
