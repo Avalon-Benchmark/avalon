@@ -11,7 +11,6 @@ from types import TracebackType
 from typing import Any
 from typing import Dict
 from typing import Generic
-from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -20,6 +19,7 @@ from typing import cast
 import numpy as np
 from loguru import logger
 from numpy import typing as npt
+from typing_extensions import Literal
 
 from avalon.datagen.errors import GodotError
 from avalon.datagen.generate import InteractiveGodotProcess

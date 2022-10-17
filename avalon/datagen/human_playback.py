@@ -11,7 +11,6 @@ from typing import Any
 from typing import BinaryIO
 from typing import Dict
 from typing import List
-from typing import Literal
 from typing import NamedTuple
 from typing import Optional
 from typing import OrderedDict as OrderedDictType
@@ -26,6 +25,7 @@ import numpy as np
 import numpy.typing as npt
 from loguru import logger
 from numpy import typing as npt
+from typing_extensions import Literal
 
 from avalon.common.errors import SwitchError
 from avalon.datagen.env_helper import create_env

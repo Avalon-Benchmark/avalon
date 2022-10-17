@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Optional
+from typing import Tuple
 
 import attr
 import gym.spaces
@@ -39,7 +40,7 @@ class Params:
     # wandb
     project: str
     name: Optional[str] = None  # wandb run name
-    tags: tuple[str, ...] = ()
+    tags: Tuple[str, ...] = ()
     log_freq_hist: int = 50
     log_freq_scalar: int = 1
     log_freq_media: int = 250
@@ -56,7 +57,7 @@ class Params:
     obs_first: bool = True
 
     train_gpu: int = 0  # currently this does nothing (but will happen automatically)
-    inference_gpus: tuple[int] = (0,)  # only applied if there are async worker managers
+    inference_gpus: Tuple[int] = (0,)  # only applied if there are async worker managers
 
     # training
     is_training: bool = True

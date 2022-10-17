@@ -3,7 +3,6 @@ from typing import Callable
 from typing import Generic
 from typing import Iterator
 from typing import List
-from typing import Literal
 from typing import Set
 from typing import Tuple
 from typing import Type
@@ -12,6 +11,7 @@ from typing import cast
 
 import attr
 from loguru import logger
+from typing_extensions import Literal
 
 from avalon.common.errors import SwitchError
 from avalon.datagen.godot_env.actions import ActionType

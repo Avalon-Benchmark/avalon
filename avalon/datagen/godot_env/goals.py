@@ -1,12 +1,12 @@
 from typing import Any
 from typing import Dict
 from typing import Generic
-from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import TypeVar
 
 import attr
+from typing_extensions import Literal
 
 from avalon.common.errors import SwitchError
 from avalon.datagen.godot_env.observations import AvalonObservationType

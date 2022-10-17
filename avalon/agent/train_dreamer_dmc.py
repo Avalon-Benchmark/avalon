@@ -5,6 +5,7 @@ import warnings
 from functools import partial
 from pathlib import Path
 from typing import Iterator
+from typing import Tuple
 
 import attr
 import torch
@@ -126,7 +127,7 @@ class DreamerDMCParams(DreamerParams):
     deter_size: int = 200
     rssm_hidden_size: int = 200
     train_gpu: int = 0
-    inference_gpus: tuple[int] = (0,)
+    inference_gpus: Tuple[int] = (0,)
     log_freq_hist: int = 100
     log_freq_scalar: int = 20
     log_freq_media: int = 500

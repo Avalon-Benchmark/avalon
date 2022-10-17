@@ -1,3 +1,4 @@
+from typing import Tuple
 import warnings
 
 import attr
@@ -34,7 +35,7 @@ class DreamerTestEnvParams(DreamerParams):
     worker_managers: int = 1
     num_workers: int = 4
     train_gpu: int = 0
-    inference_gpus: tuple[int] = (0,)
+    inference_gpus: Tuple[int] = (0,)
 
     log_freq_hist: int = 10
     log_freq_scalar: int = 1

@@ -1,3 +1,4 @@
+from typing import Tuple
 import warnings
 
 import attr
@@ -45,7 +46,7 @@ class DreamerAtariParams(DreamerParams):
     freeze_actor_steps: int = 0
     train_every: int = 16
     train_gpu: int = 0
-    inference_gpus: tuple[int] = (0,)
+    inference_gpus: Tuple[int] = (0,)
     log_freq_hist: int = 2000
     log_freq_scalar: int = 25
     log_freq_media: int = 1000

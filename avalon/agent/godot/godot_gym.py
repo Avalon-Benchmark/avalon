@@ -11,7 +11,6 @@ from typing import DefaultDict
 from typing import Dict
 from typing import Hashable
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import Union
@@ -25,6 +24,7 @@ from einops import rearrange
 from gym import Wrapper
 from numpy.typing import NDArray
 from torch import Tensor
+from typing_extensions import Literal
 
 from avalon.agent.common.params import EnvironmentParams
 from avalon.common.errors import SwitchError

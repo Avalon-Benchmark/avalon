@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from typing import Tuple
 from typing import Union
 
 import numpy as np
@@ -50,7 +51,7 @@ def visualize_arraylike_as_video(
     frames: TensorOrNDArray,
     normalize: bool = False,
     fps: int = 10,
-    size: tuple[int, int] = (256, 256),
+    size: Tuple[int, int] = (256, 256),
     video_format: str = "webm",
 ) -> None:
     """Render a video in a jupyter notebook. See `encode_video` for options.

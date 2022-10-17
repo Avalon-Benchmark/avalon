@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Tuple
 from typing import Type
@@ -8,6 +7,7 @@ from typing import Type
 import attr
 import numpy as np
 from scipy import stats
+from typing_extensions import Literal
 
 from avalon.datagen.errors import ImpossibleWorldError
 from avalon.datagen.world_creation.configs.export import ExportConfig

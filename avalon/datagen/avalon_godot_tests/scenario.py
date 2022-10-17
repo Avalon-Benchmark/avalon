@@ -7,7 +7,6 @@ from typing import ClassVar
 from typing import Dict
 from typing import Iterable
 from typing import List
-from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -21,6 +20,7 @@ import numpy as np
 from numpy.typing import NDArray
 from scipy import stats
 from scipy.spatial.transform import Rotation
+from typing_extensions import Literal
 
 from avalon.common.utils import dir_checksum
 from avalon.common.utils import file_checksum
