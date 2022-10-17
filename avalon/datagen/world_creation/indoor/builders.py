@@ -295,7 +295,7 @@ class DefaultRoomBuilder(RoomBuilder):
                 # The options here are: a) try a more compact placement algorithm; b) skip room; for now we just raise
                 visualize_tiles(grid)
                 raise RoomPlacementError(
-                    f"can't fit room of size {room.width, room.length} with {margin=} in any block"
+                    f"can't fit room of size {room.width, room.length} with margin={margin} in any block"
                 )
         return placed_rooms
 
