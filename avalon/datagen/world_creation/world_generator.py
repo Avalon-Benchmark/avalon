@@ -558,7 +558,7 @@ def generate_world(params: GenerateWorldParams) -> GeneratedWorldParams:
                 logger.error(f"Params were: {params}")
                 raise
             else:
-                logger.info(f"Impossible world was generated, this was try {i}... (reason: {e})")
+                logger.debug(f"Impossible world was generated, this was try {i}... (reason: {e})")
                 # clear the output
                 shutil.rmtree(output_path)
                 output_path.mkdir(parents=True, exist_ok=True)

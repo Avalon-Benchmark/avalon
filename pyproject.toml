@@ -11,45 +11,40 @@ requires-python = ">=3.9"
 dependencies = [
   "attrs >= 21.4.0",
   "boto3 >= 1.20.47",
-  "deepdiff >= 5.8.1",
-  "dm-tree >= 0.1.7",
   "einops >= 0.3.2",
   "godot-parser >= 0.1.6",
   "gym >= 0.21.0",
-  "ipyplot >= 1.1.0",
-  "ipywidgets >= 7.6.5",
   "loguru >= 0.6.0",
-  "lz4 >= 4.0.1",
   "matplotlib >= 3.5.1",
-  "mypy >= 0.971",
-  "nest-asyncio >= 1.5.4",
   "networkx >= 2.6.3",
-  "notebook >= 6.4.8",
   "nptyping >= 2.0.1",
   "numpy >= 1.22.2",
-  "openturns >= 1.19.post1",
-  "pandas >= 1.4.0",
+  "openturns >= 1.19",  # 1.19post1 has broken mac builds, don't require it
   "Pillow >= 9.0.1",
   "psutil >= 5.9.0",
-  "pytest >= 6.2.5",
-  "pytest-forked >= 1.4.0",
-  "pytest-integration >= 0.2.2",
-  "pytest-xdist >= 2.5.0",
-  "pytorch-lightning >= 1.2.6",
   "requests >= 2.27.1",
   "rliable >= 1.0.7",
   "scipy >= 1.7.3",
-  "seaborn >= 0.11.2",
   "sentry-sdk >= 1.5.4",
   "scikit-image >= 0.19.3",
   "sh >= 1.14.2",
   "shapely >= 1.7.0",
-  "tabulate >= 0.8.9",
-  "torch >= 1.12.0",
-  "torchvision >= 0.13.0",
   "tqdm >= 4.62.3",
-  "triangle >= 20220202",
+  "triangle @ git+https://github.com/drufat/triangle.git@v20200424",  # mac can't install recent versions from pip
   "trimesh >= 3.12.0",
+  "wandb >= 0.12.21",
+]
+
+[project.optional-dependencies]
+dev = [
+  "deepdiff >= 5.8.1",
+  "mypy >= 0.971",
+  "pytest >= 6.2.5",
+  "pytest-forked >= 1.4.0",
+  "pytest-integration >= 0.2.2",
+  "pytest-xdist >= 2.5.0",
+  "seaborn >= 0.11.2",
+  "tabulate >= 0.8.9",
   "types-futures >= 3.3.8",
   "types-protobuf >= 3.19.4",
   "types-requests >= 2.27.1",
@@ -59,8 +54,14 @@ dependencies = [
   "types-toml >= 0.10.2",
   "types-urllib3 >= 1.26.9",
   "typing_extensions >= 4.1.1",
-  "wandb >= 0.12.21",
+  "torch >= 1.12.0",
 ]
+train = [
+  "dm-tree >= 0.1.7",
+  "torch >= 1.12.0",
+  "torchvision >= 0.13.0",
+]
+
 
 [tool.setuptools.packages]
 find = {}

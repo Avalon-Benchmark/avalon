@@ -11,7 +11,6 @@ from typing import cast
 import attr
 import gym
 import numpy as np
-import torch
 from gym import spaces
 from gym.spaces import Box
 
@@ -135,8 +134,6 @@ class VRActionType(AttrsAction):
     def from_input(cls, input_dict: Dict[str, np.ndarray]) -> "VRActionType":
         # clipping each triplet to sphere
         input_real = input_dict["real"]
-        if isinstance(input_real, torch.Tensor):
-            input_real = input_real.numpy()
         triplet_norm = np.linalg.norm(np.reshape(input_real, (6, 3)), axis=-1)
         scale = 1 / np.clip(triplet_norm, a_min=1, a_max=float("inf"))
         clipped_real = np.repeat(scale, 3) * input_real

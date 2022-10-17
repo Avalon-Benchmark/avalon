@@ -14,6 +14,7 @@ from typing import cast
 import attr
 import numpy as np
 import torch
+from numpy.typing import NDArray
 
 from avalon.common.utils import flatten
 from avalon.datagen.avalon_godot_tests.conftest import AvalonEnv
@@ -24,8 +25,8 @@ from avalon.datagen.avalon_godot_tests.scenario import ScenarioObservations
 from avalon.datagen.avalon_godot_tests.scenario import SnapshotContext
 from avalon.datagen.avalon_godot_tests.scenario import np_checksum
 from avalon.datagen.avalon_godot_tests.scenario import rgbd_observations
-from avalon.datagen.env_helper import observation_video_tensor
-from avalon.datagen.env_helper import rgbd_to_video_tensor
+from avalon.datagen.env_helper import observation_video_array
+from avalon.datagen.env_helper import rgbd_to_video_array
 from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.observations import AvalonObservationType
@@ -93,7 +94,7 @@ class SnapshotCollection:
     def get_comparable_videos(self, is_prelude_included: bool = False) -> Tuple[torch.Tensor, torch.Tensor]:
         original = original_rgbd(self.snapshots, is_prelude_included)
         combined = combined_snapshot_rgbd(self.snapshots, is_prelude_included)
-        return rgbd_to_video_tensor(original), rgbd_to_video_tensor(combined)
+        return torch.from_numpy(rgbd_to_video_array(original)), torch.from_numpy(rgbd_to_video_array(combined))
 
 
 def run_scenarios_with_snapshots(
@@ -111,7 +112,7 @@ def run_scenarios_with_snapshots(
 
 def combined_snapshot_videos(snapshots: List[SnapshotObservations]) -> torch.Tensor:
     combined_observations = flatten([snapshot.action_observations for snapshot in snapshots])
-    return observation_video_tensor(combined_observations)
+    return torch.from_numpy(observation_video_array(combined_observations))
 
 
 def compare_all_collections_with_originals(
@@ -171,7 +172,9 @@ def compare_two_collection_rgbd(
 def compare_two_collections(
     a: SnapshotCollection, b: SnapshotCollection
 ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-    as_vid = rgbd_to_video_tensor
+    def as_vid(x: NDArray) -> torch.Tensor:
+        return torch.from_numpy(rgbd_to_video_array(x))
+
     a_rgbd, b_rgbd, diff = compare_two_collection_rgbd(a, b)
     return (as_vid(a_rgbd), as_vid(b_rgbd), as_vid(diff))
 

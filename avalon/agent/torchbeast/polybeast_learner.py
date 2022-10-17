@@ -27,6 +27,7 @@ from typing import Any
 from typing import Dict
 from typing import Set
 
+import nest
 import numpy as np
 import sentry_sdk
 import torch
@@ -36,7 +37,6 @@ from torch import nn
 from torch.nn import functional as F
 
 import libtorchbeast
-import nest
 from avalon.agent.godot.godot_gym import CURRICULUM_BASE_PATH
 from avalon.agent.ppo.observation_model import ImpalaConvNet
 from avalon.agent.torchbeast.avalon_helpers import IS_PROPRIOCEPTION_USED
@@ -56,7 +56,7 @@ from avalon.agent.torchbeast.avalon_helpers import vtrace_from_dist
 from avalon.agent.torchbeast.core.environment import Environment
 from avalon.agent.torchbeast.model import DictActionHead
 from avalon.common.log_utils import logger
-from avalon.common.visual_utils import get_path_to_video_png
+from avalon.common.visual_utils import encode_video
 from avalon.common.wandb_utils import get_latest_checkpoint_filename
 from avalon.datagen.generate import GODOT_ERROR_LOG_PATH
 
@@ -436,7 +436,7 @@ def run_test(env: Environment, model: Net, num_episodes: int, log_prefix="", is_
             video_tensor = torch.cat(
                 [obs_to_frame(step["frame"])[..., :3, :, :] / 255.0 for step in episode[:-1]] + [final_frame], dim=0
             ).squeeze(1)
-            video_png_path = get_path_to_video_png(video_tensor, normalize=False)
+            video_png_path = encode_video(video_tensor, normalize=False)
             log_data[f"{log_prefix}{task}/video_{episode_id}_diff_{difficulty:3g}"] = wandb.Image(video_png_path)
 
     # AGGREGATE ROLLOUT STATS

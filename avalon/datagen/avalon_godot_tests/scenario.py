@@ -18,7 +18,7 @@ from uuid import uuid4
 
 import attr
 import numpy as np
-import torch
+from numpy.typing import NDArray
 from scipy import stats
 from scipy.spatial.transform import Rotation
 
@@ -27,11 +27,11 @@ from avalon.common.utils import file_checksum
 from avalon.contrib.utils import TEMP_DIR
 from avalon.datagen.env_helper import DebugLogLine
 from avalon.datagen.env_helper import get_debug_json_logs
-from avalon.datagen.env_helper import observation_video_tensor
+from avalon.datagen.env_helper import observation_video_array
+from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
@@ -164,7 +164,7 @@ class ScenarioObservations:
 
     debug_output: List[DebugLogLine]
 
-    _video: Optional[torch.Tensor] = None
+    _video: Optional[NDArray] = None
 
     @property
     def _checksum_dict(self) -> Dict[str, ManifestValue]:
@@ -179,9 +179,9 @@ class ScenarioObservations:
         return {f"{self.scenario.name}": self._checksum_dict}
 
     @property
-    def video(self) -> torch.Tensor:
+    def video(self) -> NDArray:
         if self._video is None:
-            self._video = observation_video_tensor(self.observations)
+            self._video = observation_video_array(self.observations)
         return self._video
 
     def is_unchanged_from_version_in(self, checksums: Dict[str, Dict[str, ManifestValue]]) -> bool:

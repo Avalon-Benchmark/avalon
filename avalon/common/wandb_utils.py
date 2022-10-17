@@ -1,16 +1,11 @@
 import os
 import re
 from pathlib import Path
-from typing import Any
 from typing import List
 from typing import Optional
 
-import pytorch_lightning
-import torch
 import wandb
 from loguru import logger
-from pytorch_lightning.loggers import WandbLogger
-from torch import Tensor
 from wandb.apis.public import Run
 from wandb.apis.public import Runs
 
@@ -31,15 +26,6 @@ class RunDoesNotExist(Exception):
 
 class ProjectDoesNotExist(Exception):
     pass
-
-
-def add_scalar(trainer: Any, tag: str, value: Tensor, freq: int = 20):
-    i = trainer.global_step
-    if i % freq != 0:
-        return
-    if type(value) == torch.Tensor:
-        value = value.cpu().detach()
-    trainer.logger.experiment.log({tag: value, "epoch": trainer.current_epoch}, commit=False)
 
 
 def get_wandb_file_by_partial_name(run: Run, file_name: str) -> wandb.apis.public.File:
@@ -111,23 +97,6 @@ def download_wandb_checkpoint_from_run(project: str, experiment_name: str, check
 
 def wandb_ensure_api_key():
     assert os.getenv("WANDB_API_KEY"), "WANDB_API_KEY not defined, make sure it's included in your bashenv.sh!"
-
-
-def log_histogram(trainer: pytorch_lightning.Trainer, tag: str, value: Tensor, freq: int = 20):
-    if (
-        trainer is None
-        or trainer.logger is None
-        or (isinstance(trainer.logger, WandbLogger) and trainer.logger.experiment is None)
-    ):
-        return
-    if not trainer.is_global_zero:
-        return
-    if trainer.global_step % (freq) != 0:
-        return
-    if type(value) == torch.Tensor:
-        value = value.cpu().detach()
-    assert isinstance(trainer.logger, WandbLogger)
-    trainer.logger.experiment.log({tag: value}, step=trainer.global_step)
 
 
 def load_checkpoint_from_wandb_run(run_path: str, filename: str) -> str:

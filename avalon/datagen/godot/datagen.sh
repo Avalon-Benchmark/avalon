@@ -8,10 +8,12 @@ export XDG_DATA_HOME='/tmp/xdg-godot'
 export DISPLAY="${DISPLAY:-}"
 export LANG='en_US.UTF-8'
 
+RESOLUTION='96x96'
+
 CHECK_ENV=''
 CHILD_PID=''
 
-GODOT_BIN='/usr/bin/godot'
+GODOT_BIN='/usr/local/bin/godot'
 GODOT_CFG=()
 GODOT_CMD=(
     "$GODOT_BIN"
@@ -83,6 +85,9 @@ do
         --cuda-gpu-id)
             export EGL_CUDA_ID="$V"
         ;;
+        --resolution)
+            RESOLUTION="$V"
+        ;;
         -*)
             echo "unknown argument: '$1'"
             exit 1
@@ -133,5 +138,5 @@ fi
 
 if [[ "${#GODOT_CFG[@]}" ]]
 then
-    exec "${GODOT_CMD[@]}" "${GODOT_CFG[@]}"
+    exec "${GODOT_CMD[@]}" --resolution "$RESOLUTION" "${GODOT_CFG[@]}"
 fi
