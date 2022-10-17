@@ -112,9 +112,14 @@ def _popen_process_group(bash_cmd: Iterable[str], log_path: str):
         )
 
 
-def _kill_process_group(process: subprocess.Popen):
-    pgid = os.getpgid(process.pid)
-    assert pgid == process.pid, f"Cannot to _kill_process_group of a child process (pgid={pgid}, pid={process.pid})"
+def _kill_process_group(process: subprocess.Popen, is_lookup_error_ok: bool = True):
+    try:
+        pgid = os.getpgid(process.pid)
+    except ProcessLookupError:
+        if not is_lookup_error_ok:
+            raise
+        return
+    assert pgid == process.pid, f"Cannot _kill_process_group of a child process (pgid={pgid}, pid={process.pid})"
     return os.killpg(pgid, SIGKILL)
 
 
@@ -220,12 +225,16 @@ class InteractiveGodotProcess:
             extra_flags = extra_flags + tuple([f"--cuda-gpu-id={self.gpu_id}"])
         else:
             assert False
+        resolution = (self.config.recording_options.resolution_x, self.config.recording_options.resolution_y)
+        if self.config.recording_options.is_adding_debugging_views:
+            resolution = (resolution[0] * 2, resolution[1] * 2)
         return [
             f"{NEW_GODOT_PATH}/datagen.sh",
             f"--thread_count=4",
             f"-U",
             f"--input_pipe_path={input_pipe_path}",
             f"--output_pipe_path={output_pipe_path}",
+            f"--resolution={resolution[0]}x{resolution[1]}",
             *extra_flags,
             self.config_path,
         ]
@@ -295,15 +304,16 @@ class InteractiveGodotProcess:
         if self.process is None:
             return
 
-        if raise_logged_errors:
-            self._raise_any_logged_godot_errors()
-
         if kill:
             _kill_process_group(self.process)
+
+        if raise_logged_errors:
+            self._raise_any_logged_godot_errors()
 
         try:
             wait_until_true(self._poll_for_exit)
         except Exception as e:
+            _kill_process_group(self.process)
             if raise_logged_errors:
                 raise
             logger.error(f"Got error {e} but continuing to exit")
@@ -329,7 +339,7 @@ class InteractiveGodotProcess:
         if is_error_logged:
             self._raise_error("\n".join(lines))
 
-    def wait_for_ready_signal(self):
+    def wait_for_log_signal(self, log_signal: str):
         process = self.process
         assert process is not None, "Cannot wait_for_ready_signal() before start()"
 
@@ -344,14 +354,17 @@ class InteractiveGodotProcess:
                     artifact_path=self.artifact_path,
                     log_content="\n".join(log_lines),
                 )
-            if any(READY_LOG_SIGNAL in l for l in log_lines):
+            if any(log_signal in l for l in log_lines):
                 return True
 
         try:
             wait_until_true(wait_for_ready, sleep_inc=0.0001)
         except TimeoutError as e:
-            err = f"did not observe ready message {READY_LOG_SIGNAL}: {str(e)}"
+            err = f"did not observe ready message {log_signal}: {str(e)}"
             _raise_godot_error(log_path=self.log_path, artifact_path=self.artifact_path, details=err)
+
+    def wait_for_ready_signal(self):
+        self.wait_for_log_signal(READY_LOG_SIGNAL)
 
     def _poll_for_exit(self):
         assert self.process is not None, "Cannot call _poll_for_exit() before start()"

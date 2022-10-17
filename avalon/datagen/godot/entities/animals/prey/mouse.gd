@@ -20,33 +20,41 @@ var activation_criteria: ActivationGate
 func _ready():
 	var active_criteria := [PlayerInDetectionRadius.new()]
 	var initial_criteria = [CanSeePlayer.new()]
-	activation_criteria = ActivationGate.new(active_criteria, initial_criteria)
+	activation_criteria = load_or_init(
+		"activation_criteria", ActivationGate.new().init(active_criteria, initial_criteria)
+	)
 
-	inactive_behavior = ClimbWhenNecessary.new(
-		climbing_speed,
-		climbing_escape_hop_speed,
-		HopRandomly.new(
-			_rng_key("inactive"),
-			inactive_movement_frequency,
-			inactive_speed,
-			inactive_movement_hops
+	set_inactive(
+		ClimbWhenNecessary.new().init(
+			climbing_speed,
+			climbing_escape_hop_speed,
+			HopRandomly.new().init(
+				_rng_key("inactive"),
+				inactive_movement_frequency,
+				inactive_speed,
+				inactive_movement_hops
+			)
 		)
 	)
 
-	var stay_grounded_when_making_headway = AbleToMakeHeadway.new(
+	var stay_grounded_when_making_headway = AbleToMakeHeadway.new().init(
 		required_grounded_movement_distance, climb_after_hops_without_progress
 	)
 
-	active_behavior = ClimbWhenNecessary.new(
-		climbing_speed,
-		climbing_escape_hop_speed,
-		HopInDirection.new(
-			AWAY_FROM_PLAYER, active_flee_speed, active_flee_hops, active_rest_frames
-		),
-		stay_grounded_when_making_headway
+	set_active(
+		ClimbWhenNecessary.new().init(
+			climbing_speed,
+			climbing_escape_hop_speed,
+			HopInDirection.new().init(
+				AWAY_FROM_PLAYER, active_flee_speed, active_flee_hops, active_rest_frames
+			),
+			stay_grounded_when_making_headway
+		)
 	)
 
-	avoid_ocean_behavior = AvoidOcean.new(_rng_key("avoid_ocean"), active_flee_hops, inactive_speed)
+	set_avoid_ocean(
+		AvoidOcean.new().init(_rng_key("avoid_ocean"), active_flee_hops, inactive_speed)
+	)
 
 
 func select_next_behavior() -> AnimalBehavior:

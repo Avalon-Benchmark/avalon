@@ -2,16 +2,17 @@ extends BehaviorCriteria
 
 class_name NoticesPlayerMoving
 
-var last_player_position: Vector3 = Vector3.ZERO
+export var last_player_position: Vector3 = Vector3.ZERO
 
-var movement_detection_threshold: float = 0.01
-var give_up_after_hops: int
-var player_still_steps := 0
+export var movement_detection_threshold: float = 0.01
+export var give_up_after_hops: int
+export var player_still_steps := 0
 
 
-func _init(_movement_detection_threshold: float, _give_up_after_hops: int):
+func init(_movement_detection_threshold: float, _give_up_after_hops: int) -> BehaviorCriteria:
 	movement_detection_threshold = _movement_detection_threshold
 	give_up_after_hops = _give_up_after_hops
+	return self
 
 
 func is_matched_by(animal: Animal) -> bool:

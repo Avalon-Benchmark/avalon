@@ -24,20 +24,22 @@ func _initialize() -> void:
 	var input_pipe_path = results[1]
 	var output_pipe_path = results[2]
 
+	HARD.print_debug_info()
+
 	if avalon_spec.player is HumanPlayerSpec and not avalon_spec.player.is_human_playback_enabled:
 		game_manager = HumanGameManager.new(root, avalon_spec)
 	elif avalon_spec.player is AgentPlayerSpec or avalon_spec.player.is_human_playback_enabled:
 		game_manager = AgentGameManager.new(root, avalon_spec, input_pipe_path, output_pipe_path)
-
-	# NOTE: this needs to happen at the end of initialize otherwise godot crashes silently
-	_set_window_size()
 
 	print(CONST.READY_LOG_SIGNAL)
 	print()
 
 
 func _input_event(event: InputEvent) -> void:
-	game_manager.read_input_from_event(event)
+	if _is_quitting:
+		return
+	if avalon_spec.player is HumanPlayerSpec and not avalon_spec.player.is_human_playback_enabled:
+		game_manager.read_input_from_event(event)
 
 
 func _iteration(delta: float) -> bool:
@@ -116,16 +118,6 @@ func load_avalon_spec_from_args():
 				HARD.stop("Unknown command line arg: '%s'", [arg])
 	HARD.assert(HARD.mode() or (len(config_paths) == 1), "No config file given")
 
-	var json_dict := Tools.path_read_json(config_paths[-1])
+	var json_dict := Tools.read_json_from_path(config_paths[-1])
 	var json_spec = ClassBuilder.get_object_from_json(json_dict, "/")
 	return [json_spec, input_pipe_path, output_pipe_path]
-
-
-func _set_window_size() -> void:
-	# NOTE: for some reason OS.window_size can cause godot to silently crash so we handle
-	# setting the window size in sim loop we can guarantee it happens at the end of initialize
-	var resolution = avalon_spec.get_resolution()
-	if avalon_spec.recording_options.is_adding_debugging_views:
-		OS.window_size = resolution * 2
-	else:
-		OS.window_size = resolution

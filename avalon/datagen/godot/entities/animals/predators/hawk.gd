@@ -17,30 +17,38 @@ var return_to_territory: ReturnToTerritoryBehavior
 
 
 func _ready():
-	return_to_territory = ReturnToTerritoryBehavior.new(
-		FlyInDirection.new(TOWARDS_TERRITORY, inactive_speed),
-		global_transform.origin,
-		territory_radius,
-		retreat_within_radius
-	)
-
-	inactive_behavior = FlyInCircles.new(
-		inactive_speed, inactive_steps_per_side, inactive_steps_per_turn, inactive_turn_angle
-	)
-
-	active_behavior = PursueAndAttackPlayer.new(
-		FlyInDirection.new(
-			TOWARDS_PLAYER,
-			active_chase_full_speed,
-			active_chase_turn_speed,
-			active_chase_turn_rotation_speed
+	return_to_territory = load_or_init(
+		"return_to_territory",
+		ReturnToTerritoryBehavior.new().init(
+			FlyInDirection.new().init(TOWARDS_TERRITORY, inactive_speed),
+			global_transform.origin,
+			territory_radius,
+			retreat_within_radius
 		)
 	)
-	avoid_ocean_behavior = AvoidOcean.new(
-		_rng_key("avoid_ocean"),
-		AvoidOcean.FLY_STEPS,
-		inactive_speed,
-		active_chase_turn_rotation_speed
+
+	set_inactive(
+		FlyInCircles.new().init(
+			inactive_speed, inactive_steps_per_side, inactive_steps_per_turn, inactive_turn_angle
+		)
+	)
+	set_active(
+		PursueAndAttackPlayer.new().init(
+			FlyInDirection.new().init(
+				TOWARDS_PLAYER,
+				active_chase_full_speed,
+				active_chase_turn_speed,
+				active_chase_turn_rotation_speed
+			)
+		)
+	)
+	set_avoid_ocean(
+		AvoidOcean.new().init(
+			_rng_key("avoid_ocean"),
+			AvoidOcean.FLY_STEPS,
+			inactive_speed,
+			active_chase_turn_rotation_speed
+		)
 	)
 
 
@@ -48,13 +56,13 @@ func select_next_behavior() -> AnimalBehavior:
 	if return_to_territory.is_returning_to_territory(self):
 		return return_to_territory
 
-	if is_player_in_detection_radius and is_player_in_territory() and not should_give_respite():
+	if _is_player_in_detection_radius and is_player_in_territory() and not should_give_respite():
 		return active_behavior
 
 	if HARD.mode() and previous_behavior == active_behavior:
 		var reason = (
 			"player outside radius %s" % territory_radius
-			if not is_player_in_detection_radius
+			if not _is_player_in_detection_radius
 			else ("player left territory" if not is_player_in_territory() else "of attack respite")
 		)
 		print("%s giving up pursuit because %s" % [self, reason])

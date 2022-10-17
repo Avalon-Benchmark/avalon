@@ -2,6 +2,10 @@ extends DynamicEntity
 
 class_name Item
 
+const _DEFAULT_SHAPE_RADIUS := 1.0
+
+export var _is_state_initialized = false
+
 export var ground_contact_history = []
 export var ground_contact_count := 0
 export var is_behaving_like_item = true
@@ -25,13 +29,15 @@ export var bounding_radius_factor = 1.05
 export var safe_scale := Vector3.ONE
 export var base_color := ""
 
-const _DEFAULT_SHAPE_RADIUS := 1.0
-var _prev_origin: Vector3
+export var _prev_origin: Vector3
 
-var is_held := false
-var is_hidden := false
+export var is_held := false
+export var is_hidden := false
 
-var previous_velocity := Vector3.ZERO
+export var previous_velocity := Vector3.ZERO
+
+# ignores body_entered signals when reloading, which only happens after the first frame
+var _reload_ground_contact_count_correction_buffer := 0
 
 
 func is_impossible_to_eat() -> bool:
@@ -41,8 +47,16 @@ func is_impossible_to_eat() -> bool:
 func _ready():
 	HARD.assert(OK == connect("body_entered", self, "_on_body_entered"), "Failed to connect signal")
 	HARD.assert(OK == connect("body_exited", self, "_on_body_exited"), "Failed to connect signal")
+	if not _is_state_initialized:
+		_initialize_state()
+	else:
+		_reload_ground_contact_count_correction_buffer = ground_contact_count
+
+
+func _initialize_state():
 	contact_monitor = true
 	contacts_reported = 10
+
 	ground_contact_history = []
 
 	if (self.safe_scale - Vector3.ONE).length() > 0.01:
@@ -52,6 +66,7 @@ func _ready():
 		set_base_color(self.base_color)
 
 	_set_previous_position()
+	_is_state_initialized = true
 
 
 # required because godot is weird/buggy and things go crazy if you apply scale to a collision shape
@@ -93,6 +108,9 @@ func set_base_color(color):
 
 func _on_body_entered(body: Node):
 	if Tools.is_terrain(body):
+		if _reload_ground_contact_count_correction_buffer > 0:
+			_reload_ground_contact_count_correction_buffer -= 1
+			return
 		ground_contact_count += 1
 
 

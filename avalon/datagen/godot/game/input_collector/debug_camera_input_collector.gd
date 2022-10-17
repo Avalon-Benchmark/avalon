@@ -18,6 +18,7 @@ func read_input_from_pipe(action_pipe: StreamPeerBuffer) -> void:
 	action.offset = read_vec(action_pipe)
 	action.rotation = read_vec(action_pipe)
 	action.is_facing_tracked = action_pipe.get_float() == 1.0
+	action.is_frame_advanced = action_pipe.get_float() == 1.0
 	var remaining_size = action_pipe.get_size() - action_pipe.get_position()
 	action.tracked_node = action_pipe.get_utf8_string(remaining_size)
 

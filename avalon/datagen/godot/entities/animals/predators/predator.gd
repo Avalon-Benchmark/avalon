@@ -5,7 +5,8 @@ class_name Predator
 export var attack_damage := 0.5
 export var rest_steps_between_attacks := 7
 
-var attack_rest_step := 0
+export var attack_rest_step := 0
+
 var weapon: NaturalWeapon
 
 

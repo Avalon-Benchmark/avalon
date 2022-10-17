@@ -2,17 +2,19 @@ extends CyclingBehavior
 
 class_name HopInCircle
 
-var hop_speed: Vector2
+export var hop_speed: Vector2
 
-var loop_angle_increment: float
-var loop_steps_per_side: float
+export var loop_angle_increment: float
+export var loop_steps_per_side: float
 
 
-func _init(_hop_speed: Vector2, _act_steps: int, _rest_steps: int, _loop_angle_increment: float).(
-	_act_steps, _rest_steps
-):
+func init(
+	_hop_speed: Vector2, _act_steps: int, _rest_steps: int, _loop_angle_increment: float
+) -> CyclingBehavior:
+	.init_super(_act_steps, _rest_steps)
 	hop_speed = _hop_speed
 	loop_angle_increment = _loop_angle_increment
+	return self
 
 
 func do(animal: Animal, delta: float) -> Vector3:

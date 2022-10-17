@@ -2,14 +2,25 @@ extends AnimalBehavior
 
 class_name PursueAndAttackPlayer
 
+export var knock_back: Vector2
+
 var pursue_behavior: AnimalBehavior
 
-var knock_back: Vector2
+
+func get_logic_nodes() -> Array:
+	return [pursue_behavior]
 
 
-func _init(_pursue_behavior: AnimalBehavior, _knock_back: Vector2 = Vector2(-2, 2)):
+func init(
+	_pursue_behavior: AnimalBehavior, _knock_back: Vector2 = Vector2(-2, 2)
+) -> AnimalBehavior:
 	pursue_behavior = _pursue_behavior
 	knock_back = _knock_back
+	return self
+
+
+func _ready():
+	pursue_behavior = LogicNodes.prefer_persisted(self, "pursue_behavior", pursue_behavior)
 
 
 func do(animal, delta: float) -> Vector3:

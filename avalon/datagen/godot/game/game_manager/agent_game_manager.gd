@@ -53,19 +53,23 @@ func spawn() -> void:
 	.spawn()
 
 
+func _reply_with_observation():
+	var interactive_observation
+	if last_observation == null:
+		interactive_observation = observation_handler.get_interactive_observation(
+			player, episode, frame, selected_features, true, true
+		)
+		if not PERF_OBSERVATION_READ:
+			last_observation = interactive_observation
+	else:
+		interactive_observation = last_observation
+	if PERF_OBSERVATION_WRITE:
+		env_bridge.write_step_result_to_pipe(interactive_observation)
+
+
 func read_input_from_pipe() -> bool:
 	if env_bridge.is_output_enabled and is_reply_requested:
-		var interactive_observation
-		if last_observation == null:
-			interactive_observation = observation_handler.get_interactive_observation(
-				player, episode, frame, selected_features, true, true
-			)
-			if not PERF_OBSERVATION_READ:
-				last_observation = interactive_observation
-		else:
-			interactive_observation = last_observation
-		if PERF_OBSERVATION_WRITE:
-			env_bridge.write_step_result_to_pipe(interactive_observation)
+		_reply_with_observation()
 
 	log_debug_info()
 
@@ -117,10 +121,20 @@ func read_input_from_pipe() -> bool:
 						avalon_spec.recording_options.resolution_y
 					)
 					camera_controller.add_debug_camera(size)
-				camera_controller.debug_view.read_and_apply_action(data)
-				is_reply_requested = true
-				advance_frame()
-				return false
+
+				var is_frame_advanced = camera_controller.debug_view.read_and_apply_action(data)
+				if not is_frame_advanced:
+					_reply_with_observation()
+				else:
+					is_reply_requested = true
+					advance_frame()
+					return false
+			[CONST.SAVE_SNAPSHOT_MESSAGE]:
+				var snapshot_path = SnapshotHandler.save_snapshot(self)
+				env_bridge.write_single_value(snapshot_path)
+			[CONST.LOAD_SNAPSHOT_MESSAGE, var snapshot_path]:
+				SnapshotHandler.load_snapshot(self, snapshot_path)
+				_reply_with_observation()
 			[CONST.CLOSE_MESSAGE]:
 				print("CLOSE_MESSAGE received: exiting")
 				return true

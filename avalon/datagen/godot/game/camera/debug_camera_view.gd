@@ -61,7 +61,7 @@ func apply_action(action: DebugCameraAction):
 	if not is_already_tracking(action.tracked_node):
 		var tracked = get_tree().root.find_node(action.tracked_node, true, false)
 		if tracked == null:
-			print("DEBUG_WARNING: Could not find node %s" % action.tracked_node)
+			print("DEBUG_WARNING: Could not find node: '%s'" % action.tracked_node)
 			return
 		if not tracked is Spatial:
 			print("DEBUG_WARNING: tracked_node %s must be a Spatial node" % action.tracked_node)
@@ -89,11 +89,12 @@ func is_already_tracking(tracked_node: String) -> bool:
 	return ("%s" % full_path).ends_with(tracked_node)
 
 
-func read_and_apply_action(data: PoolByteArray):
+func read_and_apply_action(data: PoolByteArray) -> bool:
 	var stream = StreamPeerBuffer.new()
 	stream.data_array = data
 	input_collector.read_input_from_pipe(stream)
 	apply_action(input_collector.action)
+	return input_collector.action.is_frame_advanced
 
 
 # TODO not sure if the A is actually depth here post-conversion but we ignore usually anyways

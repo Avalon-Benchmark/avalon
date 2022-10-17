@@ -30,11 +30,14 @@ from avalon.datagen.godot_env.observations import FAKE_TYPE_IMAGE
 from avalon.datagen.godot_env.observations import NP_DTYPE_MAP
 from avalon.datagen.godot_env.observations import FeatureSpecDict
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
+from avalon.datagen.godot_generated_types import BRIDGE_LOG_SIGNAL
 from avalon.datagen.godot_generated_types import CLOSE_MESSAGE
 from avalon.datagen.godot_generated_types import DEBUG_CAMERA_ACTION_MESSAGE
+from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import QUERY_AVAILABLE_FEATURES_MESSAGE
 from avalon.datagen.godot_generated_types import RENDER_MESSAGE
 from avalon.datagen.godot_generated_types import RESET_MESSAGE
+from avalon.datagen.godot_generated_types import SAVE_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import SEED_MESSAGE
 from avalon.datagen.godot_generated_types import SELECT_FEATURES_MESSAGE
 
@@ -130,6 +133,14 @@ class GodotEnvBridge(Generic[ActionType]):
         self._selected_features: FeatureSpecDict = OrderedDict()
 
     @classmethod
+    def _kill_on_parsing_errors_to_avoid_zombies(cls, process: InteractiveGodotProcess):
+        try:
+            process.wait_for_log_signal(BRIDGE_LOG_SIGNAL)
+        except (GodotError, TimeoutError):
+            process.close(kill=True)
+            raise
+
+    @classmethod
     def build_by_starting_process(
         cls,
         process: InteractiveGodotProcess,
@@ -147,6 +158,8 @@ class GodotEnvBridge(Generic[ActionType]):
             _mkpipe(process.observation_pipe_path)
 
             process.start()
+
+            cls._kill_on_parsing_errors_to_avoid_zombies(process)
 
             bridge = cls(
                 action_pipe=open(process.action_pipe_path, _BINARY_WRITE),
@@ -219,6 +232,20 @@ class GodotEnvBridge(Generic[ActionType]):
         with self._kill_switch.watch_blocking_action():
             self._send_message(RENDER_MESSAGE, bytes())
             return self._read_shape(self._screen_shape, prod(self._screen_shape), dtype=np.uint8)
+
+    def save_snapshot(self) -> str:
+        with self._kill_switch.watch_blocking_action():
+            self._send_message(SAVE_SNAPSHOT_MESSAGE, bytes())
+            snapshot_path = self._observation_pipe.readline().decode("UTF-8")[:-1]
+            return snapshot_path
+
+    def load_snapshot(self, snapshot_path: str) -> FeatureDataDict:
+        with self._kill_switch.watch_blocking_action():
+            self._send_message(
+                LOAD_SNAPSHOT_MESSAGE,
+                (snapshot_path + "\n").encode("UTF-8"),
+            )
+            return self._read_features(self._selected_features)
 
     def close(self) -> None:
         with self._kill_switch.watch_blocking_action(self._close_timeout_seconds):

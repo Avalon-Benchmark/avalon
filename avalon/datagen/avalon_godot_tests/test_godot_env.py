@@ -211,6 +211,7 @@ def test_replay_from_error_artifacts(
 
     with pytest.raises(GodotError):
         godot_env.act(get_vr_action())
+    godot_env.close()
 
     assert godot_env.process.artifact_path.exists()
 

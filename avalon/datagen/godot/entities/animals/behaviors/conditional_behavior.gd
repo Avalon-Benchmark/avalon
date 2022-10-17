@@ -4,26 +4,40 @@ extends AnimalBehavior
 
 class_name ConditionalBehavior
 
+export var is_reset := true
+export var is_matched := false
+
 var criteria: Array
 
 var if_behavior: AnimalBehavior
 
-var is_matched = null
 
-
-func _init(_criteria: Array, _if_behavior):
+func init(_criteria: Array, _if_behavior) -> AnimalBehavior:
 	criteria = _criteria
 	if_behavior = _if_behavior
+	return self
+
+
+func _ready():
+	criteria = LogicNodes.prefer_persisted_array(self, "criteria", criteria)
+	if_behavior = LogicNodes.prefer_persisted(self, "if_behavior", if_behavior)
+
+
+func get_logic_nodes() -> Array:
+	var nodes = [if_behavior]
+	nodes.append_array(criteria)
+	return nodes
 
 
 func do(animal: Animal, delta: float) -> Vector3:
 	var is_previously_matched = is_matched
 	is_matched = BehaviorCriteria.all_match(animal, criteria)
-	var is_changed = is_previously_matched != is_matched
+	var is_changed = is_reset or is_previously_matched != is_matched
+	is_reset = false
 
 	if is_changed and HARD.mode():
-		var b_name = if_behavior.get_name() if is_matched else "stay_still"
-		print("behavior change in %s.conditional: -> %s" % [animal.name, b_name])
+		var b_description = if_behavior.describe() if is_matched else "stay_still"
+		print("behavior change in %s.conditional: -> %s" % [animal.name, b_description])
 
 	if is_matched:
 		return if_behavior.do(animal, delta)
@@ -39,13 +53,14 @@ func select_behavior(animal: Animal):
 
 func reset():
 	.reset()
-	is_matched = null
+	is_reset = true
+	is_matched = false
 	if_behavior.reset()
 
 
-func get_name():
+func describe():
 	var c_names = []
 	for c in criteria:
-		c_names.append(c.get_name())
+		c_names.append(c.describe())
 
-	return "when(%s, %s)" % [c_names, if_behavior.get_name()]
+	return "when(%s, %s)" % [c_names, if_behavior.describe()]

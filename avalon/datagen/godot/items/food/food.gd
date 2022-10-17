@@ -7,12 +7,13 @@ export var initial_stem_adjustement_seconds := 0.0
 export var energy = 1.0
 export var pluck_velocity_threshold = 1.0
 
-var _instantiation_time: float
-var _is_interacting := false
+export var _instantiation_time: float
+export var _is_interacting := false
 
 
 func _ready():
-	_instantiation_time = OS.get_ticks_msec()
+	if _instantiation_time == null:
+		_instantiation_time = OS.get_ticks_msec()
 	add_to_group("food")
 
 
@@ -104,7 +105,9 @@ func _open():
 	closed_mesh.visible = false
 
 
-func _is_impact_velocity_sufficient(body: Node, velocity_threshold: float, action: String = "open") -> bool:
+func _is_impact_velocity_sufficient(
+	body: Node, velocity_threshold: float, action: String = "open"
+) -> bool:
 	var impact_magnitude = _calculate_impact_magnitude(body)
 	var is_sufficient = impact_magnitude >= velocity_threshold
 	if HARD.mode():

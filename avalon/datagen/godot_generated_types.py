@@ -8,6 +8,7 @@ from typing import Optional
 from avalon.datagen.godot_base_types import *
 
 
+BRIDGE_LOG_SIGNAL: Final = "Establishing Bridge"
 READY_LOG_SIGNAL: Final = "GODATA!"
 FIXED_FPS: Final = 10
 RGBD_FEATURE: Final = "rgbd"
@@ -26,11 +27,15 @@ QUERY_AVAILABLE_FEATURES_MESSAGE: Final = 5
 CLOSE_MESSAGE: Final = 6
 DEBUG_CAMERA_ACTION_MESSAGE: Final = 7
 HUMAN_INPUT_MESSAGE: Final = 9
+SAVE_SNAPSHOT_MESSAGE: Final = 10
+LOAD_SNAPSHOT_MESSAGE: Final = 11
 VR_ACTION_SPACE: Final = "VR_ACTION_SPACE"
 MOUSE_KEYBOARD_ACTION_SPACE: Final = "MOUSE_KEYBOARD_ACTION_SPACE"
 LEFT_HAND: Final = "Left"
 RIGHT_HAND: Final = "Right"
 FAKE_TYPE_IMAGE: Final = -1
+SNAPSHOT_JSON: Final = "snapshot_context.json"
+SNAPSHOT_SUBPATH: Final = "snapshots"
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)

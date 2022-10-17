@@ -17,6 +17,8 @@ var warmup_frame := 0
 
 var scene_root: Node
 var world_node: Node
+var current_world_path := "res://scenes/entry.tscn"
+
 var spawn_point: Spatial
 var is_spawning_player := false
 
@@ -86,9 +88,19 @@ func advance_frame() -> void:
 	set_time_and_seed()
 
 
-func advance_episode(world_path: String) -> void:
+func swap_in_scene(scene_instance: Node) -> void:
 	if camera_controller.debug_view != null:
 		camera_controller.remove_debug_camera()
+
+	for child in world_node.get_children():
+		world_node.remove_child(child)
+		child.queue_free()
+
+	world_node.add_child(scene_instance)
+
+
+func advance_episode(world_path: String) -> void:
+	current_world_path = world_path
 
 	# reset internal player state before moving to a new world
 	player.reset_on_new_world()
@@ -96,12 +108,8 @@ func advance_episode(world_path: String) -> void:
 	frame = 0
 	set_time_and_seed()
 
-	for child in world_node.get_children():
-		world_node.remove_child(child)
-		child.queue_free()
-
 	var scene: PackedScene = ResourceLoader.load(world_path)
-	world_node.add_child(scene.instance())
+	swap_in_scene(scene.instance())
 
 	# move the player to spawn in the right place
 	spawn_point = world_node.find_node("SpawnPoint", true, false)

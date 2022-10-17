@@ -5,7 +5,6 @@ class_name HumanGameManager
 var arvr_interface: ARVRInterface
 var recorder: Recorder
 var initial_scene_path = "res://scenes/entry.tscn"
-var current_world_path = "res://scenes/entry.tscn"
 var gui_manager_scene_path = "res://scenes/gui/floating_gui_manager.tscn"
 var gui_manager: FloatingGUIManager
 var is_vr_warmed_up := false
@@ -82,6 +81,9 @@ func _init(_root, _avalon_spec).(_root, _avalon_spec):
 
 	if client:
 		verify_apk_version_and_disable_teleporters()
+
+	if player is MouseKeyboardHumanPlayer:
+		root.get_viewport().add_child(MouseKeyboardHelpPanel.new())
 
 
 func is_teleporter_enabled() -> bool:

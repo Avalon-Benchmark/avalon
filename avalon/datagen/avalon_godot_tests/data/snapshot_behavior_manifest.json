@@ -1,0 +1,936 @@
+{
+  "snapshot_commit": "5b0d8148281970f57cab394d8f34864fa84794b5",
+  "checksums": {
+    "banana_on_tree_10ss": {
+      "combined_videos": "b169328e5db1b206845e6b5fbf154052",
+      "snapshot_scenes": [
+        "2805584b7b0b87adf1808778410b87fd",
+        "8e7e9e0d67caad7efcbee1208e026dd6",
+        "1f6669484059f5cfab5b9ac72690187e",
+        "88037fafc5329c8bfc47ac4913bda5c3",
+        "383aa9c36f6e02871293e9df257ab51c",
+        "00a8b1133ff9500c00e0251d53f3b480",
+        "fc87fd5e8cd187ee8fcf82fcecf94b85",
+        "96c37c385157c14a5d8512c0ed44b44a",
+        "040453462be6c9dfdea28ab99cf5baf8",
+        "54cab5e545b798b41b98c55fdadf225f"
+      ],
+      "_percent_drift": 0.25932723110161937
+    },
+    "mulberry_on_tree_10ss": {
+      "combined_videos": "9951b6d9356a3b3ff2df709ae24cd77a",
+      "snapshot_scenes": [
+        "33b0c6fbf98824a94317d57e2e7d3ca2",
+        "b3eb0228db13deaebe5c231d66c1f147",
+        "33bd0a68aa250109a5fd55b9a5392996",
+        "4773ad781d28d11ba23e4d7590d67680",
+        "cc70947730eec3197677acecc9a96968",
+        "d61abc9a23c77c06f1b60201a63a972a",
+        "a0be029f0aa4c1d3f14efd89f8839ced",
+        "ca2839677767db7cac45acf05c38cd2b",
+        "a1aa4eef1bd23eb96de2ed039d6079cb",
+        "5f17773e33f03dda52d18166f24384f6"
+      ],
+      "_percent_drift": 0.2735774517059326
+    },
+    "honeycomb_on_tree_10ss": {
+      "combined_videos": "a9e063de8e713312e1cac0dd1135d0e0",
+      "snapshot_scenes": [
+        "928593db691f716667ebb12a3a528ca2",
+        "eadac5fa75b449827203b620a5e63646",
+        "cbeb1bad39f70e1776fe6df78e43d286",
+        "5b4e1c207361cb937db6f5550d9cd997",
+        "44ed96385c02bba746bcf6060df493e8",
+        "c785cb9ab60006d86134376a3c7c29e0",
+        "b5420a302e8be5e4524fd3a92b4eac7a",
+        "67426d2ea9511032c79d5835de45fd9a",
+        "232bb1a66c3eab4ef3c88e987c690372",
+        "29699e8105b3f85e2527cc7ad5d984d4"
+      ],
+      "_percent_drift": 0.29038768861351943
+    },
+    "honeycomb_gets_dirty_10ss": {
+      "combined_videos": "8e25b43963219b711c8750fa51f28562",
+      "snapshot_scenes": [
+        "4b0a59ae1bec0857a7f5b57999d99b38",
+        "90cefc96799a17c412e142c88ce1b4c8",
+        "81fd284f23c2dda5329d8a2ca75f15f6",
+        "4531207f364e1db5a0151b64d25b98db",
+        "6a7220a762bbf8cda3cf20a7db98d8e6",
+        "859dfd2bd98963a3c1125592505d9283",
+        "2cb2811715002925de0f4a031b3a1c8f",
+        "d6bb87e9993a19e08c919aa4e8eb1d8a",
+        "e902d39f489aa9b7e4635b037dbf317d",
+        "d110007bce1adcb9e1e87da99cefcc85"
+      ],
+      "_percent_drift": 0.3040613728184854
+    },
+    "banana_on_tree_snapshots": {
+      "combined_videos": "5021daaee517109d9ed70dde20a17fe4",
+      "snapshot_scenes": [
+        "cc9fb829308877bb40e3d1229a4e361f",
+        "223a15a9f0895af9fe0b6470e75c8e9a",
+        "014739df2caa522220e5faf4ec665daa",
+        "15f89a3bce43d605a417de36bf939bf6",
+        "4b33ecb71ff93f21bc204c4853d17cfa",
+        "55ac08a1d189c9b86543329c79ac8736",
+        "3e25462cf6eefe2ea0e3a39668776fc0",
+        "e2b2f1b43b1e8268ded2f080f295d750",
+        "f624250227c6c07df3d491105f29fd3f",
+        "562a2f29281e1bf73a031a64edae8632"
+      ],
+      "_percent_drift": 0.25931545368676046,
+      "_snapshot_details": "10 snapshots 10 frames each"
+    },
+    "mulberry_on_tree_snapshots": {
+      "combined_videos": "086cee447c967e39d9925958dd693f3b",
+      "snapshot_scenes": [
+        "120a5557f3ba40e7a0ff347674cac94e",
+        "eb1720835658f2845869b404d170265d",
+        "cf211a6e11c2f91c06180b4e83ead3a2",
+        "9c71774ed580c120864c4bce03cefa65",
+        "ea1b3cd4c3aa4263bd18e4116887ac0e",
+        "ac81eb9a8d56e48145073b53ed5f931a",
+        "c4999370fefe74a95a812591971c1b86",
+        "674eaae2ffda5b00396faf252345a1a7",
+        "114ab1116be4192dc7932183852b347b",
+        "0d9c7eaefacafda3ebe60b7755e8894d"
+      ],
+      "_percent_drift": 0.27361254692077636,
+      "_snapshot_details": "10 snapshots 7 frames each"
+    },
+    "honeycomb_on_tree_snapshots": {
+      "combined_videos": "da649465926987e5d92099836038d1bc",
+      "snapshot_scenes": [
+        "0aac8a1f59fb97b17f031cf69ac5a851",
+        "71efa53ee785d71962530b2cfd96b1da",
+        "8ca859b0507e487fc7d350f9a0d278e2",
+        "f216a85d35197587b8f629bcd0947980",
+        "b8981a1a38ca8768f7997b818ea4848d",
+        "c47ee68a685921380f9e829e0ea8fae7",
+        "43f6c3e4b13826cf9122157bf1160a61",
+        "062bb7234603fc57a52fdfc88dfae740",
+        "374a19cba3e1d602a242542e29d5857c",
+        "1d78996cabb0f40bb5496d4f10d86edd"
+      ],
+      "_percent_drift": 0.29041713621558213,
+      "_snapshot_details": "10 snapshots 7 frames each"
+    },
+    "honeycomb_gets_dirty_snapshots": {
+      "combined_videos": "53341352dd24a87def15ef5d26c220c9",
+      "snapshot_scenes": [
+        "00db83c54fba77204e4d407f70a6036f",
+        "a1572c8a731f4cd8f2d90532ea32f1e2",
+        "6c93e7b2fc3629676d467dba5fb355ae",
+        "9a2cd4cc871ac776c453b22ddd957ebc",
+        "bfc517f765f8ad827015a0179ad04179",
+        "8aca62ebc5a73011cd1847182802bd6e",
+        "a26682a4b9d9496367073a9014d32bac",
+        "ced3bef92a330317f5330dc649dcb9ea",
+        "5c794445e16f319e65389ab071916989",
+        "6dd606152c2cdfb9ac879f15efa39260"
+      ],
+      "_percent_drift": 0.30405677057081654,
+      "_snapshot_details": "10 snapshots 16 frames each"
+    },
+    "snake_killed_by_falling_rock_snapshots": {
+      "combined_videos": "9b4189c520464c4b2952bb2ad1bd81b3",
+      "snapshot_scenes": [
+        "ba7ebd1c8516ea5f41050a9891a61360",
+        "1c3b3b88b04d0b3fccd98cdfa437d6d3",
+        "ad342f4014f6030e1399fe65ddc388ca",
+        "2200256f7b2799d25f3ce01018521051",
+        "2ef7475dd0d1e3c90eea5cfe9ed0d5a7",
+        "b5eee46bbf8d6a198a9d0a447044c087",
+        "ee9bef015d0883a259d9d8c39a47b305",
+        "efc542730a0c8e005276a44feb8fb9df",
+        "9ecc45221ef76f91e31d9d7a96a52538",
+        "20e13026d6099c44651b24b3f2c91e4c"
+      ],
+      "_percent_drift": 0.015195238721239698,
+      "_snapshot_details": "10 snapshots 9 frames each"
+    },
+    "snake_unharmed_by_falling_stick_snapshots": {
+      "combined_videos": "cd1ae53cdceb69328794c7df1ce04fd4",
+      "snapshot_scenes": [
+        "95bd8a41d6d7f32cf3abc0c33a936ce8",
+        "5cb313244085164682568471704322fc",
+        "08802dcfa64b9487f70fed3b574c07f9",
+        "00f0903e6992aef4ef6f210e553b3579",
+        "d55a0b7a95a4b342f9d5418f7eb0a7ec",
+        "799d616dde4caac991eeb9e805cd1a84",
+        "de882d055e4174ec6dab6101e4cfd769",
+        "6156defab93c7bb4916ad8665c3bdeeb",
+        "a53a00b572dc27efe7eed9b9564e6ea5",
+        "f4d0a3a0d92a7369d3c948ef0974d963"
+      ],
+      "_percent_drift": 0.028743408538483003,
+      "_snapshot_details": "10 snapshots 9 frames each"
+    },
+    "snake_killed_with_stick_snapshots": {
+      "combined_videos": "a4f2500f9f295bc3b55a074bcc296065",
+      "snapshot_scenes": [
+        "5498ddd792c128a56c287c2bd889596f",
+        "6018b3728035a874431a88534630a40d",
+        "60dec3086fcc51a08171646c5f4e29c1",
+        "05264fec6af5d770b556ad46c71c7759",
+        "f2552e208c893e7a60f88dfc1ddd3217",
+        "c5764179f3368f5402ef614e6510c291",
+        "4994c31442b44f3c6ee1babd09a6ffec",
+        "8f199c6fa8f0bd01611409a7a9956554",
+        "50c08db8060e163c113fba8eb2b27eec",
+        "9bda7132de7c7ff6cd84c252313e6517"
+      ],
+      "_percent_drift": 0.022650985717773436,
+      "_snapshot_details": "10 snapshots 9 frames each"
+    },
+    "snake_killed_with_rock_snapshots": {
+      "combined_videos": "b0b316de3e6ccbadc3cfb5f5f13c1a10",
+      "snapshot_scenes": [
+        "3603b693763c393e59eb09e7e15b10ff",
+        "3f245de5d0f10cf271626f8c9b131b59",
+        "c54f393c1623b358e67f65d80c678790",
+        "44d7eab316908923fc0b662ab42d42d2",
+        "40153ed5134dc5a8c153594abff24989",
+        "ad7a53852ad426452e2253e0d12fe40e",
+        "76be44fe76d418774d231ed3193d4534",
+        "5f1ed79abdb07db6f6982215d9f2765a",
+        "86fe4aaa93f2e006247d6705ac91e240",
+        "26be9340db24e8785cd0c58e79f9787b"
+      ],
+      "_percent_drift": 0.007078770228794643,
+      "_snapshot_details": "10 snapshots 6 frames each"
+    },
+    "snake_unharmed_by_thrown_stick_snapshots": {
+      "combined_videos": "7be9e485b9aaf48e42d478213153ad46",
+      "snapshot_scenes": [
+        "9fa02d38cdf5213d8c6cbb0bc267fb95",
+        "313e62b44c1973dfe2ace39a1c16a50a",
+        "dd5705529fda341a3d81b594fd25c2f7",
+        "f1060c8ea7f9e4aa52491621424d7b1f",
+        "79eaf7354ce8261eb5a600223d79b676",
+        "f5bb89954e8269c1f592b4388a955130",
+        "6e93baf50f0cfa192c6cefcf37686a0e",
+        "19e6c57adc6727a7ed77d67ef06cd8ed",
+        "81256868d55710c1a9f85e9ce62429db",
+        "3d2e7f59078e280c87763da657b38e93"
+      ],
+      "_percent_drift": 0.007867546968681867,
+      "_snapshot_details": "10 snapshots 8 frames each"
+    },
+    "snake_unharmed_by_held_rock_snapshots": {
+      "combined_videos": "8bcc75e1daa7fc29d8cb0d5492979b67",
+      "snapshot_scenes": [
+        "5ce66fdf8138c1cffa823c4a64483ae4",
+        "07db3a7d25549ea62d851a5d74af3234",
+        "6fb5145f556352a97f4fb1b419141212",
+        "6a71663c89ce91b102e766f186e591d8",
+        "cbc74ca2700ff08f80d9a1279e4ab3d8",
+        "47112a560249b371736ef4abce496751",
+        "051cb7b91df3ce66a8c0ce6c2792b27a",
+        "4d767ad0bf0858876aac13030e23cc84",
+        "6211499a2aa6d7d3590d6a2d0ffe313b",
+        "87402fc6ed1a1483c4a0e4e59bed211e"
+      ],
+      "_percent_drift": 0.021062215169270832,
+      "_snapshot_details": "10 snapshots 13 frames each"
+    },
+    "frog_inactive_snapshots": {
+      "combined_videos": "98b4546ff3662bf4ebb2dd8b55c69db1",
+      "snapshot_scenes": [
+        "1ef8c3201b2503f591f09a487c903ee5",
+        "1ecce1b4d5dba959497704a9b45eb606",
+        "e6c0c997e396a3b6f47704c55f144174",
+        "3352060ccb8beac89f9caeaf2406d902",
+        "2f48da8a94c0cfa1f90c6e41716c2db8",
+        "1f56f88b938b26e4f294a030e8d9935c",
+        "8735d70cb6e0c25657eec243832ad2c5",
+        "1ce7c2d10ef428301b1eb133a8bf022f",
+        "46c296ea9b04c7cc01761df4799648eb",
+        "3a37fa6ad01739ab7852d8a538062ef8"
+      ],
+      "_percent_drift": 7.846473988907114e-05,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "turtle_inactive_snapshots": {
+      "combined_videos": "11e942b419bcfcf0222cd61af6532065",
+      "snapshot_scenes": [
+        "43f913e93f4ab19ad245116524b5f78d",
+        "8cb75f528bb7eede814b388c7add2575",
+        "1154f2f76ae0c4ac25034bd998dcff5a",
+        "2bd87bdcffae2c38e9ee22a6cc793efc",
+        "9589547025c3cd2be4150b284775cead",
+        "221c0e1d7a74e8c8f026080f3cc94847",
+        "edc85311c9471961f937861b2a080ef7",
+        "1640d9312e85667abe77ae1cf1b40f07",
+        "3fcb43d6a95edf6a5a2eec185f41f945",
+        "38843c6ee616715dab633e1a3521c38e"
+      ],
+      "_percent_drift": 0.025303013767231864,
+      "_snapshot_details": "10 snapshots 39 frames each"
+    },
+    "mouse_inactive_snapshots": {
+      "combined_videos": "efcef66435e968774c6902bc9209f113",
+      "snapshot_scenes": [
+        "7bd506d7ba3362918ec2e0667602604e",
+        "dd3a000e61dc4b4e63585cab54e06e02",
+        "ab2bedb04ebc378175214b513e4751d0",
+        "cd23374d1bf88476c84b47a6671f4953",
+        "ec2d56d4e7cd2adec90aeef23be0d522",
+        "2d4b44a73a149f2884040c25b23d2b8d",
+        "0bbc16e7c1622aea492c35d5eff8185c",
+        "3baf3e5dd6e60dc6637d09e5bd22a4f2",
+        "10e4603cc076b2971dea53e8c5e7c8fa",
+        "41723b719fe06a230909ac52fb6166cb"
+      ],
+      "_percent_drift": 0.029283976686593577,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "rabbit_inactive_snapshots": {
+      "combined_videos": "d2fb1f0f499639f9fb07a0fa828ce2ce",
+      "snapshot_scenes": [
+        "aa5bbe33fa5a765ba544966fd233ac41",
+        "74badb0f16554b7869f409438267c6dc",
+        "8d5e6eec8762afa0a40483108da06b14",
+        "3c4f5da939fd01bb913a4d53a7d04fe4",
+        "398d5b51fda69d73e27d8afdcb0eb408",
+        "d0132191c6d286e2b24b4249a1e1084d",
+        "3c1068b1d291767f66b1ceafa1d44f87",
+        "072f6945bef2b1e052d96af4e0511abf",
+        "bca5d8c7382c871b102288db2e9de42e",
+        "75888e23fbe696bb107fb16f388c19cc"
+      ],
+      "_percent_drift": 0.05572216813735541,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "pigeon_inactive_snapshots": {
+      "combined_videos": "8cea47ec72823a67bbc8e626bfb13603",
+      "snapshot_scenes": [
+        "9753590b7a62033a2dd8725e26da9501",
+        "094f605e2a65d0eb595fca4026889fee",
+        "c8840a13c43f2ad3ebde82819a8bebc6",
+        "564261455cba55b7eb120a9ded270d67",
+        "a465ed3a4a2b62c1a07fd3d1f7927e6c",
+        "d969d11caa3aeb17127e1ac591a12ef2",
+        "c6057349aa076e50981998aacb61be92",
+        "703b95c9c6ad576e045b8e158bc50ad6",
+        "68493c240a1272fc077c26be35cf6355",
+        "87934fdb0e320e54b95541ba5f9fc722"
+      ],
+      "_percent_drift": 0.00010107893970131215,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "squirrel_inactive_snapshots": {
+      "combined_videos": "73e0009eeced89147462e3fddec38258",
+      "snapshot_scenes": [
+        "1ebbb1feb673602d05e41a9dc7d4603a",
+        "4a9ea19ab3ea931212b063f4d10351da",
+        "51df425ea5349dc12550d6a37a4775f2",
+        "23f2ead08e84246d5f734914ae817604",
+        "b5d75da199ae22040d699287b93a2f08",
+        "ceaf87cc16d835b8a22bf93327b202e5",
+        "86ae86a07d4975546b66ff88f2f3bd6a",
+        "dc09eb6c8cc8e07d16557ea18133ceb7",
+        "13f91bc906198d5cfadf1bf1bef7d39e",
+        "ad1b01a159433368d22e0dc42940805c"
+      ],
+      "_percent_drift": 0.029467840879661603,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "crow_inactive_snapshots": {
+      "combined_videos": "9601965cda01f44fc2baa71704fc0803",
+      "snapshot_scenes": [
+        "0307b2b14e009cfcf314164caf9c63e6",
+        "c6d01912e5d0f9aed3b5267db33366c8",
+        "98f54b66487d71a9f448c0f20a272c54",
+        "cbeb184e1d08721a3f06700121462b8a",
+        "8814b368370e4c7b20c7ad484fec1463",
+        "98306c4139b88eaf5877249a219e0923",
+        "4cc8881f90bab77c72275a686678d1c6",
+        "183a86db9f4a18446e0f0feb6502fca3",
+        "40ddc79f15ea1d457628dbc322800277",
+        "57e77683f136398d984933bdf86a96f1"
+      ],
+      "_percent_drift": 9.876061539623619e-05,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "deer_inactive_snapshots": {
+      "combined_videos": "9124b60b79a6b4da263996292ef72caf",
+      "snapshot_scenes": [
+        "c2a02aaa1668cf00017fa0c2f092d150",
+        "c7611797ace5f2eed3a3c90bc26fdd26",
+        "d5e4667f904d57b02acdd0e80232f8b6",
+        "7ae95c4e7699bee8c57826b167ad863c",
+        "3c8c47da9b3d74f03b4359fae1defe60",
+        "6af425180512937c94b23fe947967b94",
+        "04b284abe13d796f31c67c430aabba9f",
+        "06b4d6754af0095a44b7856609559f58",
+        "28a0c4db959970fbda259ad984d949fb",
+        "20fbcb1928769d1cf86de780a57c2b32"
+      ],
+      "_percent_drift": 9.934798530910326e-05,
+      "_snapshot_details": "10 snapshots 4 frames each"
+    },
+    "bee_inactive_snapshots": {
+      "combined_videos": "0412e149700bc56ff629d7451ec5e2b9",
+      "snapshot_scenes": [
+        "d176361060d43fa8f081071e40a03d4e",
+        "a00442aa5f24a0f85a80906bc3b52877",
+        "b1c45afe15128c11b01f23f353cff4fe",
+        "823bb94798b7fd72bd21ee7300bf1429",
+        "6090b90314665258b40b2abffdaee5d1",
+        "a00ae26224ecf685f8a6f9bd2765dc14",
+        "45b119ab0099558d4933551dfa80c6af",
+        "703456987afdffb2994bc7cfb56ab0e6",
+        "c8203f09f20779950e0c13b3eda3f416",
+        "3190a0a6fada69565d8bb75ccdfe17ad"
+      ],
+      "_percent_drift": 0.00010335511265538674,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "snake_inactive_snapshots": {
+      "combined_videos": "3f264b97603a20ae907bd49dd30acd95",
+      "snapshot_scenes": [
+        "23fe78f8691a480a0b8f6ef7e7a26cc1",
+        "e2eb98d11e8a5ddb6187b7ec386bb7e6",
+        "8ac36ad86270fae77527853c173827f9",
+        "fe8da43f6edfcd79a294cf39880a158e",
+        "6683e599c10c3488e5527841825c11fb",
+        "4bdb842478ea17e71eecfe2519abfe00",
+        "1afef9c4d2f11fd7157e3a659ca17b36",
+        "37fa582072cca693f0cda21cae3e6da0",
+        "e078e1646fdddd85e3a77b1078b15da2",
+        "7c87214c2a5f4f2c055184813d1fb74e"
+      ],
+      "_percent_drift": 8.533311926800272e-05,
+      "_snapshot_details": "10 snapshots 4 frames each"
+    },
+    "hawk_inactive_snapshots": {
+      "combined_videos": "168811e047b8d10bed7f9bfbc3b66faa",
+      "snapshot_scenes": [
+        "af2a27753ce95b423f0e630ae2a30c12",
+        "a67e6c49638cdecc2b6aee6d8ca28f3e",
+        "81f25c309c015c2f6c812ca5f506c725",
+        "d61827e570ba6f1135697a79dd34095e",
+        "f30cc48e79e8815d9c59fc55ec7c003a",
+        "50127621a9d348946e0f1ba40a8feaeb",
+        "e5d6237485c051be0034370b0fbcb119",
+        "9c8ddd044007e9884d27869b9c96b0fc",
+        "3bc1f6061778d0aa23fd633f34a32ce3",
+        "f94644fa4cf7e5fab08f69b80d113686"
+      ],
+      "_percent_drift": 0.00010176048384478878,
+      "_snapshot_details": "10 snapshots 39 frames each"
+    },
+    "hippo_inactive_snapshots": {
+      "combined_videos": "4a66b89fe41915420390b6016a515186",
+      "snapshot_scenes": [
+        "d868afaaf85b99ddc15800d0e2b34098",
+        "561ccbf175c4bc86e67d91b552d3669f",
+        "25e0443603412268a55821003a6a075c",
+        "44465ba13b6136cb575ad8ffcec9f8e1",
+        "b1b32b6912d53a78ac72e8e6317712e5",
+        "0bddc904c82805b3b3e49d481ac2908a",
+        "6cc5a7e0f1952676468d87a3db433eca",
+        "b0af95317af485c1408c86b2446a5df8",
+        "3cf60fadb3d6488aadb0d1a6e3135209",
+        "ac22cda4f5914f3bb0e961d9c12a8ad2"
+      ],
+      "_percent_drift": 3.391763438349185e-05,
+      "_snapshot_details": "10 snapshots 4 frames each"
+    },
+    "alligator_inactive_snapshots": {
+      "combined_videos": "a2ecafb5f8a844ba09457e3b095db4ba",
+      "snapshot_scenes": [
+        "e180e27c7f4fa54c99ee4a32c301f9c9",
+        "c3ba943cd039f566198e8930989f883b",
+        "b860c73045955cbfec260e2a8d1bb0ad",
+        "2b123971bf3c97988aa2e6a2f2268dea",
+        "fc14512d33268d35aedad0a4640546fe",
+        "3bfef65a68d0b9aca588e2e0cfbc3fcb",
+        "3c0fa7e136dbdbbb6b519afde48945d4",
+        "3d893d0914db44903cec14b255272e0c",
+        "ead2c0f30ebd966989e7e66112690f06",
+        "9210cfca63aafaab9f60bad6e6b7f9cd"
+      ],
+      "_percent_drift": 0.00983485859401977,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "eagle_inactive_snapshots": {
+      "combined_videos": "1223cd251ea3e5eb9bd65805b3eeb8ab",
+      "snapshot_scenes": [
+        "eddc3bb6235ca075642ab6fefd0b19b1",
+        "26b02c0b6bad6b5438a4e6ad20f5fd8b",
+        "de14d46001752cb287bae280b6e8ea88",
+        "149ad0a56d69e9e53dcf127f6913d7c4",
+        "15489c91fd2ff0d4fd364e48e74bd418",
+        "ac957e77f06d164c4339ce6a72e3f8d6",
+        "66964b851ff9935fef08f68fbd6abd28",
+        "847be182c5bbcb3d3c5f50c0caaa9c22",
+        "8e10c2c4f32b4e6fe82a40b80f01424e",
+        "04cbf8ed841fa3e9152adb0693a10e75"
+      ],
+      "_percent_drift": 9.328093976605663e-05,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "wolf_inactive_snapshots": {
+      "combined_videos": "4aa3f1c4604beb7dca33005efcf9e9c6",
+      "snapshot_scenes": [
+        "ea1c7d040fff88ad8e99a46ed7317d4a",
+        "442af1aeabd16f01ac724f3bce0ae5dd",
+        "45614c804f03b7c2ea9b6ab9e2282ee2",
+        "31c2e616e252cf49f374ebc198b83902",
+        "382ce44220d4ceb25982daf3e84e18f0",
+        "df3439cb610ceaf204eee9fff4be7ff7",
+        "791c09ef71cac7fad544a057446a9ec6",
+        "51619222012eb883b698984280b87a57",
+        "8efc22f1ce6e3225380ff7a91d276768",
+        "b2fa7987afe92203cbd3dc52291407bb"
+      ],
+      "_percent_drift": 0.0005832271681306112,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "jaguar_inactive_snapshots": {
+      "combined_videos": "bb343c7a4dc1c1ab12d7365c2e71b634",
+      "snapshot_scenes": [
+        "2fcaf9f6e3ac51f9ff9a83448ede780d",
+        "bb2098baee74e9f54821ff2d2f20b9e1",
+        "e801b1f0989b96c5af5384b13b063343",
+        "03108e8af1841cb34b70cd2e307c84f0",
+        "a723f48d6cc19df71dd85fe1dcf5fe29",
+        "bff8f5483d8e9340aa5bc8c4fc809444",
+        "c72288886c6fbc2638940096807d47f4",
+        "783173e4ef5619137ddc6c0bc51fc711",
+        "bd415a9740305f7d4639f5c35f1a5729",
+        "cd437620c3878b611ace071741798fc4"
+      ],
+      "_percent_drift": 0.06391391067293542,
+      "_snapshot_details": "10 snapshots 39 frames each"
+    },
+    "bear_inactive_snapshots": {
+      "combined_videos": "4baed07c3779e81429b6fe6b082b788d",
+      "snapshot_scenes": [
+        "8a2a1dc3405d9c004857237ae39672ee",
+        "980a188ff4661f1b5fb68f04cfccc032",
+        "8e541c1bc1377a18ea76d737a79756da",
+        "5233f83eec959ae31d6905c312b79af2",
+        "9e7805f914d71d7924a24f58028e0fee",
+        "1648de6b554029b89f0aeaf0383a3188",
+        "8cf38c7d0cfc5514b367eff390f96d72",
+        "9f25c40c80a3c73f5e8070df3b79daba",
+        "626bd3b2d465df9c40f7af92340dca34",
+        "52c29ef8d7bf7ca823661f66dcb9fe26"
+      ],
+      "_percent_drift": 0.037760592297295836,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "turtle_flee_snapshots": {
+      "combined_videos": "33b4d01247388c8e20e1756dc554af33",
+      "snapshot_scenes": [
+        "f94568a07f8a126f1ef3017141688c47",
+        "de8534d7362c3b13e0730ffc8d72f705",
+        "ea38270a4dcee684f7ac594af0a9b740",
+        "823018cab149da4933d3dd2f52da7fa5",
+        "9ab832dbd9fc60c8db7d18bb1a0a1858",
+        "062b5d4683a022ab2b5ed3fd1930cd76",
+        "ad4aaa9350de8b5289c4fd7d62c72740",
+        "649b08c28236363c900b20c478bb7fac",
+        "831b5c6958a213e99fd9d237b4444d5c",
+        "d6ba22f2ce2f65afc6c9be1dae355437"
+      ],
+      "_percent_drift": 0.07649140331626597,
+      "_snapshot_details": "10 snapshots 18 frames each"
+    },
+    "mouse_flee_snapshots": {
+      "combined_videos": "8a6503c2f3d7ab1255068cb4d6b5f5d5",
+      "snapshot_scenes": [
+        "d89dcde5e3e067153a4839af2a271d89",
+        "e1e299234cb9d51aa4e061f7a4c38254",
+        "3b852b849bdd49b671312724efb2383e",
+        "cfaaab6f66adaa415056163567128ebd",
+        "e7c56c573c790fe0d6db439e61ddf7ef",
+        "43bca86d5ce52cfc748050b7bb052e8a",
+        "ad4c5242d965d1f5f86d7bf725032a4a",
+        "00bbbc1cc0c94aba3959ff568210f04d",
+        "e5842a7b45aaa18ebf7650fc7ffa47ef",
+        "4f6317cc72bde541866471a94a7812dd"
+      ],
+      "_percent_drift": 0.09242745921098067,
+      "_snapshot_details": "10 snapshots 18 frames each"
+    },
+    "rabbit_flee_snapshots": {
+      "combined_videos": "47d3136cfa925322700684b73faf79a1",
+      "snapshot_scenes": [
+        "2ecfc146fced2286309a672dd8b4ce5a",
+        "6f4bbdfad8275ca0555f73baccc1a304",
+        "68b2265f0af218a7bfea9fad3b0ff7cf",
+        "1709c51a2a27a353f4464027e53f0dfb",
+        "dc2337a2d3e22734ca7065a45b81f3d3",
+        "aed015d2636951cdf45f038ade5541df",
+        "449c4bfd3d94047b5a5c6e2e9555e022",
+        "7085eab4f064aad82e97847d395c82d2",
+        "6642e3d3d4cdf9d3e950ad10c29db2dc",
+        "770d4794e2a06339c1bab454ea4f7161"
+      ],
+      "_percent_drift": 0.07256633273804386,
+      "_snapshot_details": "10 snapshots 18 frames each"
+    },
+    "pigeon_flee_snapshots": {
+      "combined_videos": "2e45dcfd4d811fbe65ebade77926a7f3",
+      "snapshot_scenes": [
+        "53f4002dfcdf7471fac492f47b7586f9",
+        "ca13c703f0a2c10aa55a336b7280ee38",
+        "746347a5a4f6ae6955f14b9fc9d26b7a",
+        "580bde71dd8f9f4a669fa4adab26993e",
+        "68f8c22bdffe7a09c058398ea759c3e0",
+        "5afbcde16ebd95a2fec4dd8d04f06f00",
+        "c2f41aebe34ab87ae9ea8cfac01e012f",
+        "4a44b35c04800b8eefa6dd5c8871f88e",
+        "3c6375adb49bcc26f3553514edc5d1f2",
+        "0bb4f56db8ac33ee8410a970560a1c3f"
+      ],
+      "_percent_drift": 0.051959446498325894,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "squirrel_flee_snapshots": {
+      "combined_videos": "72f61b799ddfd5cfa53b066dffead572",
+      "snapshot_scenes": [
+        "b89d3c8257eb4b101eeb9703bc6f9c35",
+        "b4081f9ee8b0fbd52d9d518fc2579f29",
+        "b29e100494702fb16e885b93d48813ac",
+        "a870bcf668e17c00c34f6d87f534c546",
+        "224e5a9b5a5f013e10bcf4ae20760834",
+        "ce0a87c12d4bd64915a931e405612e93",
+        "fed306d045420b5317453a4044fcb6ab",
+        "bbc3cdd926beb87bf9c0173a0cca6d00",
+        "31a3aa435938ddf20cad6e4b99d3ea70",
+        "cbb01f167bb4b6fe667dcf4dddcd37b4"
+      ],
+      "_percent_drift": 0.0004103855533494475,
+      "_snapshot_details": "10 snapshots 18 frames each"
+    },
+    "crow_flee_snapshots": {
+      "combined_videos": "f9386ab03b844dac349e8ec8f143feaf",
+      "snapshot_scenes": [
+        "b9746855d4f2348396ee757f979c543c",
+        "20c9c9290b5d592456ca6165377ae7f2",
+        "47ce7344dd38659d854bc418735a97b7",
+        "2ba69fbcf82064147b8bce23b65cdd97",
+        "1ae319b61ec329bffc7c10794da52bb4",
+        "a2e789513652382cc5cc19e9adbed2b0",
+        "ba0b1558c52d72a9062dc36630ea3501",
+        "05096aef5f8bf5411385aa0aa07cbb43",
+        "ddf8089f37b7077637421afe47027b51",
+        "bfc980ff6d0a4225259f95aca65b4b23"
+      ],
+      "_percent_drift": 0.06492857880644747,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "deer_flee_snapshots": {
+      "combined_videos": "ed5cb43d39d021a3354210b5f8a5ddca",
+      "snapshot_scenes": [
+        "00b0ae43c46d6dc605083d7e339575fc",
+        "37983d786443d25b59125953e8c7e232",
+        "aaa543385a699a348784a3b5feb7404e",
+        "ad69010b455e90b7e98bab409ce8ce90",
+        "f012752f5b91c535fd0b1216d7972dd3",
+        "04047c9794a05173bfb5efb1a7c213ef",
+        "5015debc84788e47f89d647e8cdc2421",
+        "0a21ce6b994079e40d2251c73440f41e",
+        "53be6691150db99b94410e38c5ec9375",
+        "b19d91e27aff1df68935b3a24301d824"
+      ],
+      "_percent_drift": 0.1013303303586844,
+      "_snapshot_details": "10 snapshots 18 frames each"
+    },
+    "bee_chase_snapshots": {
+      "combined_videos": "033726faab76f7129e7463f4852c7196",
+      "snapshot_scenes": [
+        "181cacd9492dea21daddf7448f39afff",
+        "b0a5da47220a3bdc56891293dfebcbb7",
+        "7f4a9136841dc6a5695058d8334aa24b",
+        "666a6f159bf7d3b25382fd4a64208008",
+        "b2c8b94ce488ac10f3292cd6c5a9d52f",
+        "77ef80855558e42f417dd8b731385cfb",
+        "efe86142f876385ad835ba12b4e0c531",
+        "c1f7140d96493e63cb66473fc21f3e0a",
+        "ff3eaf70629389f90ee0e5ad7e768248",
+        "cba9ef382d9a047e6bd0adf1a5b66999"
+      ],
+      "_percent_drift": 0.0019067604636305755,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "snake_avoid_then_chase_snapshots": {
+      "combined_videos": "2c3f75116134b9b3b5fd7f8b31c9ba69",
+      "snapshot_scenes": [
+        "62dc9b2ceee8c45f9f76c0152839ac11",
+        "027a14fb873c890084ce141c67ece23c",
+        "2b5b23ab5b5b1164d185dfaecfc0738e",
+        "f56302fea3fda23f51f03114e53d6757",
+        "3a952da746436bf86236c3a46af018b2",
+        "7144957b0b6089154a6d8c0b812fedec",
+        "e2835b8bc3ea18fa57e9883e2d09957b",
+        "2f5f8d698ce1a943ad1543e5c167c1ed",
+        "237a2b93881c4ba9aab6bdaea508140e",
+        "0aa7228e2c1650a411893ff0298d0b5d"
+      ],
+      "_percent_drift": 0.00021659750245216135,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "hawk_chase_snapshots": {
+      "combined_videos": "409ffe604d2c57460d0bbaf9b835064b",
+      "snapshot_scenes": [
+        "9728ba66e31c4339d7bee1528f354278",
+        "bcaab4d9caacbf72e44d221f9b59ff60",
+        "bc30db4a3f76a145bff730cfd982f25d",
+        "c2aef47b7178740080c1c6af62edcba6",
+        "afc1cbdd5a9724e67477ae64e801d373",
+        "36a8c0990e0a009f388c955f38ea6ba6",
+        "8387d82b1ad1fc1061693397def1b26b",
+        "2c54cc64b877698c799b0bcc49f9a636",
+        "0c84978a04c5abe71d6cdcc1cb25f693",
+        "910ddaf5895fa2aafca0ff90e60f3ce3"
+      ],
+      "_percent_drift": 0.0117673159695932,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "hippo_avoid_then_chase_snapshots": {
+      "combined_videos": "ff8ccb875d4f9d5597bfa08d109c5997",
+      "snapshot_scenes": [
+        "0b93b35f3d14554041d7687adae0a31c",
+        "42be5f908716d767755b25e741b4dfb9",
+        "67addbf1633bfb79e24efc5e80c524f8",
+        "f4c35202d105230994ab195ad9dca9ae",
+        "b04b9ab7bd1a8a5d23b7434b1748c781",
+        "f6485de9c4f8d072888e2375d858010d",
+        "d0e8843ea0f6c64ddea6fdee79790612",
+        "3772e752dc298dbb56c9401746c5556b",
+        "333ef3597170ed0182d346ceb6c7a9ac",
+        "c9823d0a7efba39dd9143b74b9a6e288"
+      ],
+      "_percent_drift": 0.001130864483669466,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "alligator_chase_snapshots": {
+      "combined_videos": "bc7ad188105485a1164a56ca2590601f",
+      "snapshot_scenes": [
+        "0a049a16bdd3cb1a6394ffbeccf64bd9",
+        "f34285e3533e4512afcad646076fd1b9",
+        "57236532427172cf5b01eee63fd68e61",
+        "bf6de7d054c83b3a71a78a30c5007319",
+        "1e7d0bf7e7a7f81f16222ec681c438b1",
+        "d10724b12feffc5d83d03d246b5362fd",
+        "fab06609519f37f33792d1ad5b5c5556",
+        "5673062629523318a42de9d196e48d69",
+        "2fa4001b5532d27dfea0143e4cb0e717",
+        "0537a89715d8c719d859a59ff10f717c"
+      ],
+      "_percent_drift": 0.025667198954174696,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "eagle_chase_snapshots": {
+      "combined_videos": "5e9130230161374fcd6ad916fc29964a",
+      "snapshot_scenes": [
+        "15b17f04ddca4dc571afb32ec1307b87",
+        "5c8cc45ca8acfc04e0d2da3bbc24d295",
+        "55cb692d438280f25ed9e4f5be185120",
+        "4fe8b3de2510ccbd9340b884681fbb3b",
+        "f7f0e884259d4afe715939f9cd720c76",
+        "c7a9c248eaec01d9ac9ead2e8c06edad",
+        "fe367499965b32fc7fc014fe0fa2dd49",
+        "fcea00bf1480fae81d69df167ee2f8a9",
+        "3cb0aed103f6a9582f5262dedd2227c4",
+        "c098ee555a6610a8c7c16b056e98b4b2"
+      ],
+      "_percent_drift": 0.00011998364049145299,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "wolf_chase_snapshots": {
+      "combined_videos": "204dc58c8d5d66d2717a43ba43921079",
+      "snapshot_scenes": [
+        "d68655c6c1ff2a564d7a583a0d218d5d",
+        "50d6c6eb7f5f0242b620454dc976d831",
+        "f2518a3e587f94dd1350b599de7ad9c8",
+        "7bcb8f5c6434597572a405e4d440af60",
+        "12161faf7938ca85f3c5b5c7ff86c3f5",
+        "49b92be8ab12938f0247bbd5beac0827",
+        "b156728368dc464a662b1bc09be75488",
+        "66dcfaee2cb3bdafe82067b6085852ea",
+        "82a6b0bf030e381567cffa8baf75e1c5",
+        "1bedda9744457fb08593b894d07d8c02"
+      ],
+      "_percent_drift": 0.00952378663722639,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "jaguar_chase_snapshots": {
+      "combined_videos": "1f0a48f9412172431a285e648a112fd8",
+      "snapshot_scenes": [
+        "d8ef16581c4012f35c76fb3cad7dabc8",
+        "80fe2ab909171cb9e7c5c641a6a5b755",
+        "d186e4fa298cbb7119eb5a83556f4f1a",
+        "cdd230b712bb3042147c27477e11c4e6",
+        "b4711418c8d2f5837cd1284b189cf7a4",
+        "77256d4170297cb0e025f73d1198f22c",
+        "b39950257dd26e5a9c807019f639335c",
+        "3873f779923da7bb15d42e56041bb525",
+        "d63143bf08c7866615d6176e169cd5a6",
+        "249817d4059aaf4a2bbd03bb9c7d1c5f"
+      ],
+      "_percent_drift": 0.1677392127755455,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "bear_chase_snapshots": {
+      "combined_videos": "76fe4555c0908474a346a3b51a52ecd5",
+      "snapshot_scenes": [
+        "d4f809ed9f6f0ebe7b0d37044fcc9e9f",
+        "ee05eec2de23af78e0630088e2a2d35f",
+        "c2464eb0dfef18d28e231566df96f979",
+        "862277617f8547a494d4f785271d275d",
+        "d2a74ed21735692b470b35798c8b079e",
+        "96f8584c11873f40fcfb5f5a0f98d25a",
+        "28ce6d99e9783abe3f03c88eafa27c66",
+        "1ffc785927df806a54d4743a5bc32d0c",
+        "c60de332f701c11b9fcb679121e65a44",
+        "f98278de7981f3ef77d20a920523073b"
+      ],
+      "_percent_drift": 0.06430820011357379,
+      "_snapshot_details": "10 snapshots 24 frames each"
+    },
+    "bear_climbs_in_pursuit_snapshots": {
+      "combined_videos": "33ca892ee238a53cab45e8a4ed063539",
+      "snapshot_scenes": [
+        "d7f425ddfe62a6f420958e2c89610670",
+        "0654bdc4e522d273d93b741cb601e6ca",
+        "c7b44a6234d2ef24a48566cfc7905f38",
+        "d5381747d29ddfbd097540e4821ac506",
+        "e26f0bc14ac600c5a1db8e2c225b945f",
+        "b96eb1b7ef508120ecded4785ff5c26b",
+        "5da8a44bcdd9353a7f39339c3532242c",
+        "91883d017b436daaa61eb48132e209ba",
+        "b939477ce83c5ef5d1f75689abb3cdd4",
+        "1411f141a6e97fd2496579445b982365"
+      ],
+      "_percent_drift": 0.02048144621007583,
+      "_snapshot_details": "10 snapshots 14 frames each"
+    },
+    "jaguar_climbs_in_pursuit_snapshots": {
+      "combined_videos": "e4b88eefaabad16a44baf0841b5d0a1c",
+      "snapshot_scenes": [
+        "4bc0369522312dfefaf04278121f5897",
+        "6aba732ad0a3f007794c029a5a4446f0",
+        "67081c0e6eb3b0b67a8402e0ad3d073f",
+        "2816a0b8d49ce6e882a5f4f69cfc8024",
+        "9702a964c096888dad3e4ed18e0c2a5d",
+        "4bae90c755bb22ee491bc4a57227b697",
+        "d4b5eb71fe365285a15a9df49cb6bf2f",
+        "6fb5fec15caed3982ccc0fd8415eb059",
+        "189f66029399233a7f41a1a106267e66",
+        "c73f38459face8915dc8067199562f6e"
+      ],
+      "_percent_drift": 0.026989123400519874,
+      "_snapshot_details": "10 snapshots 14 frames each"
+    },
+    "squirrel_climbs_in_flight_snapshots": {
+      "combined_videos": "de7226d0179819d675639b75eb63120c",
+      "snapshot_scenes": [
+        "ed80bc44783c0f4dbcb8f63d2b47aa38",
+        "ef4619afe8ea2c9476622d2258d5d6ea",
+        "9d4860cc3632df300cf6b6bf978cf0af",
+        "06bedd33a67eaa228a475e370691df06",
+        "7bf551caeb8222d6720276612cb938ad",
+        "2068caf878348188d94c985c013465ed",
+        "7663bfd182abad858a65a0fd89759961",
+        "d3c0665127955dd9f36e2663322ff220",
+        "e7401317e97aa199fa023a02ea096ac6",
+        "f37386aff2a27af86959d49dd2f08bf1"
+      ],
+      "_percent_drift": 0.027137167313519645,
+      "_snapshot_details": "10 snapshots 14 frames each"
+    },
+    "mouse_climbs_in_flight_snapshots": {
+      "combined_videos": "91adc822a275a0c4023382179737f1ec",
+      "snapshot_scenes": [
+        "1e4e0cf51c0f81b68885bf8e5d4577ea",
+        "4c99bf11e7c702a9d0da1910589bc6fc",
+        "4612cbb42e2079bf9eb24fb598a286ac",
+        "cfb21df3034ff2eef6acf5903138b516",
+        "810e3d3c442edbdcc747d9f14b97bc9e",
+        "b93870e8bcf237a13f350baf68ea3f7c",
+        "0fb89b93ed524ceed12d271afd909eb5",
+        "96ef27a3502c60e3c6d98e0a489ed6c6",
+        "5e267263bb5869f91b909e2d3f67c432",
+        "f1b197e3a7f95c34c4f7538f8e3a7f6c"
+      ],
+      "_percent_drift": 0.0016008545370662913,
+      "_snapshot_details": "10 snapshots 14 frames each"
+    },
+    "bear_climbs_down_when_deactivated_snapshots": {
+      "combined_videos": "0f7182f276b9e36d38f29227a1956f12",
+      "snapshot_scenes": [
+        "0ddb61f5da46b7a9a1d14d0310fc5d78",
+        "29a5672272a6eb3f2f5b096f6da1bfcd",
+        "422523efd267e54efd403e6d52655897",
+        "5e2e841abaa165608e2f1cbfaf0c6d75",
+        "6f62c40c3bb25ce3245cb8586c71892b",
+        "e0053f9276dc44882987a033dc5db559",
+        "74e7a2bc80692589abced53771a853c7",
+        "af48a4db0898560292263c0b14565f03",
+        "b8f39162f103901f1318da5034e90db5",
+        "2677eac5dc11da439a28133a2400d690"
+      ],
+      "_percent_drift": 0.009111794318942075,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "jaguar_climbs_down_when_deactivated_snapshots": {
+      "combined_videos": "9350e9a0f42333a60273b28b789366b5",
+      "snapshot_scenes": [
+        "8a8b6879168140b0e45008814dcb0562",
+        "0342549a8579e8cd9542c2ecedff9ef3",
+        "333ae7aef762ef7753cd5b93cb94755e",
+        "bf900dd8815d4eb0476a39a2916d83b7",
+        "a7d5f34bdabbf3e2dc50cc48b7789cd0",
+        "a398df94b5bc113c45814ffac529cffb",
+        "0970cf2f69dcff211b4862189262da44",
+        "4cd185aee2cd3261c89fa776d56a14a5",
+        "9f6b9d7cad02c66882de37e01671bc80",
+        "054e81ae3b799fac0921168a787d7f8c"
+      ],
+      "_percent_drift": 0.00825437261254748,
+      "_snapshot_details": "10 snapshots 19 frames each"
+    },
+    "squirrel_climbs_down_when_deactivated_snapshots": {
+      "combined_videos": "3df8b54f6afa5e22b2f0b0b32dbdd145",
+      "snapshot_scenes": [
+        "b7f29e59bb946f9b551bb8b65ce448d5",
+        "f1757398f5f1f89758a998f99632a3dd",
+        "45d15e71c167cdfb7b43683b49118223",
+        "f2214c0cce18846c45b2e3ff486f7acd",
+        "bd3ccb22fb3502e0e2cfdc8442821083",
+        "26fd3b1407afedd1e40b12068c6212a4",
+        "12be2c3779f78ceb67b7384b6dbda01c",
+        "8973eae67c347b7f9098e30eb8b47306",
+        "917713a1a56596409801b86da1a7afe5",
+        "275aa5c2b76ffa889ef70f4727a2ccd4"
+      ],
+      "_percent_drift": 0.043341967934056334,
+      "_snapshot_details": "10 snapshots 20 frames each"
+    },
+    "mouse_climbs_down_when_deactivated_snapshots": {
+      "combined_videos": "169d6bd2faa1089c6994e63227f14db3",
+      "snapshot_scenes": [
+        "bd1cb996db3672ccf1698c2dd6154658",
+        "f56cd59fdffc8ff529e416ff422559dc",
+        "ead0bcd332928e82f7f9c79e147e4197",
+        "b33a9c4280bd8f257e5ed4394520b85c",
+        "8ae44755e4bd10cb14a2602d81899c9c",
+        "726c13044be6a8c641a480d6ada78b4b",
+        "25093c5045abdd084b0156976aac5ad4",
+        "42be375fe03f8e3079f5da42167fbe5d",
+        "5c68cf668d98eb498e7b63ecad11ab2f",
+        "c2e1d4d05d3c7bd0c90e9f45ed10fa37"
+      ],
+      "_percent_drift": 0.0018003162584806743,
+      "_snapshot_details": "10 snapshots 20 frames each"
+    }
+  }
+}

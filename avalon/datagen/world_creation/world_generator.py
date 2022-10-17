@@ -1,3 +1,4 @@
+import json
 import multiprocessing as mp
 import shutil
 import signal
@@ -9,6 +10,7 @@ from multiprocessing import Pool
 from pathlib import Path
 from random import Random
 from typing import Any
+from typing import ClassVar
 from typing import Dict
 from typing import Final
 from typing import Hashable
@@ -72,12 +74,28 @@ class GenerateWorldParams(Serializable):
     def output_path(self) -> Path:
         return Path(self.output)
 
+    @property
+    def main_scene_path(self) -> str:
+        return f"{self.output}/main.tscn"
+
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class GeneratedWorldParams(GenerateWorldParams):
+    SERIALIZED_FILE_NAME: ClassVar = "params.json"
+
     @classmethod
     def from_input(cls, input_params: GenerateWorldParams) -> "GeneratedWorldParams":
         return cls(**attr.asdict(input_params))
+
+    @classmethod
+    def from_world_path(cls, existing_world_path: Path) -> "GeneratedWorldParams":
+        with open(existing_world_path / cls.SERIALIZED_FILE_NAME) as file:
+            return cls.from_dict(json.load(file))
+
+    def save_to_output_path(self):
+        serialized_path = self.output_path / self.SERIALIZED_FILE_NAME
+        with open(serialized_path, "w") as file:
+            json.dump(self.to_dict(), file)
 
 
 class WorldGenerator:
@@ -85,6 +103,12 @@ class WorldGenerator:
         self.output_path = base_path / str(uuid.uuid4())
         self.output_path.mkdir(parents=True, exist_ok=False)
         self.set_seed(seed)
+
+    def load_already_generated_params(self, world_index: int) -> Optional[GeneratedWorldParams]:
+        world_path = Path(self.output_path) / str(world_index)
+        if not world_path.exists():
+            return None
+        return GeneratedWorldParams.from_world_path(world_path)
 
     def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
         """
@@ -124,7 +148,8 @@ class WorldGenerator:
         self._seed = seed
 
     def close(self):
-        shutil.rmtree(self.output_path)
+        if self.output_path.exists():
+            shutil.rmtree(self.output_path)
 
 
 class SingleTaskWorldGenerator(WorldGenerator):
@@ -524,14 +549,16 @@ def generate_world(params: GenerateWorldParams) -> GeneratedWorldParams:
     for i in range(params.num_retries):
         try:
             generation_function(rand, params.difficulty, output_path, export_config)
-            return GeneratedWorldParams.from_input(params)
+            generated_params = GeneratedWorldParams.from_input(params)
+            generated_params.save_to_output_path()
+            return generated_params
         except ImpossibleWorldError as e:
             if i == params.num_retries - 1:
                 logger.error("Ran out of retries to generate a good world!")
                 logger.error(f"Params were: {params}")
                 raise
             else:
-                logger.info(f"Impossible world was generated, this was try {i}... (reason: {e})")
+                logger.debug(f"Impossible world was generated, this was try {i}... (reason: {e})")
                 # clear the output
                 shutil.rmtree(output_path)
                 output_path.mkdir(parents=True, exist_ok=True)

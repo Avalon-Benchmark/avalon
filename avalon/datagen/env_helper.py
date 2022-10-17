@@ -13,13 +13,12 @@ from typing import TypedDict
 from typing import Union
 
 import numpy as np
-import numpy.typing as npt
-import torch
 from einops import rearrange
 from loguru import logger
+from numpy.typing import NDArray
 
 from avalon.agent.godot.godot_gym import create_base_benchmark_config
-from avalon.common.visual_utils import visualize_tensor_as_video
+from avalon.common.visual_utils import visualize_arraylike_as_video
 from avalon.datagen.generate import wait_until_true
 from avalon.datagen.godot_env.actions import AttrsAction
 from avalon.datagen.godot_env.actions import MouseKeyboardActionType
@@ -113,11 +112,11 @@ def create_env(
     )
 
 
-def rgbd_to_video_tensor(rgbd_data: Iterable[npt.NDArray]) -> torch.Tensor:
-    return torch.stack(
+def rgbd_to_video_array(rgbd_data: Iterable[NDArray]) -> NDArray:
+    return np.stack(
         [
             rearrange(
-                torch.flipud(torch.tensor(rgbd[:, :, :3])),
+                np.flipud(rgbd[:, :, :3]),
                 "h w c -> c h w",
             )
             / 255.0
@@ -126,28 +125,33 @@ def rgbd_to_video_tensor(rgbd_data: Iterable[npt.NDArray]) -> torch.Tensor:
     )
 
 
-def observation_video_tensor(data: _ActOrStepObservationSequence) -> torch.Tensor:
+def observation_video_array(data: _ActOrStepObservationSequence) -> NDArray:
     if len(data) == 0:
-        return rgbd_to_video_tensor([])
+        return rgbd_to_video_array([])
 
     if isinstance(data[0], dict):
         assert "rgbd" in data[0], "observation dict does not contain rgbd data"
-        return rgbd_to_video_tensor(x["rgbd"] for x in data)  # type: ignore[index]
+        return rgbd_to_video_array(x["rgbd"] for x in data)  # type: ignore[index]
 
-    return rgbd_to_video_tensor(x.rgbd for x in data)  # type: ignore[union-attr]
+    return rgbd_to_video_array(x.rgbd for x in data)  # type: ignore[union-attr]
 
 
-def display_video(data: _ActOrStepObservationSequence, size: Optional[Tuple[int, int]] = None) -> None:
+def display_video(
+    data: _ActOrStepObservationSequence,
+    size: Optional[Tuple[int, int]] = None,
+    fps: int = 25,
+    file_format: str = "webm",
+) -> None:
     if size is None:
         size = (512, 512)
-    tensor = observation_video_tensor(data)
-    visualize_tensor_as_video(tensor, normalize=False, size=size)
-
-
-def display_raw_rgbd_video(data: List[npt.NDArray[np.uint8]], size: Optional[Tuple[int, int]] = None) -> None:
-    if size is None:
-        size = (512, 512)
-    visualize_tensor_as_video(rgbd_to_video_tensor(data), normalize=False, size=size)
+    video_array = observation_video_array(data)
+    visualize_arraylike_as_video(
+        video_array,
+        normalize=False,
+        size=size,
+        video_format=file_format,
+        fps=fps,
+    )
 
 
 def visualize_worlds_in_folder(world_paths: Iterable[Path], resolution: int = 1024, num_frames: int = 20):
@@ -222,15 +226,19 @@ class DebugLogLine(TypedDict):
     items: List[Union[DebugItemLog, DebugAnimalLog]]
 
 
+def _output_folder_for(env: GodotEnv, episode_seed: int) -> Path:
+    dir_root = env.config.get_dir_root()
+    return Path(dir_root) / f"{episode_seed:06d}"
+
+
 def get_debug_json_logs(env: GodotEnv, episode_seed: Optional[int] = None) -> List[DebugLogLine]:
     assert (
         env.config.recording_options.is_debugging_output_requested
-    ), f"env.config.recording_options.is_debugging_output_requested is False, would not have produced a debug log"
-    latest_episode = env.episode_tracker.episodes[-1].seed
+    ), "env.config.recording_options.is_debugging_output_requested is False, would not have produced a debug log"
     if episode_seed is None:
-        episode_seed = latest_episode
-    is_episode_ongoing = not env.process.is_closed and episode_seed == latest_episode
-    debug_path = Path(env.episode_tracker.folder_for(episode_seed)) / "debug.json"
+        episode_seed = env._latest_episode_seed
+    is_episode_ongoing = not env.process.is_closed and episode_seed == env._latest_episode_seed
+    debug_path = _output_folder_for(env, episode_seed) / "debug.json"
     return _read_debug_json_log(debug_path, is_episode_ongoing=is_episode_ongoing)
 
 
@@ -265,3 +273,20 @@ def _read_debug_json_log(debug_json_path: Path, is_episode_ongoing: bool) -> Lis
                 ) from err
 
         return debug_output
+
+
+class ActionSmoother:
+    def __init__(self, decay: float = 0.999):
+        self.state: dict[str, float] = {}
+        self.decay = decay
+
+    def update(self, action: dict[str, Any]):
+        for k, v in action.items():
+            if v.dtype == np.float32:
+                if k not in self.state:
+                    self.state[k] = v * 0
+                else:
+                    self.state[k] = v * (1 - self.decay) + self.state[k] * self.decay
+            else:
+                self.state[k] = v
+        return self.state

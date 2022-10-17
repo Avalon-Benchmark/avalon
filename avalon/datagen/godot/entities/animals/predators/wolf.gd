@@ -18,40 +18,50 @@ export var active_rest_frames := 3
 
 var return_to_territory: ReturnToTerritoryBehavior
 
-var activation_criteria: Array
+var reachable_by_ground: PlayerReachableByGround
 
 
 func _ready():
-	activation_criteria = [
-		PlayerInDetectionRadius.new(),
-		PlayerReachableByGround.new(
+	reachable_by_ground = load_or_init(
+		"reachable_by_ground",
+		PlayerReachableByGround.new().init(
 			out_of_reach_height, required_movement_distance, give_up_after_hops_without_progress
-		),
-	]
-	return_to_territory = ReturnToTerritoryBehavior.new(
-		HopInDirection.new(
-			TOWARDS_TERRITORY, inactive_speed, active_chase_hops, active_rest_frames
-		),
-		global_transform.origin,
-		territory_radius,
-		retreat_within_radius
-	)
-
-	inactive_behavior = HopRandomly.new(
-		_rng_key("inactive"), inactive_movement_frequency, inactive_speed, inactive_movement_hops
-	)
-	active_behavior = PursueAndAttackPlayer.new(
-		HopInDirection.new(
-			TOWARDS_PLAYER, active_chase_speed, active_chase_hops, active_rest_frames
 		)
 	)
-	avoid_ocean_behavior = AvoidOcean.new(
-		_rng_key("avoid_ocean"), active_chase_hops, inactive_speed
+	return_to_territory = load_or_init(
+		"return_to_territory",
+		ReturnToTerritoryBehavior.new().init(
+			HopInDirection.new().init(
+				TOWARDS_TERRITORY, inactive_speed, active_chase_hops, active_rest_frames
+			),
+			global_transform.origin,
+			territory_radius,
+			retreat_within_radius
+		)
+	)
+
+	set_inactive(
+		HopRandomly.new().init(
+			_rng_key("inactive"),
+			inactive_movement_frequency,
+			inactive_speed,
+			inactive_movement_hops
+		)
+	)
+	set_active(
+		PursueAndAttackPlayer.new().init(
+			HopInDirection.new().init(
+				TOWARDS_PLAYER, active_chase_speed, active_chase_hops, active_rest_frames
+			)
+		)
+	)
+	set_avoid_ocean(
+		AvoidOcean.new().init(_rng_key("avoid_ocean"), active_chase_hops, inactive_speed)
 	)
 
 
 func select_next_behavior() -> AnimalBehavior:
-	if BehaviorCriteria.all_match(self, activation_criteria):
+	if _is_player_in_detection_radius and reachable_by_ground.is_matched_by(self):
 		return active_behavior
 
 	if return_to_territory.is_returning_to_territory(self):

@@ -1,21 +1,16 @@
-import json
 import os
 import platform
 import random
 import re
 import subprocess
 import time
-import urllib
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Any
-from typing import Optional
 
-import ipykernel
 import numpy as np
 import sh
 import torch
-from notebook import notebookapp
 
 
 def _get_filesystem_root() -> str:
@@ -82,34 +77,6 @@ def is_notebook() -> bool:
     import __main__ as main
 
     return not hasattr(main, "__file__")
-
-
-# from here: https://stackoverflow.com/questions/12544056/how-do-i-get-the-current-ipython-jupyter-notebook-name
-def get_notebook_path() -> Optional[Path]:
-    """Returns the absolute path of the Notebook or None if it cannot be determined
-    NOTE: works only when the security is token-based or there is also no password
-    """
-    try:
-        connection_file = os.path.basename(ipykernel.get_connection_file())
-    except RuntimeError as e:
-        if "app not specified, and not in a running Kernel" in str(e):
-            return None
-        raise
-    else:
-        kernel_id = connection_file.split("-", 1)[1].split(".")[0]
-
-        for srv in notebookapp.list_running_servers():
-            if srv["token"] == "" and not srv["password"]:  # No token and no password, ahem...
-                # noinspection PyUnresolvedReferences
-                req = urllib.request.urlopen(srv["url"] + "api/sessions")
-            else:
-                # noinspection PyUnresolvedReferences
-                req = urllib.request.urlopen(srv["url"] + "api/sessions?token=" + srv["token"])
-            sessions = json.load(req)
-            for sess in sessions:
-                if sess["kernel"]["id"] == kernel_id:
-                    return Path(os.path.join(srv["notebook_dir"], sess["notebook"]["path"]))
-    return None
 
 
 def set_all_seeds(seed: int):

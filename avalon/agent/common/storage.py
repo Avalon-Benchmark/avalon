@@ -16,7 +16,6 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 
-import lz4.frame
 import numpy as np
 import torch
 from loguru import logger
@@ -323,6 +322,8 @@ class LambdaStorage(TrajectoryStorage):
 
 def pack(data: Any):  # type: ignore
     """Compress any python type."""
+    import lz4.frame
+
     # Observed compression ratio on synthetic godot numpy data: 17MB -> 2-3MB
     data = pyarrow.serialize(data).to_buffer().to_pybytes()
     data = lz4.frame.compress(data)
@@ -331,6 +332,8 @@ def pack(data: Any):  # type: ignore
 
 def unpack(data):  # type: ignore
     """Uncompress something compressed with `pack`."""
+    import lz4.frame
+
     data = lz4.frame.decompress(data)
     data = pyarrow.deserialize(data)
     return data

@@ -44,7 +44,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://entities/animals/animal.gd"
 }, {
-"base": "Reference",
+"base": "Node",
 "class": "AnimalBehavior",
 "language": "GDScript",
 "path": "res://entities/animals/behaviors/animal_behavior.gd"
@@ -99,7 +99,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://entities/animals/predators/bee.gd"
 }, {
-"base": "Reference",
+"base": "Node",
 "class": "BehaviorCriteria",
 "language": "GDScript",
 "path": "res://entities/animals/behaviors/criteria/behavior_criteria.gd"
@@ -394,6 +394,11 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://items/log.gd"
 }, {
+"base": "Reference",
+"class": "LogicNodes",
+"language": "GDScript",
+"path": "res://entities/animals/behaviors/logic_nodes.gd"
+}, {
 "base": "Animal",
 "class": "Mouse",
 "language": "GDScript",
@@ -418,6 +423,11 @@ _global_script_classes=[ {
 "class": "MouseKeyboardAgentPlayerSpec",
 "language": "GDScript",
 "path": "res://game/specs/MouseKeyboardAgentPlayerSpec.gd"
+}, {
+"base": "PopupPanel",
+"class": "MouseKeyboardHelpPanel",
+"language": "GDScript",
+"path": "res://scenes/gui/mouse_keyboard_help_panel.gd"
 }, {
 "base": "MouseKeyboardInputCollector",
 "class": "MouseKeyboardHumanInputCollector",
@@ -608,6 +618,11 @@ _global_script_classes=[ {
 "class": "Snake",
 "language": "GDScript",
 "path": "res://entities/animals/predators/snake.gd"
+}, {
+"base": "Reference",
+"class": "SnapshotHandler",
+"language": "GDScript",
+"path": "res://game/game_manager/snapshot_handler.gd"
 }, {
 "base": "Reference",
 "class": "SpecBase",
@@ -857,11 +872,13 @@ _global_script_class_icons={
 "LabelGUI": "",
 "LocalRecorder": "",
 "Log": "",
+"LogicNodes": "",
 "Mouse": "",
 "MouseKeyboardAction": "",
 "MouseKeyboardAgentInputCollector": "",
 "MouseKeyboardAgentPlayer": "",
 "MouseKeyboardAgentPlayerSpec": "",
+"MouseKeyboardHelpPanel": "",
 "MouseKeyboardHumanInputCollector": "",
 "MouseKeyboardHumanPlayer": "",
 "MouseKeyboardHumanPlayerSpec": "",
@@ -900,6 +917,7 @@ _global_script_class_icons={
 "SlidingBar": "",
 "SlidingDoor": "",
 "Snake": "",
+"SnapshotHandler": "",
 "SpecBase": "",
 "SphereMarker": "",
 "Squirrel": "",
@@ -974,7 +992,8 @@ gdscript/warnings/treat_warnings_as_errors=true
 window/size/width=64
 window/size/height=64
 window/size/resizable=false
-window/size/test_height=1024
+window/size/test_width=96
+window/size/test_height=96
 window/vsync/use_vsync=false
 window/stretch/aspect="keep"
 
@@ -1064,28 +1083,6 @@ toggle_mouse_capture={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":67,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-toggle_free_movement={
-"deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":88,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
- ]
-}
-movement_speed_increase={
-"deadzone": 0.5,
-"events": [  ]
-}
-movement_speed_decrease={
-"deadzone": 0.5,
-"events": [  ]
-}
-move_toggle_rotation={
-"deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":82,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
- ]
-}
-toggle={
-"deadzone": 0.5,
-"events": [  ]
-}
 mouse_left={
 "deadzone": 0.5,
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
@@ -1114,6 +1111,7 @@ wheel_down={
 toggle_active_hand={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":72,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+, Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
 reset={
@@ -1129,6 +1127,7 @@ jump={
 grab={
 "deadzone": 0.5,
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":71,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+, Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
  ]
 }
 eat={
@@ -1141,9 +1140,9 @@ crouch={
 "events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":16777218,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
-save={
+toggle_help={
 "deadzone": 0.5,
-"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":89,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":true,"control":false,"meta":false,"command":false,"pressed":false,"scancode":0,"physical_scancode":47,"unicode":0,"echo":false,"script":null)
  ]
 }
 
@@ -1173,6 +1172,10 @@ common/physics_fps=10
 common/physics_jitter_fix=0.0
 3d/physics_engine="Bullet"
 3d/active_soft_world=false
+3d/bullet/ccd_allowed_penetration=0.04
+3d/bullet/ccd_only_on_demand=false
+3d/bullet/ccd_radius_factor=0.2
+3d/bullet/substeps=0
 2d/default_gravity=0
 2d/default_linear_damp=0.0
 2d/default_angular_damp=0.0

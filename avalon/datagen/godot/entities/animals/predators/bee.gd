@@ -16,28 +16,35 @@ var return_to_territory: ReturnToTerritoryBehavior
 
 
 func _ready():
-	return_to_territory = ReturnToTerritoryBehavior.new(
-		FlyInDirection.new(TOWARDS_TERRITORY, inactive_full_speed, inactive_turn_speed),
-		global_transform.origin,
-		territory_radius,
-		retreat_within_radius
-	)
-	inactive_behavior = FlyRandomly.new(
-		_rng_key("inactive"), inactive_turn_frequency, inactive_full_speed
-	)
-	active_behavior = PursueAndAttackPlayer.new(
-		FlyInDirection.new(
-			TOWARDS_PLAYER,
-			active_chase_full_speed,
-			active_chase_turn_speed,
-			active_chase_turn_rotation_speed
+	return_to_territory = load_or_init(
+		"return_to_territory",
+		ReturnToTerritoryBehavior.new().init(
+			FlyInDirection.new().init(TOWARDS_TERRITORY, inactive_full_speed, inactive_turn_speed),
+			global_transform.origin,
+			territory_radius,
+			retreat_within_radius
 		)
 	)
-	avoid_ocean_behavior = AvoidOcean.new(
-		_rng_key("avoid_ocean"),
-		AvoidOcean.FLY_STEPS,
-		inactive_full_speed,
-		active_chase_turn_rotation_speed
+	set_inactive(
+		FlyRandomly.new().init(_rng_key("inactive"), inactive_turn_frequency, inactive_full_speed)
+	)
+	set_active(
+		PursueAndAttackPlayer.new().init(
+			FlyInDirection.new().init(
+				TOWARDS_PLAYER,
+				active_chase_full_speed,
+				active_chase_turn_speed,
+				active_chase_turn_rotation_speed
+			)
+		)
+	)
+	set_avoid_ocean(
+		AvoidOcean.new().init(
+			_rng_key("avoid_ocean"),
+			AvoidOcean.FLY_STEPS,
+			inactive_full_speed,
+			active_chase_turn_rotation_speed
+		)
 	)
 
 
@@ -47,7 +54,7 @@ func select_next_behavior() -> AnimalBehavior:
 			print("%s died from attacking" % self)
 		_die()
 
-	if is_player_in_detection_radius:
+	if _is_player_in_detection_radius:
 		return active_behavior
 
 	if return_to_territory.is_returning_to_territory(self):

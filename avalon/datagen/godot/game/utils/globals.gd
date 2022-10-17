@@ -4,7 +4,12 @@ var _player = null
 
 
 func get_player() -> Object:
-	if _player == null:
+	var is_player_ref_valid = (
+		_player != null
+		and is_instance_valid(_player)
+		and not _player.is_queued_for_deletion()
+	)
+	if not is_player_ref_valid:
 		_player = get_tree().root.find_node("player", true, false)
 	return _player
 

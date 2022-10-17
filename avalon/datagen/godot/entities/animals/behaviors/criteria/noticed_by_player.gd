@@ -2,31 +2,34 @@ extends BehaviorCriteria
 
 class_name NoticedByPlayer
 
-var switch_after_steps: int
-var switch_step := 0
+export var switch_after_steps: int
+export var switch_step := 0
 
-var visibility_notifier: VisibilityNotifier
-var is_visible_to_player := false
-var is_noticed := false
+export var is_visible_to_player := false
+export var is_noticed := false
 
-var _player_eyes: Camera
+var _visibility_notifier: VisibilityNotifier
 
 
-func _init(_visiblity_notifier: VisibilityNotifier, _switch_after_steps: int):
-	_player_eyes = Globals.get_player().eyes
-	visibility_notifier = _visiblity_notifier
-	HARD.assert(
-		OK == visibility_notifier.connect("camera_entered", self, "_on_camera_entered"),
-		"Failed to connect signal"
-	)
-	HARD.assert(
-		OK == visibility_notifier.connect("camera_exited", self, "_on_camera_exited"),
-		"Failed to connect signal"
-	)
+func init(_switch_after_steps: int) -> BehaviorCriteria:
 	switch_after_steps = _switch_after_steps
+	return self
+
+
+func connect_visibility_notifier(visiblity_notifier: VisibilityNotifier):
+	_visibility_notifier = visiblity_notifier
+	HARD.assert(
+		OK == _visibility_notifier.connect("camera_entered", self, "_on_camera_entered"),
+		"Failed to connect signal"
+	)
+	HARD.assert(
+		OK == _visibility_notifier.connect("camera_exited", self, "_on_camera_exited"),
+		"Failed to connect signal"
+	)
 
 
 func is_matched_by(animal) -> bool:
+	HARD.assert(_visibility_notifier != null, "connect_visibility_notifier not called")
 	if is_visible_to_player == is_noticed:
 		if HARD.mode() and switch_step != 0:
 			var visibility = "re-entered camera" if is_visible_to_player else "re-exited camera"
@@ -50,12 +53,12 @@ func is_matched_by(animal) -> bool:
 
 
 func _on_camera_entered(camera: Camera):
-	if camera == _player_eyes:
+	if camera == Globals.get_player().eyes:
 		is_visible_to_player = true
 
 
 func _on_camera_exited(camera: Camera):
-	if camera == _player_eyes:
+	if camera == Globals.get_player().eyes:
 		is_visible_to_player = false
 
 

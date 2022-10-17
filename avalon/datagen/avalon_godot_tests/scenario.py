@@ -7,30 +7,35 @@ from typing import ClassVar
 from typing import Dict
 from typing import Iterable
 from typing import List
+from typing import Literal
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
 from typing import Union
 from typing import cast
+from uuid import uuid4
 
 import attr
 import numpy as np
-import torch
+from numpy.typing import NDArray
 from scipy import stats
 from scipy.spatial.transform import Rotation
 
 from avalon.common.utils import dir_checksum
 from avalon.common.utils import file_checksum
+from avalon.contrib.utils import TEMP_DIR
 from avalon.datagen.env_helper import DebugLogLine
 from avalon.datagen.env_helper import get_debug_json_logs
-from avalon.datagen.env_helper import observation_video_tensor
+from avalon.datagen.env_helper import observation_video_array
+from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.godot_env.actions import VRActionType
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
+from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
+from avalon.datagen.godot_generated_types import SAVE_SNAPSHOT_MESSAGE
 from avalon.datagen.world_creation.configs.export import ExportConfig
 from avalon.datagen.world_creation.configs.export import get_agent_export_config
 from avalon.datagen.world_creation.constants import IDENTITY_BASIS
@@ -52,7 +57,12 @@ from avalon.datagen.world_creation.worlds.world import World
 from avalon.datagen.world_creation.worlds.world_locations import WorldLocations
 
 AvalonEnv = GodotEnv[AvalonObservationType, VRActionType]
-ScenarioActions = Union[DebugCameraAction, VRActionType]
+ScenarioActions = Union[DebugCameraAction, VRActionType, Literal[10, 11]]
+
+SnapshotContext = Tuple[Path, int, Optional[DebugCameraAction]]
+
+
+ManifestValue = Union[float, str, List[str]]
 
 
 def _export_conf(is_human: bool = False) -> ExportConfig:
@@ -146,6 +156,7 @@ def _add_cliff(height: float, rand: np.random.Generator, world: World, locations
 class ScenarioObservations:
     scenario: "Scenario"
     observations: List[AvalonObservationType]
+    snapshots: List[SnapshotContext]
     scene_checksum: str
     scene_path: str
     video_checksum: str
@@ -153,10 +164,10 @@ class ScenarioObservations:
 
     debug_output: List[DebugLogLine]
 
-    _video: Optional[torch.Tensor] = None
+    _video: Optional[NDArray] = None
 
     @property
-    def _checksum_dict(self) -> Dict[str, str]:
+    def _checksum_dict(self) -> Dict[str, ManifestValue]:
         return {
             "scene": self.scene_checksum,
             "video": self.video_checksum,
@@ -164,17 +175,17 @@ class ScenarioObservations:
         }
 
     @property
-    def checksum_summary(self) -> Dict[str, Dict[str, str]]:
+    def checksum_summary(self) -> Dict[str, Dict[str, ManifestValue]]:
         return {f"{self.scenario.name}": self._checksum_dict}
 
     @property
-    def video(self) -> torch.Tensor:
+    def video(self) -> NDArray:
         if self._video is None:
-            self._video = observation_video_tensor(self.observations)
+            self._video = observation_video_array(self.observations)
         return self._video
 
-    def is_in(self, checksums: Dict[str, Dict[str, str]]) -> bool:
-        historical_checksums = checksums[self.scenario.name]
+    def is_unchanged_from_version_in(self, checksums: Dict[str, Dict[str, ManifestValue]]) -> bool:
+        historical_checksums = checksums.get(self.scenario.name, None)
         return self._checksum_dict == historical_checksums
 
 
@@ -182,7 +193,7 @@ class ScenarioObservations:
 class BehaviorManifest:
     source_path: Path
     snapshot_commit: str
-    checksums: Dict[str, Dict[str, str]]
+    checksums: Dict[str, Dict[str, ManifestValue]]
 
     @classmethod
     def load(cls, manifest_path: Path) -> "BehaviorManifest":
@@ -193,6 +204,11 @@ class BehaviorManifest:
                 checksums=manifest["checksums"],
                 source_path=manifest_path,
             )
+
+    def get_checksums(self, name: str) -> Dict[str, ManifestValue]:
+        stored_data = self.checksums[name].items()
+        metadata_prefix = "_"
+        return {key: value for key, value in stored_data if not key.startswith(metadata_prefix)}
 
     def to_dict(self):
         return {"snapshot_commit": self.snapshot_commit, "checksums": self.checksums}
@@ -251,7 +267,7 @@ class Scenario:
         return_frame: Optional[int] = None,
         return_multiplier: float = 1,
         is_player_facing_away: bool = False,
-        final_actions: List[ScenarioActions] = [],
+        final_actions: Sequence[ScenarioActions] = [],
     ) -> "Scenario":
         animal_name = animal_type.__name__.lower()
 
@@ -342,7 +358,7 @@ class Scenario:
 
         return full_path
 
-    def observe(self, env: AvalonEnv, output_path: Path) -> List[AvalonObservationType]:
+    def observe(self, env: AvalonEnv, output_path: Path) -> Tuple[List[AvalonObservationType], List[SnapshotContext]]:
         world_file = output_path / self.key / "main.tscn"
         # TODO figure out how to guarantee complete order invariance for levels run in the same GodotEnv
         # I was trying to ensure invarience in rng, regardless of observation order,
@@ -351,20 +367,32 @@ class Scenario:
             env.reset_nicely_with_specific_world(episode_seed=0, world_path=str(world_file))
         env.reset_nicely_with_specific_world(episode_seed=0, world_path=str(world_file))
         observations = []
+        snapshots = []
+        latest_camera_action: Optional[DebugCameraAction] = None
         for action in self.actions:
             if isinstance(action, DebugCameraAction):
                 obs = env.debug_act(action)
+                observations.append(obs)
+                latest_camera_action = action
+            elif action == SAVE_SNAPSHOT_MESSAGE:
+                snapshot_path = env.save_snapshot()
+                frame = len(observations)
+                snapshots.append((snapshot_path, frame, latest_camera_action))
+            elif action == LOAD_SNAPSHOT_MESSAGE:
+                latest_snapshot_path = snapshots[-1][0]
+                obs, _ = env.load_snapshot(latest_snapshot_path)
+                observations.append(obs)
             else:
                 obs, _ = env.act(action)
-            observations.append(obs)
-        return observations[self.PRE_DEBUG_FRAMES :]
+                observations.append(obs)
+        return observations[self.PRE_DEBUG_FRAMES :], snapshots
 
     def run(self, env: AvalonEnv, output_path: Path) -> ScenarioObservations:
         try:
             scene_path = self.export(output_path)
         except Exception as e:
             raise ValueError(f"Failed to export scenario {self.name}: {e.args}") from e
-        observations = self.observe(env, output_path)
+        observations, snapshots = self.observe(env, output_path)
 
         folder = os.path.join(env.config.dir_root, self.name)
         os.makedirs(folder, exist_ok=True)
@@ -374,13 +402,13 @@ class Scenario:
         shutil.move(os.path.join(env.config.dir_root, "000000", "debug.json"), debug_json_path)
 
         video_npy_path = os.path.join(folder, f"{self.name}_raw_rgbd.npy")
-        np.save(video_npy_path, np.stack([o.rgbd for o in observations]))
 
         obs = ScenarioObservations(
             self,
             observations,
+            snapshots,
             scene_checksum=dir_checksum(scene_path),
-            video_checksum=file_checksum(video_npy_path),
+            video_checksum=np_checksum(rgbd_observations(observations), video_npy_path),
             debug_output_checksum=file_checksum(debug_json_path),
             debug_output=debug_output,
             scene_path=str(scene_path),
@@ -438,3 +466,22 @@ def read_human_recorded_actions(scenario_name: str) -> Iterable[VRActionType]:
             yield message[1]
         else:
             print(f"{scenario_name} non-action recorded: {message}")
+
+
+def rgbd_observations(observations: Sequence[AvalonObservationType]) -> np.ndarray:
+    return np.stack([o.rgbd for o in observations])
+
+
+def np_checksum(value: np.ndarray, path: Optional[str] = None) -> str:
+    is_temporary = False
+    if path is None:
+        is_temporary = True
+        path = os.path.join(TEMP_DIR, f"{str(uuid4())}.npy")
+
+    np.save(path, value)
+    checksum = file_checksum(path)
+
+    if is_temporary:
+        os.remove(path)
+
+    return checksum

@@ -2,6 +2,7 @@ extends Reference
 
 class_name CONST
 
+const BRIDGE_LOG_SIGNAL := "Establishing Bridge"
 const READY_LOG_SIGNAL := "GODATA!"
 
 const FIXED_FPS := 10
@@ -24,6 +25,9 @@ const CLOSE_MESSAGE := 6
 const DEBUG_CAMERA_ACTION_MESSAGE := 7
 const HUMAN_INPUT_MESSAGE := 9
 
+const SAVE_SNAPSHOT_MESSAGE := 10
+const LOAD_SNAPSHOT_MESSAGE := 11
+
 const VR_ACTION_SPACE = "VR_ACTION_SPACE"
 const MOUSE_KEYBOARD_ACTION_SPACE = "MOUSE_KEYBOARD_ACTION_SPACE"
 
@@ -31,3 +35,6 @@ const LEFT_HAND = "Left"
 const RIGHT_HAND = "Right"
 
 const FAKE_TYPE_IMAGE = -1
+
+const SNAPSHOT_JSON := "snapshot_context.json"
+const SNAPSHOT_SUBPATH := "snapshots"

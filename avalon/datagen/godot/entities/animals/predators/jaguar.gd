@@ -25,41 +25,49 @@ var activation_criteria: ActivationGate
 func _ready():
 	var continued_activation_criteria = [
 		PlayerInDetectionRadius.new(),
-		NoticesPlayerMoving.new(movement_detection_threshold, give_up_after_stillness_steps),
+		NoticesPlayerMoving.new().init(movement_detection_threshold, give_up_after_stillness_steps),
 	]
 	var initial_activation_criteria = [CanSeePlayer.new()]
-	activation_criteria = ActivationGate.new(
-		continued_activation_criteria, initial_activation_criteria
+	activation_criteria = load_or_init(
+		"activation_criteria",
+		ActivationGate.new().init(continued_activation_criteria, initial_activation_criteria)
 	)
 
-	inactive_behavior = ClimbWhenNecessary.new(
-		climbing_speed,
-		climbing_escape_hop_speed,
-		HopInCircle.new(
-			inactive_speed, inactive_hops_per_side, inactive_frames_per_turn, inactive_turn_angle
+	set_inactive(
+		ClimbWhenNecessary.new().init(
+			climbing_speed,
+			climbing_escape_hop_speed,
+			HopInCircle.new().init(
+				inactive_speed,
+				inactive_hops_per_side,
+				inactive_frames_per_turn,
+				inactive_turn_angle
+			)
 		)
 	)
 
-	var stay_grounded_when_making_headway = AbleToMakeHeadway.new(
+	var stay_grounded_when_making_headway = AbleToMakeHeadway.new().init(
 		required_grounded_movement_distance, climb_after_hops_without_progress
 	)
 
-	active_behavior = PursueAndAttackPlayer.new(
-		ClimbWhenNecessary.new(
-			climbing_speed,
-			climbing_escape_hop_speed,
-			HopInDirection.new(
-				TOWARDS_PLAYER,
-				active_chase_speed,
-				active_chase_hops,
-				active_rest_frames,
-				active_turn_speed
-			),
-			stay_grounded_when_making_headway
+	set_active(
+		PursueAndAttackPlayer.new().init(
+			ClimbWhenNecessary.new().init(
+				climbing_speed,
+				climbing_escape_hop_speed,
+				HopInDirection.new().init(
+					TOWARDS_PLAYER,
+					active_chase_speed,
+					active_chase_hops,
+					active_rest_frames,
+					active_turn_speed
+				),
+				stay_grounded_when_making_headway
+			)
 		)
 	)
-	avoid_ocean_behavior = AvoidOcean.new(
-		_rng_key("avoid_ocean"), active_chase_hops, inactive_speed
+	set_avoid_ocean(
+		AvoidOcean.new().init(_rng_key("avoid_ocean"), active_chase_hops, inactive_speed)
 	)
 
 

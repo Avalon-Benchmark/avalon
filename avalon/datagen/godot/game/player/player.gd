@@ -21,20 +21,20 @@ var eyes: Camera
 
 # NOTE: these must be present in `reset_on_new_world`!
 # player state
-var hit_points: float
-var gravity_velocity := Vector3.ZERO
-var surface_normal := Vector3.UP
-var is_jumping := false
 var current_observation := {}
-var _hit_points_gained_from_eating: float = 0.0
-var _hit_points_lost_from_enemies: float = 0.0
-var is_dead := false
-var floor_y_vel_history := []
-var falling_y_vel_history := []
-var wall_grab_history := []
+export var hit_points: float
+export var gravity_velocity := Vector3.ZERO
+export var surface_normal := Vector3.UP
+export var is_jumping := false
+export var _hit_points_gained_from_eating: float = 0.0
+export var _hit_points_lost_from_enemies: float = 0.0
+export var is_dead := false
+export var floor_y_vel_history := []
+export var falling_y_vel_history := []
+export var wall_grab_history := []
 # see `_get_fall_damage` for more explanation on what these constants are used for
-var frames_after_taking_fall_damage := 0
-var frames_after_reaching_fall_damage_speeds := 0
+export var frames_after_taking_fall_damage := 0
+export var frames_after_reaching_fall_damage_speeds := 0
 
 # player configuration
 var height := 2.0
@@ -83,37 +83,44 @@ const _FALL_DAMAGE_WAIT_PERIOD = 2
 const _FALL_DAMAGE_DEBOUNCE_PERIOD = 4
 
 # storing previous state of the body
-var prev_hit_points: float
-var prev_target_head_global_transform: Transform
-var prev_target_left_hand_global_transform: Transform
-var prev_target_right_hand_global_transform: Transform
-var prev_physical_body_global_transform: Transform
-var prev_physical_head_global_transform: Transform
-var prev_physical_left_hand_global_transform: Transform
-var prev_physical_right_hand_global_transform: Transform
-var prev_physical_body_linear_velocity: Vector3
-var prev_physical_head_linear_velocity: Vector3
-var prev_physical_left_hand_linear_velocity: Vector3
-var prev_physical_right_hand_linear_velocity: Vector3
-var prev_physical_head_angular_velocity: Vector3
-var prev_physical_left_hand_angular_velocity: Vector3
-var prev_physical_right_hand_angular_velocity: Vector3
+export var prev_hit_points: float
+export var prev_target_head_global_transform: Transform
+export var prev_target_left_hand_global_transform: Transform
+export var prev_target_right_hand_global_transform: Transform
+export var prev_physical_body_global_transform: Transform
+export var prev_physical_head_global_transform: Transform
+export var prev_physical_left_hand_global_transform: Transform
+export var prev_physical_right_hand_global_transform: Transform
+export var prev_physical_body_linear_velocity: Vector3
+export var prev_physical_head_linear_velocity: Vector3
+export var prev_physical_left_hand_linear_velocity: Vector3
+export var prev_physical_right_hand_linear_velocity: Vector3
+export var prev_physical_head_angular_velocity: Vector3
+export var prev_physical_left_hand_angular_velocity: Vector3
+export var prev_physical_right_hand_angular_velocity: Vector3
+
+export var _is_state_initialized = false
 
 var PERF_SIMPLE_AGENT: bool = ProjectSettings.get_setting("avalon/simple_agent")
 var PERF_ACTION_APPLY: bool = ProjectSettings.get_setting("avalon/action_apply")
 
 
 func _ready() -> void:
-	initialize()
+	if not _is_state_initialized:
+		hit_points = starting_hit_points
+
+	validate_configuration()
 	set_nodes_in_ready()
-	update_previous_transforms_and_velocities(true)
+
+	if not _is_state_initialized:
+		update_previous_transforms_and_velocities(true)
+
 	# reset current observation, happens after `update_previous_transforms_and_velocities` so everthing starts at 0
 	set_current_observation()
+	_is_state_initialized = true
 
 
-func initialize():
-	hit_points = starting_hit_points
-
+func validate_configuration():
 	HARD.assert(max_head_linear_speed != null, "max_head_linear_speed is not defined")
 	HARD.assert(max_head_angular_speed != null, "max_head_angular_speed is not defined")
 	HARD.assert(max_hand_linear_speed != null, "max_hand_linear_speed is not defined")
@@ -176,14 +183,15 @@ func set_nodes_in_ready():
 		target_left_hand.visible = false
 		target_right_hand.visible = false
 
-	target_left_hand.global_transform.origin = (
-		starting_left_hand_position_relative_to_head
-		+ target_head.global_transform.origin
-	)
-	target_right_hand.global_transform.origin = (
-		starting_right_hand_position_relative_to_head
-		+ target_head.global_transform.origin
-	)
+	if not _is_state_initialized:
+		target_left_hand.global_transform.origin = (
+			starting_left_hand_position_relative_to_head
+			+ target_head.global_transform.origin
+		)
+		target_right_hand.global_transform.origin = (
+			starting_right_hand_position_relative_to_head
+			+ target_head.global_transform.origin
+		)
 
 	eyes = _get_eyes()
 
@@ -191,6 +199,11 @@ func set_nodes_in_ready():
 	var shape: SphereShape = eat_area.get_child(0).shape
 	shape.radius = eat_area_radius
 
+	_validate_arm_lengths()
+	_set_debug_mesh_visibility()
+
+
+func _validate_arm_lengths():
 	HARD.assert(
 		arm_length > starting_left_hand_position_relative_to_head.length(),
 		(
@@ -206,16 +219,12 @@ func set_nodes_in_ready():
 		)
 	)
 
-	if is_displaying_debug_meshes:
-		physical_head.get_node("beak").visible = true
-		physical_head.get_node("face").visible = true
-		physical_left_hand.get_node("marker").visible = true
-		physical_right_hand.get_node("marker").visible = true
-	else:
-		physical_head.get_node("beak").visible = false
-		physical_head.get_node("face").visible = false
-		physical_left_hand.get_node("marker").visible = false
-		physical_right_hand.get_node("marker").visible = false
+
+func _set_debug_mesh_visibility() -> void:
+	physical_head.get_node("beak").visible = is_displaying_debug_meshes
+	physical_head.get_node("face").visible = is_displaying_debug_meshes
+	physical_left_hand.get_node("marker").visible = is_displaying_debug_meshes
+	physical_right_hand.get_node("marker").visible = is_displaying_debug_meshes
 
 
 func _get_eyes() -> Node:

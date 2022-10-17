@@ -14,10 +14,10 @@ you should get exactly the same hash for your generated data between runs, even 
 
 This is only strictly necessary if you want to run / debug Godot locally, but it's a good idea.
 
-Download and extract the [Godot editor][1]. (Just the standard, 64-bit, 3.2.3 version.)
+TODO: document where the new godot binaries are
 
- - Linux: put it under `/usr/bin/godot`
- - MacOS: make that a symlink to `/?/Godot.app/Contents/MacOS/Godot`
+ - Linux: put it under `/usr/local/bin/godot`
+ - MacOS: put it under `/usr/local/bin/godot`
  - Windows: just unzip it anywhere (without spaces in the path name)
 
 # How to set up your editor
@@ -35,7 +35,7 @@ That enables decent code completion _when the Godot editor is running in the bac
 
 Create a file watcher in PyCharm to automatically reformat godot code.
 
-![Setting up GD format](../../../../docs/gdformat_configuration.png)
+![Setting up GD format](../../../../../docs/gdformat_configuration.png)
 
 You'll need to create a new scope called `gd_scope` which can be set to `file:*.gd`
 
