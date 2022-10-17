@@ -201,7 +201,8 @@ def food_scenario(
     is_recorded: bool = False,
     frames: int = 50,
 ) -> Scenario:
-    if is_on_tree := isinstance(food, tuple):
+    is_on_tree = isinstance(food, tuple)
+    if is_on_tree:
         actual_food = food[1]
     else:
         actual_food = food

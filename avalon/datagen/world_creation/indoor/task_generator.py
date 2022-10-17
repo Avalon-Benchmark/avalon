@@ -156,7 +156,8 @@ def decide_spawn_room_and_tile(
     story: Story,
     permitted_tiles_by_room_id: Optional[Dict[int, List[Tuple[int, int]]]] = None,
 ) -> Tuple[Room, Tuple[int, int]]:
-    if entrances := story.entrances:
+    entrances = story.entrances
+    if entrances:
         entrance = rand.choice(entrances)  # type: ignore[arg-type]
         spawn_room, landing_position = entrance.get_connected_room_and_landing_position(story)
         spawn_tile = landing_position.x, landing_position.z

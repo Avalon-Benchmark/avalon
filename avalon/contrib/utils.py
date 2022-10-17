@@ -133,7 +133,10 @@ def run_local_command(
                 break
         time.sleep(0.1)
 
-    while next_line := process.stdout.readline():
+    while True:
+        next_line = process.stdout.readline()
+        if not next_line:
+            break
         all_lines.append(next_line)
         if trace_output:
             print(next_line.rstrip("\n"))

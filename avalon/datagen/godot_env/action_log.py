@@ -62,7 +62,10 @@ def _parse_raw_message_log(
     record_log: BufferedReader,
     action_from_bytes: Callable[[bytes], ActionType],
 ) -> Iterator[_RawMessage[ActionType]]:
-    while message_bytes := record_log.read(1):
+    while True:
+        message_bytes = record_log.read(1)
+        if not message_bytes:
+            break
         message = int.from_bytes(message_bytes, byteorder="little", signed=False)
         if message in _no_payload_messages:
             # TODO remove cast when mypy can refine types (https://github.com/python/mypy/issues/12535)

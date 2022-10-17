@@ -124,9 +124,11 @@ class HingeDoor(Door):
             for lock in bar_locks:
                 if not isinstance(lock, (RotatingBar, SlidingBar)):
                     continue
-                if lock.position[1] > 0 and (lock_bottom := lock.position[1] - lock.size[1] / 2) < max_y:
+                lock_bottom = lock.position[1] - lock.size[1] / 2
+                lock_top = lock.position[1] + lock.size[1] / 2
+                if lock.position[1] > 0 and lock_bottom < max_y:
                     max_y = lock_bottom
-                elif lock.position[1] < 0 and (lock_top := lock.position[1] + lock.size[1] / 2) > min_y:
+                elif lock.position[1] < 0 and lock_top > min_y:
                     min_y = lock_top
             max_handle_height = min(abs(max_y), abs(min_y)) * 2 - leeway
             if handle_height > max_handle_height:

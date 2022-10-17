@@ -293,7 +293,10 @@ def parse_human_input(
 ) -> Sequence[AttrsAction]:
     human_inputs = []
     with open(path, "rb") as f:
-        while message_bytes := f.read(1):
+        while True:
+            message_bytes = f.read(1)
+            if not message_bytes:
+                break
             message = int.from_bytes(message_bytes, byteorder="little", signed=False)
             assert message == HUMAN_INPUT_MESSAGE
             size_bytes = f.read(4)
