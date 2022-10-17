@@ -4,32 +4,40 @@ class_name FlyRandomly
 
 const TURN_ACCURACY_THRESHOLD = deg2rad(7.5)
 
-var rng_key: String
-var speed: float
-var rotation_target
+export var rng_key: String
+export var speed: float
+export var rotation_target := NAN
+export var turn_frequency: float
 
-var rotation_dist = UniformDistribution.new(deg2rad(-179), deg2rad(180))
+var rotation_dist: UniformDistribution = UniformDistribution.new(deg2rad(-179), deg2rad(180))
 var turn_frequency_dist: ChoicesDistribution
 
 
-func _init(_rng_key: String, turn_frequency: float, _speed: float):
+func init(_rng_key: String, _turn_frequency: float, _speed: float) -> AnimalBehavior:
 	rng_key = _rng_key
+	turn_frequency = _turn_frequency
+	speed = _speed
+	_ready()
+	return self
+
+
+func _ready():
+	rotation_dist = UniformDistribution.new(deg2rad(-179), deg2rad(180))
 	turn_frequency_dist = ChoicesDistribution.new(
 		[false, true], [1 - turn_frequency, turn_frequency]
 	)
-	speed = _speed
 
 
 func do(animal: Animal, delta: float) -> Vector3:
 	var controller = animal.controller
 
 	var is_ok_to_turn_again = true
-	if rotation_target != null:
+	if not is_nan(rotation_target):
 		var remaining_rotation = rotation_target - animal.rotation.y
 		is_ok_to_turn_again = abs(remaining_rotation) < TURN_ACCURACY_THRESHOLD
 		animal.rotate_y(clamp_rotation(remaining_rotation))
 		if remaining_rotation == 0:
-			rotation_target = null
+			rotation_target = NAN
 
 	var should_turn = is_ok_to_turn_again and turn_frequency_dist.new_value(rng_key)
 	if should_turn:
@@ -77,11 +85,13 @@ static func seek_desired_altitude(animal: Animal, delta: float) -> Transform:
 	)
 
 
-static func correct_course(transform: Transform, current_rotation: Vector3, desired_pitch: float) -> Transform:
+static func correct_course(
+	transform: Transform, current_rotation: Vector3, desired_pitch: float
+) -> Transform:
 	var scale = transform.basis.get_scale()
 	transform.basis = Basis(Vector3(desired_pitch, current_rotation.y, 0)).scaled(scale)
 	return transform
 
 
 func reset():
-	rotation_target = null
+	rotation_target = NAN

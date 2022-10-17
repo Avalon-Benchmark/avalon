@@ -156,7 +156,9 @@ func align_with_ray(
 	return xform
 
 
-func align_and_position_parent(xform: Transform, floor_alignment_interpolation_weight: float = 0.2) -> Transform:
+func align_and_position_parent(
+	xform: Transform, floor_alignment_interpolation_weight: float = 0.2
+) -> Transform:
 	xform.origin = global_transform.origin
 	transform.origin = Vector3.ZERO
 	if current_domain == AIR:

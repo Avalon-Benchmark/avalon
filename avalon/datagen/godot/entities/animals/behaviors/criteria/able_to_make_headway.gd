@@ -4,22 +4,19 @@ extends BehaviorCriteria
 
 class_name AbleToMakeHeadway
 
-var required_movement_distance: int
-var give_up_after_hops: int
+export var required_movement_distance: int
+export var give_up_after_hops: int
 
-var recent_position: Vector3
-var give_up_step := -1
-var is_able_to_make_headway: bool = true
-var is_last_step_counted: bool = false
-
-var additional_criteria: BehaviorCriteria
-
-var log_state := false
+export var recent_position: Vector3
+export var give_up_step := -1
+export var is_able_to_make_headway: bool = true
+export var is_last_step_counted: bool = false
 
 
-func _init(_required_movement_distance: int, _give_up_after_hops: int):
+func init(_required_movement_distance: int, _give_up_after_hops: int) -> BehaviorCriteria:
 	required_movement_distance = _required_movement_distance
 	give_up_after_hops = _give_up_after_hops
+	return self
 
 
 func wait_to_consider_giving_up(animal: Animal) -> bool:

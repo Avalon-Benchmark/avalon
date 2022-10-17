@@ -34,14 +34,18 @@ export var player_detection_radius := 12.0
 export var damage_invincibility_frames := 10
 export var invincibility_indicator_frames := 5
 
-var is_player_in_detection_radius := false
+export var _is_player_in_detection_radius := false
 
-var invincibility_frame := 0
+export var _invincibility_frame := 0
+
+export var _is_frozen: bool = false
 
 var controller: MovementController
 var _collision_shape: CollisionShape
 
 var _player: Player
+
+var possible_impediments: Array
 
 var inactive_behavior
 var active_behavior
@@ -49,9 +53,7 @@ var previous_behavior
 
 var avoid_ocean_behavior
 
-var is_frozen: bool = false
-
-var possible_impediments: Array
+var _logic_nodes: Array = []
 
 
 func _ready():
@@ -69,7 +71,7 @@ func _ready():
 
 
 func select_next_behavior():
-	if is_player_in_detection_radius:
+	if _is_player_in_detection_radius:
 		return active_behavior
 	return inactive_behavior
 
@@ -83,8 +85,8 @@ func _safely_select_next_behavior():
 
 func _switch_behavior(behavior):
 	if HARD.mode():
-		var previous = previous_behavior.get_name() if previous_behavior else ""
-		var new = behavior.get_name()
+		var previous = previous_behavior.describe() if previous_behavior else ""
+		var new = behavior.describe()
 		print("%s behavior changed: %s -> %s" % [self, previous, new])
 	if previous_behavior != null:
 		previous_behavior.reset()
@@ -93,7 +95,7 @@ func _switch_behavior(behavior):
 
 func maybe_freeze(player_distance: float) -> bool:
 	var should_freeze = player_distance >= freeze_at_distance_from_player
-	if should_freeze == is_frozen:
+	if should_freeze == _is_frozen:
 		return should_freeze
 
 	if should_freeze:
@@ -101,7 +103,7 @@ func maybe_freeze(player_distance: float) -> bool:
 	elif is_alive():
 		controller.get_floor_ray().enabled = true
 
-	is_frozen = should_freeze
+	_is_frozen = should_freeze
 
 	if HARD.mode():
 		var change = "freezing" if should_freeze else "unfreezing"
@@ -112,7 +114,7 @@ func maybe_freeze(player_distance: float) -> bool:
 
 func _physics_process(delta):
 	var player_distance = distance_to_player(is_flying())
-	is_player_in_detection_radius = (
+	_is_player_in_detection_radius = (
 		player_distance <= player_detection_radius
 		or _is_still_climbing_up_away_from_player()
 	)
@@ -155,9 +157,7 @@ func _integrate_forces(state):
 
 
 func get_player_position() -> Vector3:
-	if _player == null:
-		_player = get_tree().root.find_node("player", true, false)
-	return _player.physical_body.global_transform.origin
+	return get_player().physical_body.global_transform.origin
 
 
 func distance_to_player(is_in_2d: bool = false) -> float:
@@ -319,16 +319,16 @@ func hide_pain_or_dead():
 
 
 func is_temporariy_invisible():
-	return invincibility_frame > 0
+	return _invincibility_frame > 0
 
 
 func handle_damage_debounce():
-	if invincibility_frame == 0:
+	if _invincibility_frame == 0:
 		return
 
-	invincibility_frame = (invincibility_frame + 1) % damage_invincibility_frames
+	_invincibility_frame = (_invincibility_frame + 1) % damage_invincibility_frames
 
-	if $dead_mesh.visible and invincibility_frame >= invincibility_indicator_frames:
+	if $dead_mesh.visible and _invincibility_frame >= invincibility_indicator_frames:
 		hide_pain_or_dead()
 
 
@@ -398,7 +398,7 @@ func _calculate_damage_and_death(body: Node):
 	if not is_alive():
 		_die(is_point_right_of(body.transform.origin))
 	else:
-		invincibility_frame = 1
+		_invincibility_frame = 1
 		show_pain_or_dead()
 
 
@@ -535,12 +535,69 @@ func _rng_key(behavior_name: String) -> String:
 
 func to_dict() -> Dictionary:
 	var data = .to_dict()
-	data["is_frozen"] = is_frozen
+	data["is_frozen"] = _is_frozen
 	data["is_mobile"] = mode == MODE_KINEMATIC
 	data["is_alive"] = is_alive()
 	data["current_domain"] = controller.current_domain
 	data["hit_points"] = hit_points
-	data["behavior"] = previous_behavior.get_name() if previous_behavior else null
+	data["behavior"] = previous_behavior.describe() if previous_behavior else null
 	var impediment = get_first_forwad_impediment()
 	data["forward_impediment"] = impediment.name if impediment else null
 	return data
+
+
+func get_logic_nodes() -> Array:
+	return _logic_nodes
+
+
+func _is_already_persisting_behaviors() -> bool:
+	return LogicNodes.is_container_already_persiting(self)
+
+
+func persist_behaviors():
+	LogicNodes.persist(self)
+
+
+func get_persisted_behavior_list() -> Node:
+	return LogicNodes.get_persisted(self)
+
+
+func load_or_init(behavior_name: String, behavior: Node) -> Node:
+	var node = LogicNodes.prefer_persisted(self, behavior_name, behavior)
+	_logic_nodes.append(node)
+	return node
+
+
+func set_active(behavior) -> void:
+	active_behavior = load_or_init("active_behavior", behavior)
+
+
+func set_inactive(behavior) -> void:
+	inactive_behavior = load_or_init("inactive_behavior", behavior)
+
+
+func set_avoid_ocean(behavior) -> void:
+	avoid_ocean_behavior = load_or_init("avoid_ocean_behavior", behavior)
+
+
+func get_player() -> Object:
+	# TODO there is an error when referencing scripts that reference Globals in GameManager
+	var is_player_ref_valid = (
+		_player != null
+		and is_instance_valid(_player)
+		and not _player.is_queued_for_deletion()
+	)
+	if not is_player_ref_valid:
+		_player = get_tree().root.find_node("player", true, false)
+	return _player
+
+
+func _acceptable_scale_perturbation() -> float:
+	# kinematically-controlled rigid bodyies may have scale changes that are recorded at snapshot time.
+	# This happens in climbing scenarios in particular (as much as 0.16).
+	return 1.0 if _is_state_initialized else ._acceptable_scale_perturbation()
+
+
+func _notification(what):
+	if what == NOTIFICATION_PREDELETE:
+		LogicNodes.handle_predelete(self)

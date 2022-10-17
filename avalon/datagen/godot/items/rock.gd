@@ -7,7 +7,7 @@ export var natural_fall_velocity_threshold := 10.0
 
 export var relative_impact_velocity_threshold := 0.5
 
-var is_thrown := false
+export var is_thrown := false
 
 
 func is_mid_air() -> bool:

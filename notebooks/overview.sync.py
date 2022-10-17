@@ -9,10 +9,10 @@ from avalon.datagen.env_helper import create_vr_benchmark_config
 from avalon.datagen.env_helper import display_video
 from avalon.datagen.env_helper import get_debug_json_logs
 from avalon.datagen.env_helper import get_null_vr_action
-from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_env.actions import DebugCameraAction
-from avalon.datagen.godot_env.godot_env import GodotEnv
 from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.godot_env import GodotEnv
+from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.world_creation.constants import SINGLE_TASK_GROUPS
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
@@ -87,6 +87,38 @@ for world_id, task_group, distance in task_groups_to_look_at:
     logger.info(f"{task_group}\n {len(items)} items: {items}")
 
     display_video(isometric_view_of_current_world(hd_env, distance))
+
+# %% [markdown]
+# You can also inspect generated levels locally in the [Godot Editor](https://godotengine.org/download)
+# By copying them into `datagen/godot/worlds` with `docker cp`.
+#
+# > NOTE: Each env uses a different unique path for world generation,
+#         And also need those path references replaced to open properly locally
+#
+# To try this, run the command output by the following block locally,
+# then open Godot and [import the project](https://docs.godotengine.org/en/latest/tutorials/editor/project_manager.html#opening-and-importing-projects).
+# ```bash
+# # outputs absolute world paths from most to least recent
+# function recent_avaolon_worlds {
+#   docker exec $container_id '/bin/sh' '-c' 'ls -td /tmp/level_gen/*/*'
+# }
+# function pull_avalon_worlds {
+# }
+# # Pull the last 10 generated worlds
+# pull_avalon_worlds `recent_avalon_worlds | head -10`
+#
+# ```
+# %%
+unique_env_level_path = hd_env.world_generator.output_path
+world_index = "1"
+local_worlds_path = "datagen/godot/worlds"
+print(
+    f"# Copy world .tscn to local {local_worlds_path}"
+    f"docker cp $container_id:{unique_env_level_path}/{world_index} datagen/godot/worlds\n"
+    f"# Find and replace absolute generated world path to fix local references"
+    f"perl -pi -e s,{unique_env_level_path},res://worlds, {local_worlds_path}/{world_index}/*\n"
+)
+
 
 # %%
 

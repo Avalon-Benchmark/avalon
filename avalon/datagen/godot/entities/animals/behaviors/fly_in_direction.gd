@@ -2,33 +2,34 @@ extends AnimalBehavior
 
 class_name FlyInDirection
 
-var direction: int  # -1 towards, 1 away
-var full_speed: float
-var turn_speed: float
-var turn_rotation_speed: float
+export var direction: int  # -1 towards, 1 away
+export var full_speed: float
+export var turn_speed: float
+export var turn_rotation_speed: float
 
-var readiness_threshold = deg2rad(45)
+export var readiness_threshold = deg2rad(45)
 
-var fixed_point: Vector3  # Optional
+export var fixed_point := Vector3.INF
 
 
-func _init(
+func init(
 	_direction: int,
 	_full_speed: float,
 	_turn_speed: float = 1.0,
 	_turn_rotation_speed: float = 1.0,
 	_fixed_point = null
-):
+) -> AnimalBehavior:
 	direction = _direction
 	full_speed = _full_speed
 	turn_speed = _turn_speed
 	turn_rotation_speed = _turn_rotation_speed
 	if _fixed_point:
 		fixed_point = _fixed_point
+	return self
 
 
 func target_position(animal: Animal) -> Vector3:
-	if fixed_point:
+	if is_fixed_point_set():
 		return fixed_point
 	var vertical_correction = Vector3(0, -0.5 if direction == Animal.AWAY_FROM_PLAYER else 0.5, 0)
 	return animal.get_player_position() + vertical_correction
@@ -40,7 +41,7 @@ func go_up_when_stuck(animal: Animal, target: Vector3) -> Vector3:
 	var animal_pos = animal.global_transform.origin
 	var pos_2d = Vector3(target.x, animal_pos.y, target.z)
 	var distance_2d = animal_pos.distance_to(pos_2d)
-	var is_close_enough = distance_2d != NAN and distance_2d < 2
+	var is_close_enough = not is_nan(distance_2d) and distance_2d < 2
 	if not is_close_enough:
 		# angle up to get over presumed obstacle
 		target.y = animal_pos.y + (-2 if direction == Animal.AWAY_FROM_PLAYER else 2)
@@ -77,7 +78,7 @@ func stay_around_coasting_altitude(animal: Animal, target_altitude: float) -> fl
 	return target_altitude
 
 
-func get_name():
+func describe():
 	var dir = ""
 	match direction:
 		Animal.TOWARDS_PLAYER:
@@ -87,3 +88,7 @@ func get_name():
 		Animal.AWAY_FROM_PLAYER:
 			dir = "away from player"
 	return "fly %s" % dir
+
+
+func is_fixed_point_set() -> bool:
+	return fixed_point != Vector3.INF

@@ -21,18 +21,21 @@ from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import CLOSE_MESSAGE
 from avalon.datagen.godot_generated_types import DEBUG_CAMERA_ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import HUMAN_INPUT_MESSAGE
+from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import QUERY_AVAILABLE_FEATURES_MESSAGE
 from avalon.datagen.godot_generated_types import RENDER_MESSAGE
 from avalon.datagen.godot_generated_types import RESET_MESSAGE
+from avalon.datagen.godot_generated_types import SAVE_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import SEED_MESSAGE
 from avalon.datagen.godot_generated_types import SELECT_FEATURES_MESSAGE
 
 _BINARY_READ: Literal["br"] = "br"
 
-_NoPayloadMessageTypes = Literal[2, 5, 6]
+_NoPayloadMessageTypes = Literal[2, 5, 6, 10]
 _NoPayloadMessage = Tuple[_NoPayloadMessageTypes]
 _SeedMessage = Tuple[Literal[1], int]
 _SelectFeaturesMessage = Tuple[Literal[4], List[str]]
+_LoadSnapshotMessage = Tuple[Literal[11], str]
 _ActionMessage = Tuple[Literal[3, 9], ActionType]
 _DebugMessage = Tuple[Literal[7], DebugCameraAction]
 _ResetMessage = Tuple[Literal[3, 0], ActionType, int, str, float]
@@ -43,8 +46,14 @@ _RawMessage = Union[
     _ActionMessage[ActionType],
     _ResetMessage[ActionType],
     _DebugMessage,
+    _LoadSnapshotMessage,
 ]
-_no_payload_messages: Set[_NoPayloadMessageTypes] = {RENDER_MESSAGE, QUERY_AVAILABLE_FEATURES_MESSAGE, CLOSE_MESSAGE}
+_no_payload_messages: Set[_NoPayloadMessageTypes] = {
+    RENDER_MESSAGE,
+    QUERY_AVAILABLE_FEATURES_MESSAGE,
+    CLOSE_MESSAGE,
+    SAVE_SNAPSHOT_MESSAGE,
+}
 
 _ActionOrDebugMessage = Union[_ActionMessage[ActionType], _DebugMessage]
 
@@ -90,6 +99,9 @@ def _parse_raw_message_log(
                 _ResetMessage,
                 (message, action_from_bytes(action_bytes), episode_seed, world_path, starting_hit_points),
             )
+        elif message == LOAD_SNAPSHOT_MESSAGE:
+            snapshot_path = record_log.readline()
+            yield cast(_LoadSnapshotMessage, (message, snapshot_path))
         else:
             raise SwitchError(f"Invalid message type {message}")
 

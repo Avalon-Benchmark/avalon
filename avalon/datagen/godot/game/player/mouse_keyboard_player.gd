@@ -104,7 +104,9 @@ func get_throw_force_magnitude() -> float:
 	return 10.0
 
 
-func do_hand_action(hand: PlayerHand, is_grasping: bool, is_throwing: bool, is_eating: bool) -> void:
+func do_hand_action(
+	hand: PlayerHand, is_grasping: bool, is_throwing: bool, is_eating: bool
+) -> void:
 	var throw_impulse = Vector3.ZERO
 	var held_thing = hand.get_held_thing()
 

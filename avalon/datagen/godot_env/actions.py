@@ -182,6 +182,9 @@ class DebugCameraAction(AttrsAction):
     offset: Vector3 = Vector3(0, 0, 0)
     rotation: Vector3 = Vector3(0, 0, 0)
     is_facing_tracked: bool = False
+    # Setting to False will result in an empty response for the first frame,
+    # but will not interfere with physics or the results of surounding actions (i.e. when replaying)
+    is_frame_advanced: bool = True
     tracking_node: str = "physical_head"
 
     @classmethod
@@ -190,11 +193,13 @@ class DebugCameraAction(AttrsAction):
         tracking_node: str = "physical_head",
         distance: float = 12,
         is_facing_tracked: bool = True,
+        is_frame_advanced: bool = True,
     ):
         return DebugCameraAction(
             Vector3(distance / 2, abs(distance), distance / 2),
             Vector3(np.radians(-45), np.radians(45), 0),
             is_facing_tracked,
+            is_frame_advanced,
             tracking_node,
         )
 
@@ -204,11 +209,13 @@ class DebugCameraAction(AttrsAction):
         tracking_node: str = "physical_head",
         distance: float = 12,
         is_facing_tracked: bool = True,
+        is_frame_advanced: bool = True,
     ):
         return DebugCameraAction(
             Vector3(distance / 2, 0, distance / 2),
             Vector3(np.radians(-45), 0, 0),
             is_facing_tracked,
+            is_frame_advanced,
             tracking_node,
         )
 
@@ -219,6 +226,7 @@ class DebugCameraAction(AttrsAction):
             action_bytes += _to_bytes(float, vec.y)
             action_bytes += _to_bytes(float, vec.z)
         action_bytes += _to_bytes(float, 1.0 if self.is_facing_tracked else 0.0)
+        action_bytes += _to_bytes(float, 1.0 if self.is_frame_advanced else 0.0)
         action_bytes += self.tracking_node.encode("UTF-8")
         return _to_bytes(int, len(action_bytes)) + action_bytes
 
@@ -236,8 +244,9 @@ class DebugCameraAction(AttrsAction):
         offset, remaining_bytes = cls._read_vec(remaining_bytes)
         rotation, remaining_bytes = cls._read_vec(remaining_bytes)
         is_facing_tracked, remaining_bytes = _from_bytes(float, remaining_bytes)
+        is_frame_advanced, remaining_bytes = _from_bytes(float, remaining_bytes)
         tracking_node = remaining_bytes.decode("UTF-8")
-        return cls(offset, rotation, is_facing_tracked != 0, tracking_node)
+        return cls(offset, rotation, is_facing_tracked != 0, is_frame_advanced != 0, tracking_node)
 
 
 def _to_bytes(value_type: Type, value: Any) -> bytes:

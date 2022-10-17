@@ -5,22 +5,29 @@ class_name ClimbWhenNecessary
 const DOWN = Vector2(0, -1)
 const UP = Vector2(0, 1)
 
-var climb_speed: float
-var escape_hop_speed: Vector2
-var is_horizontal_movement_enabled := false
+export var climb_speed: float
+export var escape_hop_speed: Vector2
+export var is_horizontal_movement_enabled := false
+
+export var is_making_escape_hop := false
 
 var grounded_headway_criteria: AbleToMakeHeadway
 var hop_behavior: AnimalBehavior
 
-var is_making_escape_hop := false
+
+func get_logic_nodes() -> Array:
+	var nodes = [hop_behavior]
+	if grounded_headway_criteria != null:
+		nodes.append(grounded_headway_criteria)
+	return nodes
 
 
-func _init(
+func init(
 	_climb_speed: float,
 	_escape_hop_speed: Vector2,
 	_hop_behavior: AnimalBehavior,
 	_grounded_headway_criteria = null
-):
+) -> AnimalBehavior:
 	HARD.assert(
 		"hop_speed" in _hop_behavior, "ClimbWhenNecessary.hop_behavior must implement .hop_speed"
 	)
@@ -29,6 +36,16 @@ func _init(
 	hop_behavior = _hop_behavior
 	if _grounded_headway_criteria != null:
 		grounded_headway_criteria = _grounded_headway_criteria
+	return self
+
+
+func _ready():
+	hop_behavior = LogicNodes.prefer_persisted(self, "hop_behavior", hop_behavior)
+
+	var is_null_ok = true
+	grounded_headway_criteria = LogicNodes.prefer_persisted(
+		self, "grounded_headway_criteria", grounded_headway_criteria, is_null_ok
+	)
 
 
 func get_climb_direction(animal: Animal) -> Vector2:
@@ -142,6 +159,6 @@ func reset():
 	hop_behavior.reset()
 
 
-func get_name():
-	var hop_name = hop_behavior.get_name()
+func describe():
+	var hop_name = hop_behavior.describe()
 	return "climb or %s" % hop_name

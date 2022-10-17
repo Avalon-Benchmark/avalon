@@ -18,10 +18,18 @@ def test_code_contains_no_print_statement():
         ...   # script
     after the line with the print on it and it will be ignore by this linter
     """
+    exclusions = " ".join([f"--exclude-dir={dirname}" for dirname in ["contrib", "quarantine", "env", "venv"]])
+    ignore_test_files_and_notebooks = "grep -v -E '(tests?/|/test_|_test.py|.sync.py)'"
+    ignore_lines_marked_with_script_comment = 'grep -v " # script"'
     result = subprocess.run(
-        r'grep -E -r --exclude-dir=contrib --exclude-dir=quarantine --exclude-dir=env --exclude-dir=venv --include="*.py" "(^|\s)print\\(" | grep -v -E "(tests?/|/test_|_test.py)" | grep -v "  # script"',
+        f'grep -E -r {exclusions} --include="*.py" "(^|\s)print\\(" | {ignore_test_files_and_notebooks } | {ignore_lines_marked_with_script_comment}',
         shell=True,
+        capture_output=True,
+        text=True,
     )
-    assert (
-        result.returncode == 1
-    ), "Some files appear to have print statements. Please replace with calls to logger.whatever, or end the line with # script, as appropriate"
+    is_ok = result.returncode == 1
+    assert is_ok, (
+        "Some files appear to have print statements. "
+        "Please replace with calls to logger.whatever, or end the line with # script, as appropriate. "
+        f"Offending lines:\n{result.stdout}"
+    )

@@ -19,32 +19,36 @@ var activation_criteria: ActivationGate
 
 
 func _ready():
-	var player_in_detection_radius = PlayerInDetectionRadius.new()
 	var continued_activation_criteria := [
-		player_in_detection_radius,
-		PlayerReachableByGround.new(
+		PlayerInDetectionRadius.new(),
+		PlayerReachableByGround.new().init(
 			out_of_reach_height, required_movement_distance, give_up_after_hops_without_progress
 		),
 	]
-	var initial_activation_criteria := [PlayerWithinThreshold.new(active_within_threshold)]
-	activation_criteria = ActivationGate.new(
-		continued_activation_criteria, initial_activation_criteria
+	var initial_activation_criteria := [PlayerWithinThreshold.new().init(active_within_threshold)]
+	activation_criteria = load_or_init(
+		"activation_criteria",
+		ActivationGate.new().init(continued_activation_criteria, initial_activation_criteria)
 	)
 
-	inactive_behavior = ConditionalBehavior.new(
-		[player_in_detection_radius],
-		HopInDirection.new(
-			AWAY_FROM_PLAYER, inactive_avoid_speed, inactive_avoid_hops, inactive_rest_frames
+	set_inactive(
+		ConditionalBehavior.new().init(
+			[PlayerInDetectionRadius.new()],
+			HopInDirection.new().init(
+				AWAY_FROM_PLAYER, inactive_avoid_speed, inactive_avoid_hops, inactive_rest_frames
+			)
 		)
 	)
 
-	active_behavior = PursueAndAttackPlayer.new(
-		HopInDirection.new(
-			TOWARDS_PLAYER, active_chase_speed, active_chase_hops, active_rest_frames
+	set_active(
+		PursueAndAttackPlayer.new().init(
+			HopInDirection.new().init(
+				TOWARDS_PLAYER, active_chase_speed, active_chase_hops, active_rest_frames
+			)
 		)
 	)
-	avoid_ocean_behavior = AvoidOcean.new(
-		_rng_key("avoid_ocean"), active_chase_hops, inactive_avoid_speed
+	set_avoid_ocean(
+		AvoidOcean.new().init(_rng_key("avoid_ocean"), active_chase_hops, inactive_avoid_speed)
 	)
 
 

@@ -7,11 +7,16 @@ export var inactive_movement_hops := 1
 
 
 func _ready():
-	inactive_behavior = HopRandomly.new(
-		_rng_key("inactive"), inactive_movement_frequency, inactive_speed, inactive_movement_hops
+	set_inactive(
+		HopRandomly.new().init(
+			_rng_key("inactive"),
+			inactive_movement_frequency,
+			inactive_speed,
+			inactive_movement_hops
+		)
 	)
 
-	avoid_ocean_behavior = AvoidOcean.new(_rng_key("avoid_ocean"), 8, inactive_speed / 2)
+	set_avoid_ocean(AvoidOcean.new().init(_rng_key("avoid_ocean"), 8, inactive_speed / 2))
 
 
 func select_next_behavior() -> AnimalBehavior:

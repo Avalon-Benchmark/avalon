@@ -35,7 +35,7 @@ That enables decent code completion _when the Godot editor is running in the bac
 
 Create a file watcher in PyCharm to automatically reformat godot code.
 
-![Setting up GD format](../../../../docs/gdformat_configuration.png)
+![Setting up GD format](../../../../../docs/gdformat_configuration.png)
 
 You'll need to create a new scope called `gd_scope` which can be set to `file:*.gd`
 

@@ -222,15 +222,19 @@ class DebugLogLine(TypedDict):
     items: List[Union[DebugItemLog, DebugAnimalLog]]
 
 
+def _output_folder_for(env: GodotEnv, episode_seed: int) -> Path:
+    dir_root = env.config.get_dir_root()
+    return Path(dir_root) / f"{episode_seed:06d}"
+
+
 def get_debug_json_logs(env: GodotEnv, episode_seed: Optional[int] = None) -> List[DebugLogLine]:
     assert (
         env.config.recording_options.is_debugging_output_requested
-    ), f"env.config.recording_options.is_debugging_output_requested is False, would not have produced a debug log"
-    latest_episode = env.episode_tracker.episodes[-1].seed
+    ), "env.config.recording_options.is_debugging_output_requested is False, would not have produced a debug log"
     if episode_seed is None:
-        episode_seed = latest_episode
-    is_episode_ongoing = not env.process.is_closed and episode_seed == latest_episode
-    debug_path = Path(env.episode_tracker.folder_for(episode_seed)) / "debug.json"
+        episode_seed = env._latest_episode_seed
+    is_episode_ongoing = not env.process.is_closed and episode_seed == env._latest_episode_seed
+    debug_path = _output_folder_for(env, episode_seed) / "debug.json"
     return _read_debug_json_log(debug_path, is_episode_ongoing=is_episode_ongoing)
 
 
