@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict
-from typing import SupportsIndex
+from typing_extensions import SupportsIndex
 from typing import Tuple
 from typing import Union
 
