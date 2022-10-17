@@ -14,7 +14,6 @@ from typing import Iterator
 from typing import KeysView
 from typing import List
 from typing import Optional
-from typing import Protocol
 from typing import Tuple
 from typing import TypeVar
 from typing import Union
@@ -23,6 +22,7 @@ from typing import cast
 
 import numpy as np
 from IPython.core.display import display
+from typing_extensions import Protocol
 
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.contrib.utils import TEMP_DIR

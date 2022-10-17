@@ -16,11 +16,11 @@ from typing import Final
 from typing import Hashable
 from typing import List
 from typing import Optional
-from typing import Protocol
 from typing import Tuple
 
 import attr
 import numpy as np
+from typing_extensions import Protocol
 
 from avalon.common.errors import SwitchError
 from avalon.common.log_utils import logger

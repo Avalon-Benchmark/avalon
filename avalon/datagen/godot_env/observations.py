@@ -6,7 +6,6 @@ from typing import Generic
 from typing import Iterable
 from typing import List
 from typing import Optional
-from typing import Protocol
 from typing import Set
 from typing import Tuple
 from typing import Type
@@ -17,6 +16,7 @@ import attr
 import numpy as np
 from gym import spaces
 from numpy import typing as npt
+from typing_extensions import Protocol
 
 from avalon.common.type_utils import assert_not_none
 from avalon.common.utils import only

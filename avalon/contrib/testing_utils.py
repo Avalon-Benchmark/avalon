@@ -9,7 +9,6 @@ from typing import ContextManager
 from typing import Generator
 from typing import Iterable
 from typing import Optional
-from typing import Protocol
 from typing import TypeVar
 from typing import Union
 from uuid import uuid4
@@ -17,6 +16,7 @@ from uuid import uuid4
 import pytest
 from _pytest.fixtures import Config
 from _pytest.python import Function
+from typing_extensions import Protocol
 
 from avalon.contrib.utils import TEMP_DIR
 

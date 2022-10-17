@@ -1,7 +1,6 @@
 import struct
 from typing import Any
 from typing import Dict
-from typing import Protocol
 from typing import Tuple
 from typing import Type
 from typing import TypeVar
@@ -13,6 +12,7 @@ import gym
 import numpy as np
 from gym import spaces
 from gym.spaces import Box
+from typing_extensions import Protocol
 
 from avalon.common.errors import SwitchError
 from avalon.datagen.godot_base_types import Vector3

@@ -10,7 +10,6 @@ from typing import Generic
 from typing import Iterator
 from typing import List
 from typing import Optional
-from typing import Protocol
 
 import attr
 import torch
@@ -18,6 +17,7 @@ import wandb
 from loguru import logger
 from torch.utils.data import DataLoader
 from tree import map_structure
+from typing_extensions import Protocol
 
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.action_model import visualize_actions

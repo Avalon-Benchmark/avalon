@@ -5,7 +5,6 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Protocol
 from typing import Tuple
 
 import attr
@@ -14,6 +13,7 @@ from godot_parser import GDObject
 from godot_parser import Node as GDNode
 from godot_parser import Vector3 as GDVector3
 from scipy.spatial.transform import Rotation
+from typing_extensions import Protocol
 
 from avalon.common.utils import only
 from avalon.datagen.godot_base_types import FloatRange
