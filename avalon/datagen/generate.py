@@ -225,12 +225,16 @@ class InteractiveGodotProcess:
             extra_flags = extra_flags + tuple([f"--cuda-gpu-id={self.gpu_id}"])
         else:
             assert False
+        resolution = (self.config.recording_options.resolution_x, self.config.recording_options.resolution_y)
+        if self.config.recording_options.is_adding_debugging_views:
+            resolution = (resolution[0] * 2, resolution[1] * 2)
         return [
             f"{NEW_GODOT_PATH}/datagen.sh",
             f"--thread_count=4",
             f"-U",
             f"--input_pipe_path={input_pipe_path}",
             f"--output_pipe_path={output_pipe_path}",
+            f"--resolution={resolution[0]}x{resolution[1]}",
             *extra_flags,
             self.config_path,
         ]

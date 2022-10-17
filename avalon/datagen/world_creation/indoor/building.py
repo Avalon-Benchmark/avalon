@@ -15,7 +15,6 @@ from typing import cast
 import attr
 import networkx as nx
 import numpy as np
-import seaborn as sns
 from godot_parser import GDSubResourceSection
 from godot_parser import Node as GDNode
 from matplotlib import patches as mpatches
@@ -727,6 +726,8 @@ class Building:
         return level_blocks
 
     def plot(self):
+        import seaborn as sns
+
         vmin = min(tile_symbol.value for tile_symbol in TileIdentity)
         colors = {
             "gray": TileIdentity.FULL.value,

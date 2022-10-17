@@ -1,24 +1,21 @@
-# Status
 
-This code is being made public so that it can be reviewed as part of our paper submission to the Neurips Datasets and Benchmarks track.
+# Avalon
 
-A future release (with additional docs, tests, and examples) will be made at a later date.
 
-# Getting started
+## Getting started
 
-## Docker startup (recommended)
+### Docker startup
 
-For running examples and training models,
-the easiest way to get started is to create a docker container:
 
 ```bash
-# build the docker image for PPO (https://openai.com/blog/openai-baselines-ppo/)
+# build the docker image for PPO or Dreamer
 docker build -f ./docker/Dockerfile . --tag=avalon/ppo
 
-# optionally, use the following to build an image that can be used to run torchbeast (https://github.com/facebookresearch/torchbeast)
+# optionally, use the following to build an image that can be used to run Impala using torchbeast (https://github.com/facebookresearch/torchbeast)
 docker build -f ./docker_torchbeast/Dockerfile . --tag=avalon/torchbeast
 
 # start the docker container and forward ports for a jupyter notebook
+# The docker container starts a jupyter notebook by default
 # to enable wandb, add `-e WANDB_API_KEY=<your wandb key>`
 docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabilities=compute,utility,graphics"' avalon/ppo
 ```
@@ -30,7 +27,7 @@ To start training PPO, run the following command:
 docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabilities=compute,utility,graphics"' avalon/ppo ./scripts/ppo.sh
 ```
 
-## Installing locally
+## Installing locally (with pip)
 
 Alternatively, the requirements in `docker/20_requirements.txt` and `docker/21_requirements.txt` can be manually installed locally:
 ```sh
@@ -38,6 +35,9 @@ pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 
 ```
 You will also need to pull out the packages that are pip installed in `docker/41_pip_extras.sh`.
 
+TODO: godot server install (hopefully will be wrapped up in pip).
+
+TODO: godot editor install
 
 ## Using avalon via the OpenAI Gym interface
 
@@ -68,7 +68,7 @@ display_video(observations)
 
 For a full example on how to create random worlds, take actions as an agent, and display the resulting observations, see [gym_interface_example](./notebooks/gym_interface_example.sync.ipynb).
 
-# Notebooks
+## Tutorials
 
 **Using Avalon via the OpenAI Gym interface**
 

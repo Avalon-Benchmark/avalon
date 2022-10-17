@@ -49,3 +49,6 @@ for i, export_config in enumerate(export_configs):
     export_world(output_path, rand, world)
 
 # %%
+
+# TODO: talk about export configs
+# get_oculus_export_config vs other one?

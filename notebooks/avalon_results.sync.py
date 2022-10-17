@@ -22,6 +22,7 @@ from science.common.s3_utils import SimpleS3Client
 s3_client = SimpleS3Client()
 FIXED_WORLD_KEY = "avalon_worlds__0824_full.tar.gz"
 
+
 # to upload
 # data_key = "avalon_worlds__d24d1746-4b0d-43da-bc83-338bc1eab441.tar.gz"
 # s3_client.upload_from_file(Path("/tmp/avalon_worlds/d24d1746-4b0d-43da-bc83-338bc1eab441.tar.gz"), data_key)
