@@ -97,7 +97,7 @@ def make_deterministic(seed: int):
 
 def run_local_command(
     command: str, is_checked: bool = True, trace_output: bool = True
-) -> subprocess.CompletedProcess[bytes]:
+) -> subprocess.CompletedProcess:
     if trace_output:
         print(command)
     # NOTE: do we really have to jump through all these hoops to get live line output?
