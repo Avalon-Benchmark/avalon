@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from typing import OrderedDict as OrderedDictType
 from typing import Any
 from typing import Dict
 from typing_extensions import Final
@@ -23,7 +24,7 @@ from avalon.common.utils import only
 from avalon.datagen.godot_generated_types import FAKE_TYPE_IMAGE as GENERATED_FAKE_TYPE_IMAGE
 
 # Mapping of feature name to (data_type, shape).
-FeatureSpecDict = OrderedDict[str, Tuple[int, Tuple[int, ...]]]
+FeatureSpecDict = OrderedDictType[str, Tuple[int, Tuple[int, ...]]]
 
 # Data dictionary of features, interpretable by a `FeatureSpecDict`
 FeatureDataDict = Dict[str, npt.NDArray]
