@@ -67,4 +67,4 @@ train = [
 find = {}
 
 [tool.setuptools.package-data]
-avalon = ["*py.typed"]
+avalon = ["*py.typed", "godot/**"]
