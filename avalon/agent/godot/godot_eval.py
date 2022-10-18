@@ -41,7 +41,7 @@ RESULT_TAG = "DATALOADER:0 TEST RESULTS"
 def log_rollout_stats_packed(
     packed_rollouts: Dict[str, npt.NDArray], infos: Dict[int, List[Dict[str, npt.NDArray]]], i: int
 ) -> None:
-    successes: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
+    successes: Dict[str, Dict[str, list]] = defaultdict(lambda: defaultdict(list))
     keys = ["success", "difficulty"]
     for worker, timestep in np.argwhere(packed_rollouts["dones"]):
         info = infos[worker][timestep]
@@ -57,7 +57,7 @@ def log_rollout_stats_packed(
 
 def log_rollout_stats(rollouts: List[List[StepData]], i: int) -> None:
     """Log stats, when rollouts is a collection of episode fragments."""
-    successes: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
+    successes: Dict[str, Dict[str, list]] = defaultdict(lambda: defaultdict(list))
     keys = ["success", "difficulty"]
     for fragment in rollouts:
         for timestep in fragment:
@@ -237,7 +237,7 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
     player.shutdown()
 
     end_time = time.monotonic()
-    test_log: dict[str, float] = {"test_time": end_time - start_time}
+    test_log: Dict[str, float] = {"test_time": end_time - start_time}
     if log_extra is not None:
         test_log.update(log_extra)
     total_episodes_logged = 0

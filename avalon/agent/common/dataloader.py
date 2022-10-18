@@ -2,6 +2,7 @@ import pathlib
 import pickle
 import random
 import time
+from typing import Dict
 from typing import Iterator
 from typing import List
 
@@ -47,7 +48,7 @@ class ReplayDataset(IterableDataset):
 
     def __init__(self, params: OffPolicyParams, storage_dir: str, update_interval: int = 100):
         self.params = params
-        self.cache: dict[str, SequenceData] = {}
+        self.cache: Dict[str, SequenceData] = {}
         # For O(1) key sampling. Must manually maintain that set(self.storage.keys()) == set(self.storage_keys)
         self.cache_keys: List[str] = []
         self.storage_dir = pathlib.Path(storage_dir).expanduser()

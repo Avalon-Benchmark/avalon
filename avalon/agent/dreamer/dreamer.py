@@ -1,5 +1,6 @@
 import itertools
 from typing import Any
+from typing import Dict
 from typing import Optional
 from typing import Tuple
 from typing import List
@@ -202,7 +203,7 @@ class Dreamer(Algorithm[DreamerParams]):
         state = (latent, action)
         return action, state
 
-    def _imagine_ahead(self, start: LatentBatch, dones: Tensor) -> dict[str, Any]:
+    def _imagine_ahead(self, start: LatentBatch, dones: Tensor) -> Dict[str, Any]:
         # In the sequence, at a given index, it's an (action -> state) pair. action comes first.
         # Thus the dummy "0" action at the front.
 
@@ -283,7 +284,7 @@ class Dreamer(Algorithm[DreamerParams]):
         # as we actually do). We don't want to try to predict this, if we need to know if the episode ended,
         # we have a pcont signal for that.
         # For done but non-terminal (time limit), we should still be given the true next frame, so predicting that is fine.
-        likelihoods: dict[str, Tensor] = {}
+        likelihoods: Dict[str, Tensor] = {}
         # likelihoods["obs"] = sum([(x * autoencoder_mask).mean() for x in obs_likelihoods.values()])
         likelihoods |= {k: (v * autoencoder_mask).mean() for k, v in obs_likelihoods.items()}
         likelihoods["reward"] = reward_pred.log_prob(rewards).mean()

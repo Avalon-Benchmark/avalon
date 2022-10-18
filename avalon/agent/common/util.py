@@ -13,7 +13,7 @@ from torch import Tensor
 
 def pack_1d_list(sequence: List, out_cls: Type):
     """Pack a list of StepDatas into a BatchData, or a list of SequenceDatas into a BatchSequenceData"""
-    out: dict[str, Any] = {}
+    out: Dict[str, Any] = {}
     for field_obj in attr.fields(type(sequence[0])):
         field = field_obj.name
         if field == "info":
@@ -33,7 +33,7 @@ def pack_1d_list(sequence: List, out_cls: Type):
 
 def pack_2d_list(batch: List[List], out_cls: Type):
     """Pack a batch of StepDatas into a BatchSequenceData (or subclass)"""
-    out: dict[str, Any] = {}
+    out: Dict[str, Any] = {}
     for k_obj in attr.fields(type(batch[0][0])):
         k = k_obj.name
         if k == "info":
@@ -48,7 +48,7 @@ def pack_2d_list(batch: List[List], out_cls: Type):
                 [torch.stack([getattr(transition, k) for transition in trajectory]) for trajectory in batch]
             )
         elif isinstance(example, dict):
-            out2: dict[str, Any] = {}
+            out2: Dict[str, Any] = {}
             for k2 in example.keys():
                 out2[k2] = torch.stack(
                     [torch.stack([getattr(transition, k)[k2] for transition in trajectory]) for trajectory in batch]

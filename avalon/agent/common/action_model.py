@@ -293,7 +293,7 @@ def visualize_action_dists(
 
 
 def visualize_actions(
-    action_space: gym.spaces.Dict, action_dict: dict[str, Tensor], prefix: str = "actions", freq: Optional[int] = None
+    action_space: gym.spaces.Dict, action_dict: Dict[str, Tensor], prefix: str = "actions", freq: Optional[int] = None
 ):
     """Log a batch of actions to wandb (any batch shape is fine)."""
     for k, space in action_space.spaces.items():

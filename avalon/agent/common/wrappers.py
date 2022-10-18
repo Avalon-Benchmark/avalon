@@ -30,8 +30,8 @@ from torchvision import transforms
 
 # All wrappers should operate only on ndarrays, no torch Tensors!
 ArrayType = nptyping.NDArray
-DictActionType = dict[str, ArrayType]
-DictObservationType = dict[str, ArrayType]
+DictActionType = Dict[str, ArrayType]
+DictObservationType = Dict[str, ArrayType]
 
 GenericObservationType = TypeVar("GenericObservationType")
 GenericActionType = TypeVar("GenericActionType")
@@ -231,8 +231,8 @@ class OneHotActionWrapper(gym.ActionWrapper):
             if isinstance(space, gym.spaces.MultiBinary):
                 self.action_space.spaces[k] = OneHotMultiDiscrete([2] * space.n)
 
-    def action(self, action_dict: DictActionType) -> dict[str, Any]:
-        out: dict[str, Any] = copy.copy(action_dict)
+    def action(self, action_dict: DictActionType) -> Dict[str, Any]:
+        out: Dict[str, Any] = copy.copy(action_dict)
         for k, space in self._env.action_space.spaces.items():
             action = action_dict[k]
             assert isinstance(action, NDArray)
@@ -377,7 +377,7 @@ class DictFrameStack(gym.ObservationWrapper):
         self.num_stack = num_stack
 
         assert isinstance(env.observation_space, gym.spaces.Dict)
-        new_observation_space: dict[str, gym.Space] = {}
+        new_observation_space: Dict[str, gym.Space] = {}
         for k, space in env.observation_space.spaces.items():
             if isinstance(space, gym.spaces.Box):
                 low = np.repeat(space.low, num_stack, axis=0)
@@ -387,14 +387,14 @@ class DictFrameStack(gym.ObservationWrapper):
                 assert False, (k, space)
 
         self.observation_space = gym.spaces.Dict(new_observation_space)
-        self.history: dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
+        self.history: Dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
 
-    def add_to_history(self, obs: dict[str, NDArray]) -> None:
+    def add_to_history(self, obs: Dict[str, NDArray]) -> None:
         for k, v in obs.items():
             self.history[k].append(v)
 
     def reset(self, **kwargs):
-        self.history: dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
+        self.history: Dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
         obs = self.env.reset(**kwargs)
         # We'll initialize the buffer with copies of the first frame
         [self.add_to_history(obs) for _ in range(self.num_stack - 1)]
@@ -402,7 +402,7 @@ class DictFrameStack(gym.ObservationWrapper):
 
     def observation(self, obs: Dict[str, NDArray]) -> Dict[str, NDArray]:
         self.add_to_history(obs)
-        out: dict[str, NDArray] = {}
+        out: Dict[str, NDArray] = {}
         for k, v in obs.items():
             assert len(self.history[k]) == self.num_stack
             # images should be chw, and scalars/vectors should be stacked on dim 0 also

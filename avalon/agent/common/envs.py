@@ -1,6 +1,7 @@
 import os
 import subprocess
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Tuple
 from typing import cast
@@ -189,7 +190,7 @@ class DeepMindControl(gym.Env):
 
     @property
     def observation_space(self) -> gym.spaces.Dict:  # type: ignore[override]
-        spaces: dict[str, gym.Space] = {}
+        spaces: Dict[str, gym.Space] = {}
         if self.include_state:
             for key, value in self._env.observation_spec().items():
                 logger.warning("gym spaces do not give observation ranges. no rescaling will be applied.")

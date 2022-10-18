@@ -143,7 +143,7 @@ class DiskStorage(TrajectoryStorage):
         if self.params.env_params.suite == "godot":
             # Can't use log_rollout_stats because these are full episodes, not fragments,
             # so the analysis is a bit different. We can make stronger statements here.
-            successes: dict[str, dict[str, Any]] = defaultdict(lambda: defaultdict(list))
+            successes: Dict[str, Dict[str, Any]] = defaultdict(lambda: defaultdict(list))
             keys = ["success", "difficulty"]
             for episode in self.recent_eps:
                 last_step = episode[-1]
