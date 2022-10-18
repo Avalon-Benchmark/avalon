@@ -5,13 +5,13 @@ import time
 from collections import OrderedDict
 from io import BufferedReader
 from io import BufferedWriter
-from math import prod
 from threading import Thread
 from types import TracebackType
 from typing import Any
 from typing import Dict
 from typing import Generic
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Type
 from typing import cast
@@ -46,6 +46,13 @@ FeatureDataDict = Dict[str, npt.NDArray]
 
 _BINARY_READ: Literal["br"] = "br"
 _BINARY_WRITE: Literal["bw"] = "bw"
+
+
+def prod(values: Sequence[int]) -> int:
+    value = 1
+    for v in values:
+        value *= v
+    return v
 
 
 class _BridgeKillSwitch:

@@ -5,7 +5,6 @@ import shutil
 import struct
 from collections import defaultdict
 from io import BufferedReader
-from math import prod
 from pathlib import Path
 from typing import Any
 from typing import BinaryIO
@@ -83,6 +82,13 @@ DISCRETE_KEYS = [
 def _write_message(fp: BinaryIO, message_type: int, message: bytes):
     fp.write(message_type.to_bytes(1, byteorder="little", signed=False))
     fp.write(message)
+
+
+def prod(values: Sequence[int]) -> int:
+    value = 1
+    for v in values:
+        value *= v
+    return v
 
 
 def get_replay_log_from_human_recording(
