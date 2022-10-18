@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Dict
 from typing import Tuple
+from typing import List
 
 import torch
 from gym import Space
@@ -131,12 +132,12 @@ class ImpalaConvNet(nn.Module):
     def __init__(self, out_dim: int = 256, img_dim: int = 96, input_channels: int = 4):
         super().__init__()
 
-        feat_convs: list[Module] = []
-        resnet1: list[Module] = []
-        resnet2: list[Module] = []
+        feat_convs: List[Module] = []
+        resnet1: List[Module] = []
+        resnet2: List[Module] = []
 
         for num_ch in [16, 32, 32]:
-            sub_feats_convs: list[Module] = []
+            sub_feats_convs: List[Module] = []
             sub_feats_convs.append(
                 nn.Conv2d(
                     in_channels=input_channels,
@@ -152,7 +153,7 @@ class ImpalaConvNet(nn.Module):
             input_channels = num_ch
 
             for i in range(2):
-                resnet_block: list[Module] = []
+                resnet_block: List[Module] = []
                 resnet_block.append(nn.ReLU())
                 resnet_block.append(
                     nn.Conv2d(

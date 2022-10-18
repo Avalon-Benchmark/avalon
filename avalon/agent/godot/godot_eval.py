@@ -241,11 +241,11 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
     if log_extra is not None:
         test_log.update(log_extra)
     total_episodes_logged = 0
-    all_successes: list[float] = []
+    all_successes: List[float] = []
     for task, success_by_difficulty_bin in success_by_task_and_difficulty_bin.items():
         if log:
             log_success_by_difficulty(success_by_difficulty_bin, suffix=task)
-        task_successes: list[int] = sum(list(success_by_difficulty_bin.values()), [])
+        task_successes: List[int] = sum(list(success_by_difficulty_bin.values()), [])
         all_successes.extend(task_successes)
         test_log[f"{task}_success_rate"] = float(np.mean(task_successes))
         for difficulty_bin, successes in success_by_difficulty_bin.items():

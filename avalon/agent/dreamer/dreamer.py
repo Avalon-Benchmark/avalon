@@ -2,6 +2,7 @@ import itertools
 from typing import Any
 from typing import Optional
 from typing import Tuple
+from typing import List
 
 import gym
 import numpy as np
@@ -117,7 +118,7 @@ class Dreamer(Algorithm[DreamerParams]):
         self,
         next_obs: ObservationBatch,
         dones: Tensor,
-        indices_to_run: list[bool],
+        indices_to_run: List[bool],
         exploration_mode: str,
     ) -> Tuple[ActionBatch, AlgorithmInferenceExtraInfoBatch]:
         # Only used in the GamePlayer

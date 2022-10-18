@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Tuple
 from typing import Type
+from typing import List
 
 import attr
 import gym
@@ -96,7 +97,7 @@ class PPO(Algorithm["PPOParams"]):
         self,
         next_obs: ObservationBatch,
         dones: Tensor,  # shape (batch_size, )
-        indices_to_run: list[bool],  # shape (batch_size, )
+        indices_to_run: List[bool],  # shape (batch_size, )
         exploration_mode: str,
     ) -> Tuple[ActionBatch, PPOInferenceExtraInfoBatch]:
         step_values: Tensor

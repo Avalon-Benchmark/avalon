@@ -211,7 +211,7 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
         wandb.require(experiment="service")
         wandb.setup()
 
-        self.train_rollout_managers: list[AsyncRolloutManager] = []
+        self.train_rollout_managers: List[AsyncRolloutManager] = []
         super().__init__(params)
         ModelStorage.clean()
 

@@ -584,7 +584,7 @@ def _print_array(array: np.ndarray, precision: int) -> str:
 def create_multimesh_instance(
     scene: GodotScene,
     name: str,
-    instances: list[Scenery],
+    instances: List[Scenery],
     resource_file: str,
     flora_config: Dict[str, FloraConfig],
 ):

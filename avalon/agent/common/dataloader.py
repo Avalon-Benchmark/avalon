@@ -3,6 +3,7 @@ import pickle
 import random
 import time
 from typing import Iterator
+from typing import List
 
 import attr
 import numpy as np
@@ -48,7 +49,7 @@ class ReplayDataset(IterableDataset):
         self.params = params
         self.cache: dict[str, SequenceData] = {}
         # For O(1) key sampling. Must manually maintain that set(self.storage.keys()) == set(self.storage_keys)
-        self.cache_keys: list[str] = []
+        self.cache_keys: List[str] = []
         self.storage_dir = pathlib.Path(storage_dir).expanduser()
         self.storage_dir.mkdir(parents=True, exist_ok=True)
         self.time_since_last_update = None
