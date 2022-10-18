@@ -9,7 +9,6 @@ from pathlib import Path
 from posixpath import basename
 from signal import SIGKILL
 from signal import Signals
-from signal import valid_signals
 from typing import Callable
 from typing import Deque
 from typing import Iterable
@@ -322,9 +321,11 @@ class InteractiveGodotProcess:
         if self.process is None or not self.process.returncode:
             return ""
         signal = abs(self.process.returncode)
-        matching_known_signal = (s.name for s in valid_signals() if isinstance(s, Signals) and s.value == signal)
-        name = next(matching_known_signal, "UNKNOWN")
-        return f"returncode={name}({self.process.returncode})"
+        try:
+            signal_name = Signals(signal).name
+        except ValueError:
+            signal_name = "UNKNOWN"
+        return f"returncode={signal_name}({self.process.returncode})"
 
     def _raise_error(self, log_content: Optional[str] = None):
         _raise_godot_error(
