@@ -9,7 +9,7 @@ from multiprocessing import Pool
 from pathlib import Path
 from typing import List
 from typing import Sequence
-from typing import TypedDict
+from typing_extensions import TypedDict
 
 import requests
 from loguru import logger

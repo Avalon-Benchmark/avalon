@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Dict
 from typing import Optional
-from typing import TypedDict
+from typing_extensions import TypedDict
 from typing import cast
 
 import numpy as np

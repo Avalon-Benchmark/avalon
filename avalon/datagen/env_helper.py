@@ -9,7 +9,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Type
-from typing import TypedDict
+from typing_extensions import TypedDict
 from typing import Union
 
 import numpy as np
