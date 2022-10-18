@@ -49,10 +49,10 @@ _BINARY_WRITE: Literal["bw"] = "bw"
 
 
 def prod(values: Sequence[int]) -> int:
-    value = 1
+    p = 1
     for v in values:
-        value *= v
-    return v
+        p *= v
+    return p
 
 
 class _BridgeKillSwitch:

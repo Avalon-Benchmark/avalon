@@ -85,10 +85,10 @@ def _write_message(fp: BinaryIO, message_type: int, message: bytes):
 
 
 def prod(values: Sequence[int]) -> int:
-    value = 1
+    p = 1
     for v in values:
-        value *= v
-    return v
+        p *= v
+    return p
 
 
 def get_replay_log_from_human_recording(
