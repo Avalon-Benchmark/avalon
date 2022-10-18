@@ -2,6 +2,7 @@
 # TODO: type this file that's not used in production
 from abc import abstractmethod
 from typing import Callable
+from typing import Tuple
 
 import gym
 import numpy as np
@@ -16,7 +17,7 @@ from avalon.agent.common.types import ObservationBatch
 
 class PPOModel(Module):
     @abstractmethod
-    def forward(self, obs: ObservationBatch) -> tuple[Tensor, DictActionDist]:
+    def forward(self, obs: ObservationBatch) -> Tuple[Tensor, DictActionDist]:
         raise NotImplementedError
 
 

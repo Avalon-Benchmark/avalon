@@ -11,6 +11,7 @@ from typing import Deque
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 from typing import TypeVar
 from typing import Union
 
@@ -67,7 +68,7 @@ class DictObsActionWrapper(Wrapper[DictObservationType, DictActionType]):
         observation = self.env.reset(*args, **kwargs)
         return self.observation(observation)
 
-    def step(self, action: DictActionType) -> tuple[DictObservationType, float, bool, dict]:
+    def step(self, action: DictActionType) -> Tuple[DictObservationType, float, bool, dict]:
         unwrapped_action = self.action(action)
         observation, reward, done, info = self.env.step(unwrapped_action)
         return self.observation(observation), reward, done, info
@@ -257,7 +258,7 @@ class TimeLimit(gym.Wrapper[GenericObservationType, GenericActionType]):
         self._max_episode_steps: Optional[int] = max_episode_steps
         self._elapsed_steps: Optional[int] = None
 
-    def step(self, action: GenericActionType) -> tuple[GenericObservationType, float, bool, dict]:
+    def step(self, action: GenericActionType) -> Tuple[GenericObservationType, float, bool, dict]:
         assert self._max_episode_steps is not None, "max_episode_steps must be set"
         assert self._elapsed_steps is not None, "Cannot call env.step() before calling reset()"
         observation, reward, done, info = self.env.step(action)
@@ -288,7 +289,7 @@ class ElapsedTimeWrapper(gym.Wrapper[DictObservationType, GenericActionType]):
         observation["elapsed_time"] = np.array(((self._elapsed_steps / self._max_episode_steps) - 0.5) * 2)
         return observation
 
-    def step(self, action: GenericActionType) -> tuple[DictObservationType, float, bool, dict]:
+    def step(self, action: GenericActionType) -> Tuple[DictObservationType, float, bool, dict]:
         assert self._elapsed_steps is not None, "Cannot call env.step() before calling reset()"
         observation, reward, done, info = self.env.step(action)
         self._elapsed_steps += 1
@@ -351,7 +352,7 @@ class ActionRepeat(gym.Wrapper[GenericObservationType, GenericActionType]):
         super().__init__(env)
         self._amount = amount
 
-    def step(self, action: GenericActionType) -> tuple[GenericObservationType, float, bool, dict]:
+    def step(self, action: GenericActionType) -> Tuple[GenericObservationType, float, bool, dict]:
         done = False
         total_reward = 0
         current_step = 0

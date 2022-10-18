@@ -319,7 +319,7 @@ class AvalonGodotEnvWrapper(GodotEnv[AvalonObservationType, VRActionType]):
             assert isinstance(self.goal_evaluator, GodotGoalEvaluator)
             lame_observation["frame_id"] = self.goal_evaluator.frame_limit - lame_observation["frame_id"] - 1
 
-    def step(self, action: Dict[str, np.ndarray]) -> tuple[AvalonObservationType, float, bool, dict]:
+    def step(self, action: Dict[str, np.ndarray]) -> Tuple[AvalonObservationType, float, bool, dict]:
         observation, goal_progress = self.act(self.action_type.from_input(action))
         lame_observation = self.observation_context.lamify(observation)
         self.update_lame_observation(lame_observation)

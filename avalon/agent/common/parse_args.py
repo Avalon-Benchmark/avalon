@@ -2,6 +2,7 @@ import sys
 import typing
 from enum import EnumMeta
 from typing import Any
+from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
@@ -49,7 +50,7 @@ def cast_argument_to_paramater_type(key: str, value: str, params: Any) -> Any:
     elif dtype == list[str]:
         # use comma-separated list with no spaces
         return value.split(",")
-    elif dtype == tuple[str, ...]:
+    elif dtype == Tuple[str, ...]:
         # use comma-separated list with no spaces
         return tuple(value.split(","))
     else:
