@@ -3,13 +3,27 @@ set -e
 set -u
 set -x
 
-# TODO: update to 3.4.4.7
-wget -nv https://github.com/Avalon-Benchmark/godot/releases/download/3.4.4.avalon.0.4/godot.egl.opt.64        -O /usr/local/bin/godot-3.4.4-egl-fast
-wget -nv https://github.com/Avalon-Benchmark/godot/releases/download/3.4.4.avalon.0.4/godot.egl.opt.tools.64  -O /usr/local/bin/godot-3.4.4-egl-safe
+pushd /tmp
+
+GODOT=3.4.4
+PATCH=0.9.1
+
+RUNNER=/usr/local/bin/godot-runner-$GODOT-$PATCH
+EDITOR=/usr/local/bin/godot-editor-$GODOT-$PATCH
+
+wget -nv https://github.com/Avalon-Benchmark/godot/releases/download/$GODOT.avalon.$PATCH/linux-egl-runner.zip
+wget -nv https://github.com/Avalon-Benchmark/godot/releases/download/$GODOT.avalon.$PATCH/linux-egl-editor.zip
+
+unzip ./linux-egl-runner.zip
+unzip ./linux-egl-editor.zip
+
+mv -f ./godot.egl.opt.debug.64 $RUNNER
+mv -f ./godot.egl.opt.tools.64 $EDITOR
 
 chmod +x /usr/local/bin/godot-*
 
-# NOTE: using the safe binary for easier debugging
-ln -s /usr/local/bin/godot-3.4.4-egl-safe /usr/local/bin/godot
+ln -s $EDITOR /usr/local/bin/godot
 
-rm -rf /tmp/*
+popd
+
+rm -rf /tmp/*.zip
