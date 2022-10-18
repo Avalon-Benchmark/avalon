@@ -136,10 +136,10 @@ def create_world(
         generation_function(rand, difficulty, export_path, export_config)
     except ImpossibleWorldError:
         logger.error(
-            f"Got ImpossibleWorldError while generating world for {task=}, {difficulty=}, {seed=}, path will be empty"
+            f"Got ImpossibleWorldError while generating world for {task}, {difficulty}, {seed}, path will be empty"
         )
     except Exception as e:
-        # logger.error(f"Got '{type(e)}: {e.args}' while generating world for {task=}, {difficulty=}, {seed=}")
+        # logger.error(f"Got '{type(e)}: {e.args}' while generating world for {task}, {difficulty}, {seed}")
         raise
     return export_path
 

@@ -213,7 +213,7 @@ class HeightPath:
         start_height = map.get_rough_height_at_point(start_point)
         end_height = map.get_rough_height_at_point(end_point)
         height_delta = end_height - start_height
-        # logger.debug(f"{height_delta=}")
+        # logger.debug(f"{height_delta}")
 
         if self.is_solution_flattened or self.is_chasm_bottom_flattened:
             assert not self.is_height_affected, "Flattening and affecting height are mutually exclusive"

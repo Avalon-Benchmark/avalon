@@ -1058,7 +1058,7 @@ class DefaultEntranceBuilder(EntranceBuilder):
 
         # TODO: 1d9f913a-3870-41b0-839e-8b29d0b89983
         if len(viable_connections) == 0:
-            raise ImpossibleWorldError(f"Can't build entryway to any room ({permitted_room_ids=})")
+            raise ImpossibleWorldError(f"Can't build entryway to any room ({permitted_room_ids})")
         connection_idx = rand.choice(list(range(len(viable_connections))))
         connected_room_id, azimuth, hallway_points = viable_connections[connection_idx]
 

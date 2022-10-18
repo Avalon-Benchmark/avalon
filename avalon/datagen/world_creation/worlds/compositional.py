@@ -500,7 +500,7 @@ def create_compositional_task(
         is_raised_island_mode = rand.uniform() < task_config.is_raised_island_mode_probability
 
         if is_debug_graph_printing_enabled:
-            logger.debug(f"{is_raised_island_mode=}")
+            logger.debug(f"{is_raised_island_mode}")
         if is_raised_island_mode:
             # add as many ring obstacles as we can (up to the max we want)
 
@@ -706,8 +706,8 @@ def create_compositional_task(
         world = attr.evolve(world, buildings=tuple([new_building]))
 
     if is_debug_graph_printing_enabled:  # TODO KJ
-        logger.debug(f"{obstacle_count=}")
-        logger.debug(f"{desired_obstacle_count=}")
+        logger.debug(f"{obstacle_count}")
+        logger.debug(f"{desired_obstacle_count}")
 
     # add any required buildings
     for i in range(building_count):

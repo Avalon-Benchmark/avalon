@@ -794,7 +794,7 @@ class World(Serializable):  # type: ignore[no-untyped-def]  # mypy bug?
                 if ring.config.expansion_meters > 0.0:
                     expanded_mask = mask.copy()
                     cell_units = int(ring.config.expansion_meters * map_new.cells_per_meter) + 1
-                    # logger.debug(f"{cell_units=}")
+                    # logger.debug(f"{cell_units}")
                     nearby = morphology.dilation(expanded_mask > 0.0, morphology.disk(cell_units))
                     expanded_mask[nearby] = np.clip(expanded_mask[nearby], 0.001, None)
                     expanded_mask[np.logical_not(island_mask)] = 0.0
