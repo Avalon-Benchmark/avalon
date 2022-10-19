@@ -23,12 +23,12 @@ from psutil import NoSuchProcess
 from psutil import Process
 
 from avalon.agent.godot.godot_gym import LEVEL_OUTPUT_PATH
-from avalon.agent.godot.godot_gym import AvalonGodotEnvWrapper
+from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import GodotObsTransformWrapper
 from avalon.agent.godot.godot_gym import ScaleAndSquashAction
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
-from avalon.agent.godot.godot_gym import VRActionType
+from avalon.agent.godot.godot_gym import VRAction
 from avalon.agent.godot.godot_gym import task_groups_from_training_protocol
 from avalon.agent.torchbeast.core.environment import Environment
 from avalon.agent.torchbeast.core.vtrace import VTraceFromLogitsReturns
@@ -41,7 +41,7 @@ from avalon.datagen.world_creation.world_generator import get_world_params_for_t
 
 def get_dict_action_space(num_actions: int):
     # return spaces.Dict({"discrete": spaces.Discrete(num_actions)})
-    return VRActionType.to_gym_space()
+    return VRAction.to_gym_space()
 
 
 class DictifyAtari(gym.Wrapper):
@@ -343,7 +343,7 @@ def get_avalon_test_scores(prefix: str = "test/") -> Dict[str, float]:
 
 def create_godot_env(params: WrappedGodotEnvironmentParams):
     logger.info(f"Creating godot env with params {params}")
-    env = AvalonGodotEnvWrapper(params.env_params)
+    env = AvalonEnv(params.env_params)
     # env = WarpFrame(env, grayscale=False, dict_space_key="rgb")
     env = ScaleAndSquashAction(env)
     env = FlattenAction(env)

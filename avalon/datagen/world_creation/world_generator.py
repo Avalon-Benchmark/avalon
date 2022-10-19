@@ -13,14 +13,18 @@ from typing import Any
 from typing import ClassVar
 from typing import Dict
 from typing import Final
+from typing import Generic
 from typing import Hashable
 from typing import List
 from typing import Optional
 from typing import Protocol
 from typing import Tuple
+from typing import TypeVar
+from typing import cast
 
 import attr
 import numpy as np
+from godot_parser import Node as GDNode
 
 from avalon.common.errors import SwitchError
 from avalon.common.log_utils import logger
@@ -53,6 +57,7 @@ from avalon.datagen.world_creation.tasks.scramble import generate_scramble_task
 from avalon.datagen.world_creation.tasks.stack import generate_stack_task
 from avalon.datagen.world_creation.tasks.survive import generate_survive_task
 from avalon.datagen.world_creation.tasks.throw import generate_throw_task
+from avalon.datagen.world_creation.types import GodotScene
 from avalon.datagen.world_creation.worlds.difficulty import select_categorical_difficulty
 
 DEFAULT_WORLD_ID: Final = 0
@@ -60,15 +65,7 @@ DEFAULT_WORLD_ID: Final = 0
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class GenerateWorldParams(Serializable):
-    task: AvalonTask
-    difficulty: float
-    seed: int
-    index: int
     output: str
-    # this parameter is a trade-off between how quickly you will hear about a task generator that is
-    # totally busted (lower values) vs the probability that your process crashed because you just got unlucky
-    # (higher values). Can set to inf if you're sure there are no bugs and you definitely want it to run until it finds a level...
-    num_retries: int = 5
 
     @property
     def output_path(self) -> Path:
@@ -81,16 +78,32 @@ class GenerateWorldParams(Serializable):
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class GeneratedWorldParams(GenerateWorldParams):
-    SERIALIZED_FILE_NAME: ClassVar = "params.json"
-
     @classmethod
     def from_input(cls, input_params: GenerateWorldParams) -> "GeneratedWorldParams":
         return cls(**attr.asdict(input_params))
 
-    @classmethod
-    def from_world_path(cls, existing_world_path: Path) -> "GeneratedWorldParams":
-        with open(existing_world_path / cls.SERIALIZED_FILE_NAME) as file:
-            return cls.from_dict(json.load(file))
+
+@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
+class GenerateAvalonWorldParams(GenerateWorldParams):
+    task: AvalonTask
+    difficulty: float
+    seed: int
+    index: int
+    output: str
+    # this parameter is a trade-off between how quickly you will hear about a task generator that is
+    # totally busted (lower values) vs the probability that your process crashed because you just got unlucky
+    # (higher values). Can set to inf if you're sure there are no bugs and you definitely want it to run until it finds a level...
+    num_retries: int = 5
+
+
+@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
+class GeneratedAvalonWorldParams(GenerateAvalonWorldParams, GeneratedWorldParams):
+    SERIALIZED_FILE_NAME: ClassVar = "params.json"
+
+    @staticmethod
+    def from_world_path(existing_world_path: Path) -> "GeneratedAvalonWorldParams":
+        with open(existing_world_path / GeneratedAvalonWorldParams.SERIALIZED_FILE_NAME) as file:
+            return GeneratedAvalonWorldParams.from_dict(json.load(file))
 
     def save_to_output_path(self):
         serialized_path = self.output_path / self.SERIALIZED_FILE_NAME
@@ -98,25 +111,46 @@ class GeneratedWorldParams(GenerateWorldParams):
             json.dump(self.to_dict(), file)
 
 
-class WorldGenerator:
+GenerateWorldParamsType = TypeVar("GenerateWorldParamsType", bound=GenerateWorldParams)
+GeneratedWorldParamsType = TypeVar("GeneratedWorldParamsType", bound=GeneratedWorldParams)
+
+
+class WorldGenerator(Generic[GeneratedWorldParamsType]):
     def __init__(self, base_path: Path, seed: int):
         self.output_path = base_path / str(uuid.uuid4())
         self.output_path.mkdir(parents=True, exist_ok=False)
         self.set_seed(seed)
 
-    def load_already_generated_params(self, world_index: int) -> Optional[GeneratedWorldParams]:
-        world_path = Path(self.output_path) / str(world_index)
-        if not world_path.exists():
-            return None
-        return GeneratedWorldParams.from_world_path(world_path)
-
-    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParamsType]:
         """
         :returns: a (batch_size)-long list of folders (one folder per scene).
-        The folder can be assumed to contained a "main.tscn" file
+        The folder can be assumed to contain a "main.tscn" file
         """
         raise NotImplementedError()
 
+    def set_seed(self, seed: int):
+        self._seed = seed
+
+    def close(self):
+        if self.output_path.exists():
+            shutil.rmtree(self.output_path)
+
+
+class EmptyLevelGenerator(WorldGenerator[GeneratedWorldParams]):
+    def __init__(self, base_path: Path, seed: int):
+        super().__init__(base_path, seed)
+        scene = GodotScene()
+        env = scene.add_sub_resource("Environment")
+        with scene.use_tree() as tree:
+            tree.root = GDNode("WorldEnvironment", type="WorldEnvironment", properties=dict(environment=env.reference))
+        scene.write(str(self.output_path.absolute() / "main.tscn"))
+
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
+        assert batch_size == 1
+        return [GeneratedWorldParams(str(self.output_path))]
+
+
+class AvalonWorldGenerator(WorldGenerator[GeneratedAvalonWorldParams]):
     def sample_tasks(self, n_tasks: int) -> List[Hashable]:
         """Samples task of the meta-environment
 
@@ -144,21 +178,20 @@ class WorldGenerator:
         """
         raise NotImplementedError()
 
-    def set_seed(self, seed: int):
-        self._seed = seed
+    def load_already_generated_params(self, world_index: int) -> Optional[GeneratedAvalonWorldParams]:
+        world_path = Path(self.output_path) / str(world_index)
+        if not world_path.exists():
+            return None
+        return GeneratedAvalonWorldParams.from_world_path(world_path)
 
-    def close(self):
-        if self.output_path.exists():
-            shutil.rmtree(self.output_path)
 
-
-class SingleTaskWorldGenerator(WorldGenerator):
+class SingleTaskWorldGenerator(AvalonWorldGenerator):
     def __init__(self, base_path: Path, seed: int, difficulty: float, task: AvalonTask):
         super().__init__(base_path, seed)
         self.difficulty = difficulty
         self.task = task
 
-    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedAvalonWorldParams]:
         """
         :returns: a (batch_size)-long list of folders (one folder per scene).
         The folder can be assumed to contained a "main.tscn" file
@@ -192,7 +225,7 @@ def rand_task_with_difficulty(
     return rand.choice(TASKS_BY_TASK_GROUP[task_group])  # type: ignore
 
 
-class BlockingWorldGenerator(WorldGenerator):
+class BlockingWorldGenerator(AvalonWorldGenerator):
     def __init__(
         self,
         base_path: Path,
@@ -205,12 +238,12 @@ class BlockingWorldGenerator(WorldGenerator):
         self.task_groups = task_groups
         self.meta_difficulty = start_difficulty
 
-    def _generate_world(self, i: int) -> GeneratedWorldParams:
+    def _generate_world(self, i: int) -> GeneratedAvalonWorldParams:
         rand = np.random.default_rng([self._seed, i])
         task = rand_task_with_difficulty(self.task_groups, self.meta_difficulty, rand)
 
         return generate_world(
-            GenerateWorldParams(
+            GenerateAvalonWorldParams(
                 task=task,
                 difficulty=self.difficulties[task],
                 seed=self._seed,
@@ -219,7 +252,7 @@ class BlockingWorldGenerator(WorldGenerator):
             )
         )
 
-    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedAvalonWorldParams]:
         if start_world_id is None:
             start_world_id = DEFAULT_WORLD_ID
         return [self._generate_world(i) for i in range(start_world_id, start_world_id + batch_size)]
@@ -248,13 +281,13 @@ def get_world_params_for_task_groups(
     difficulties: Tuple[float, ...],
     output_path: Path,
     seed: int,
-) -> List[GenerateWorldParams]:
-    worlds: List[GenerateWorldParams] = []
+) -> List[GenerateAvalonWorldParams]:
+    worlds: List[GenerateAvalonWorldParams] = []
     index = 0
     for task in get_all_tasks_for_task_groups(task_groups):
         for difficulty in difficulties:
             worlds.append(
-                GenerateWorldParams(
+                GenerateAvalonWorldParams(
                     task=task,
                     difficulty=difficulty,
                     seed=seed,
@@ -268,15 +301,15 @@ def get_world_params_for_task_groups(
 
 
 def generate_fixed_worlds(
-    world_params: List[GenerateWorldParams],
+    world_params: List[GenerateAvalonWorldParams],
     num_processes: int = 4,
-) -> Dict[int, GeneratedWorldParams]:
-    worlds: Dict[int, GeneratedWorldParams] = {}
+) -> Dict[int, GeneratedAvalonWorldParams]:
+    worlds: Dict[int, GeneratedAvalonWorldParams] = {}
     index = 0
 
     ctx = mp.get_context("spawn")
 
-    def on_done(result: GeneratedWorldParams):
+    def on_done(result: GeneratedAvalonWorldParams):
         # logger.info(f"Finished generating {result}")
         worlds[result.index] = result
 
@@ -304,7 +337,7 @@ def generate_fixed_worlds(
     return worlds
 
 
-class FixedWorldGenerator(WorldGenerator):
+class FixedWorldGenerator(AvalonWorldGenerator):
     """
     Generates num_unique_worlds and copies them to a working dir each time they are requested.
     If `load_levels_from_path` is set, load worlds from this path instead of generating them.
@@ -334,7 +367,7 @@ class FixedWorldGenerator(WorldGenerator):
         ]
 
         assert len(selected_list_indices_and_paths) > 0
-        self.worlds: Dict[int, GeneratedWorldParams] = {}
+        self.worlds: Dict[int, GeneratedAvalonWorldParams] = {}
         for list_index, world_path in selected_list_indices_and_paths:
             new_world_path = self.output_path / world_path.name
             shutil.copytree(world_path, new_world_path)
@@ -345,7 +378,7 @@ class FixedWorldGenerator(WorldGenerator):
                 raise Exception("Cannot have two worlds with the same index!")
             difficulty = float(world_name_parts[2].replace("_", "."))
 
-            world = GeneratedWorldParams(
+            world = GeneratedAvalonWorldParams(
                 task=task,
                 difficulty=difficulty,
                 seed=world_index,
@@ -373,7 +406,7 @@ class FixedWorldGenerator(WorldGenerator):
         assert len(world_params) > 0
         self.worlds = generate_fixed_worlds(world_params)
 
-    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedAvalonWorldParams]:
         assert batch_size == 1, "Not supported for fixed world gen"
         if start_world_id is None:
             start_world_id = DEFAULT_WORLD_ID
@@ -391,7 +424,7 @@ def disable_sigint():
 
 
 # TODO: this introduces some non-determinism, fix it by anchoring to ids of levels generated
-class LocalProcessWorldGenerator(WorldGenerator):
+class LocalProcessWorldGenerator(AvalonWorldGenerator):
     def __init__(
         self,
         base_path: Path,
@@ -411,13 +444,13 @@ class LocalProcessWorldGenerator(WorldGenerator):
         self.meta_difficulty = start_difficulty
         self.is_task_curriculum_used = is_task_curriculum_used
         self.rand = np.random.default_rng([self._seed])
-        self.buffer: List[GeneratedWorldParams] = []
+        self.buffer: List[GeneratedAvalonWorldParams] = []
         self.lock = Lock()
         self.worker_pool = Pool(processes=num_workers, initializer=disable_sigint)
         self.offset = offset
         self._request_batch(buffer_size)
 
-    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedAvalonWorldParams]:
         assert start_world_id is None, "Not supported for local process world gen"
         self._request_batch(batch_size)
         while True:
@@ -458,7 +491,7 @@ class LocalProcessWorldGenerator(WorldGenerator):
                 self.worker_pool.apply_async(
                     generate_world,
                     args=(
-                        GenerateWorldParams(
+                        GenerateAvalonWorldParams(
                             task=task,
                             difficulty=difficulty,
                             seed=self._seed,
@@ -471,7 +504,7 @@ class LocalProcessWorldGenerator(WorldGenerator):
                 )
             self.offset += batch_size
 
-    def _pop_batch(self, batch_size: int) -> List[GeneratedWorldParams]:
+    def _pop_batch(self, batch_size: int) -> List[GeneratedAvalonWorldParams]:
         with self.lock:
             if len(self.buffer) >= batch_size:
                 result = self.buffer[:batch_size]
@@ -479,7 +512,7 @@ class LocalProcessWorldGenerator(WorldGenerator):
                 return result
             raise InsufficientBufferSize()
 
-    def _on_world_generation_done(self, result: GeneratedWorldParams):
+    def _on_world_generation_done(self, result: GeneratedAvalonWorldParams):
         with self.lock:
             self.buffer.append(result)
 
@@ -539,7 +572,7 @@ GENERATION_FUNCTION_BY_TASK: Final[Dict[AvalonTask, TaskGenerationFunction]] = {
 MAX_NOISE_SCALE = 0.3
 
 
-def generate_world(params: GenerateWorldParams) -> GeneratedWorldParams:
+def generate_world(params: GenerateAvalonWorldParams) -> GeneratedAvalonWorldParams:
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     output_path = Path(params.output)
     output_path.mkdir(parents=True)
@@ -549,7 +582,7 @@ def generate_world(params: GenerateWorldParams) -> GeneratedWorldParams:
     for i in range(params.num_retries):
         try:
             generation_function(rand, params.difficulty, output_path, export_config)
-            generated_params = GeneratedWorldParams.from_input(params)
+            generated_params = cast(GeneratedAvalonWorldParams, GeneratedAvalonWorldParams.from_input(params))
             generated_params.save_to_output_path()
             return generated_params
         except ImpossibleWorldError as e:
@@ -577,7 +610,7 @@ def generate_world(params: GenerateWorldParams) -> GeneratedWorldParams:
 
 if __name__ == "__main__":
     generate_world(
-        GenerateWorldParams(
+        GenerateAvalonWorldParams(
             AvalonTask.MOVE,
             1,
             42,

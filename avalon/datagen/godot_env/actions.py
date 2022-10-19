@@ -96,7 +96,7 @@ class AttrsAction(ActionProtocol):
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class VRActionType(AttrsAction):
+class VRAction(AttrsAction):
     """All of these that are floats have range (-1, 1). They are rescaled to physical units in the simulator."""
 
     head_x: float
@@ -131,7 +131,7 @@ class VRActionType(AttrsAction):
         )
 
     @classmethod
-    def from_input(cls, input_dict: Dict[str, np.ndarray]) -> "VRActionType":
+    def from_input(cls, input_dict: Dict[str, np.ndarray]) -> "VRAction":
         # clipping each triplet to sphere
         input_real = input_dict["real"]
         triplet_norm = np.linalg.norm(np.reshape(input_real, (6, 3)), axis=-1)
@@ -143,7 +143,7 @@ class VRActionType(AttrsAction):
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class MouseKeyboardActionType(AttrsAction):
+class MouseKeyboardAction(AttrsAction):
     head_x: float
     head_z: float
     head_pitch: float
@@ -167,7 +167,7 @@ class MouseKeyboardActionType(AttrsAction):
         )
 
     @classmethod
-    def from_input(cls, input_dict: Dict[str, np.ndarray]) -> "MouseKeyboardActionType":
+    def from_input(cls, input_dict: Dict[str, np.ndarray]) -> "MouseKeyboardAction":
         clipped_real = np.clip(input_dict["real"], a_min=-1, a_max=1)
         input_vec = np.concatenate([clipped_real, input_dict["discrete"]], axis=-1)
 

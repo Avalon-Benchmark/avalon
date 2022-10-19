@@ -10,20 +10,21 @@ from avalon.datagen.env_helper import display_video
 from avalon.datagen.env_helper import get_debug_json_logs
 from avalon.datagen.env_helper import get_null_vr_action
 from avalon.datagen.godot_env.actions import DebugCameraAction
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.world_creation.constants import SINGLE_TASK_GROUPS
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
 from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
+from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType
 
 # %% [markdown]
 # ### Simple random sampling with the standard gym interface
 
 # %%
 config = create_vr_benchmark_config()
-vr_action_type = VRActionType
+vr_action_type = VRAction
 action_space = vr_action_type.to_gym_space()
 env = create_env(config, vr_action_type)
 
@@ -50,7 +51,7 @@ with create_vr_benchmark_config().mutable_clone() as hd_config:
     hd_config.recording_options.resolution_y = 1024
     hd_config.recording_options.is_debugging_output_requested = True
 
-hd_env = create_env(hd_config, VRActionType)
+hd_env = create_env(hd_config, VRAction)
 assert isinstance(hd_env.world_generator, BlockingWorldGenerator)
 
 difficulty = 0.6
@@ -59,8 +60,8 @@ hd_env.world_generator.difficulties = {task: difficulty for task in _all_tasks}
 
 
 def isometric_view_of_current_world(
-    env: GodotEnv[AvalonObservationType, VRActionType], distance: float = 50, frames: int = 1
-) -> List[AvalonObservationType]:
+    env: GodotEnv[AvalonObservation, VRAction, GeneratedWorldParamsType], distance: float = 50, frames: int = 1
+) -> List[AvalonObservation]:
     iso = DebugCameraAction.isometric("tile_0_0", distance)
     view = [env.debug_act(iso) for _ in range(frames)]
     env.act(get_null_vr_action())

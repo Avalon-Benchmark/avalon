@@ -21,12 +21,12 @@ from avalon.agent.godot.godot_gym import create_base_benchmark_config
 from avalon.common.visual_utils import visualize_arraylike_as_video
 from avalon.datagen.generate import wait_until_true
 from avalon.datagen.godot_env.actions import AttrsAction
-from avalon.datagen.godot_env.actions import MouseKeyboardActionType
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import MouseKeyboardAction
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.goals import NullGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
 from avalon.datagen.godot_env.observations import AttrsObservation
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_env.replay import get_action_type_from_config as _get_action_type_from_config
 from avalon.datagen.godot_generated_types import AgentPlayerSpec
 from avalon.datagen.godot_generated_types import AvalonSimSpec
@@ -34,7 +34,7 @@ from avalon.datagen.godot_generated_types import MouseKeyboardAgentPlayerSpec
 from avalon.datagen.godot_generated_types import VRAgentPlayerSpec
 from avalon.datagen.godot_utils import S3_AVALON_ERROR_BUCKET
 
-_ActOrStepObservationSequence = Union[Sequence[AvalonObservationType], Sequence[Dict[str, Any]]]
+_ActOrStepObservationSequence = Union[Sequence[AvalonObservation], Sequence[Dict[str, Any]]]
 
 get_action_type_from_config: Final = _get_action_type_from_config
 
@@ -54,7 +54,7 @@ def create_vr_benchmark_config() -> AvalonSimSpec:
 
 
 def get_null_mouse_keyboard_action() -> AttrsAction:
-    return MouseKeyboardActionType(
+    return MouseKeyboardAction(
         head_x=0.0,
         head_z=0.0,
         head_pitch=0.0,
@@ -69,8 +69,8 @@ def get_null_mouse_keyboard_action() -> AttrsAction:
     )
 
 
-def get_null_vr_action() -> VRActionType:
-    return VRActionType(
+def get_null_vr_action() -> VRAction:
+    return VRAction(
         head_x=0.0,
         head_y=0.0,
         head_z=0.0,
@@ -99,14 +99,13 @@ def create_env(
     config: AvalonSimSpec,
     action_type: Type[AttrsAction],
     is_logging_artifacts_on_error_to_s3: bool = False,
-    observation_type: Type[AttrsObservation] = AvalonObservationType,
+    observation_type: Type[AttrsObservation] = AvalonObservation,
 ) -> GodotEnv:
     return GodotEnv(
         config=config,
         observation_type=observation_type,
         action_type=action_type,
         goal_evaluator=NullGoalEvaluator(),
-        gpu_id=0,
         is_logging_artifacts_on_error_to_s3=is_logging_artifacts_on_error_to_s3,
         s3_bucket_name=S3_AVALON_ERROR_BUCKET,
     )
@@ -161,7 +160,7 @@ def visualize_worlds_in_folder(world_paths: Iterable[Path], resolution: int = 10
     with config.mutable_clone() as config:
         config.recording_options.resolution_x = resolution
         config.recording_options.resolution_y = resolution
-    action_type = VRActionType
+    action_type = VRAction
     env = create_env(config, action_type)
 
     all_observations = []

@@ -42,17 +42,17 @@ TODO: godot editor install
 ## Using avalon via the OpenAI Gym interface
 
 Running Avalon is as simple as the following:
+
 ```python
 # From notebooks/overview.ipynb
 # Simple random sampling with the standard gym interface
 from avalon.datagen.env_helper import create_env
 from avalon.datagen.env_helper import create_vr_benchmark_config
 from avalon.datagen.env_helper import display_video
-from avalon.datagen.godot_env.actions import VRActionType
-
+from avalon.datagen.godot_env.actions import VRAction
 
 config = create_vr_benchmark_config()
-action_type = VRActionType
+action_type = VRAction
 action_space = action_type.to_gym_space()
 env = create_env(config, action_type)
 

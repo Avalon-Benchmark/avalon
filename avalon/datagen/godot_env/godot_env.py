@@ -12,6 +12,7 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 from typing import Type
+from typing import cast
 
 import gym
 import numpy as np
@@ -36,9 +37,8 @@ from avalon.datagen.godot_generated_types import SimSpec
 
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
-from avalon.datagen.world_creation.constants import AvalonTaskGroup
-from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
-from avalon.datagen.world_creation.world_generator import GenerateWorldParams
+from avalon.datagen.world_creation.world_generator import EmptyLevelGenerator
+from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType
 from avalon.datagen.world_creation.world_generator import WorldGenerator
 
 _DEFAULT_EPISODE_SEED: Final = 0
@@ -47,8 +47,8 @@ if TYPE_CHECKING:
     from avalon.datagen.godot_env.replay import GodotEnvReplay
 
 
-class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
-    """An OpenAI Gym Env  that communicates with Godot over unix pipes.
+class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParamsType]):
+    """An OpenAI Gym Env that communicates with Godot over unix pipes.
 
     We expose the main gym.Env methods, although reset does not accept all arguments yet:
         step
@@ -83,9 +83,9 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         config: SimSpec,
         observation_type: Type[ObservationType],
         action_type: Type[ActionType],
-        goal_evaluator: GoalEvaluator[ObservationType],
-        gpu_id: int,
-        is_logging_artifacts_on_error_to_s3: bool,
+        goal_evaluator: GoalEvaluator[ObservationType, GeneratedWorldParamsType],
+        gpu_id: int = 0,
+        is_logging_artifacts_on_error_to_s3: bool = False,
         s3_bucket_name: Optional[str] = None,
         is_error_log_checked_after_each_step: bool = True,
         is_observation_space_flattened: bool = False,
@@ -132,11 +132,11 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         )
         self._bridge.select_and_cache_features(self.observation_context.selected_features)
         self.seed_nicely(0)
-        self.recent_worlds: Deque[GenerateWorldParams] = deque()
+        self.recent_worlds: Deque[GeneratedWorldParamsType] = deque()
 
-    def _create_world_generator(self) -> WorldGenerator:
-        return BlockingWorldGenerator(
-            base_path=Path("/tmp/level_gen"), seed=2, start_difficulty=0, task_groups=(AvalonTaskGroup.ONE,)
+    def _create_world_generator(self) -> WorldGenerator[GeneratedWorldParamsType]:
+        return cast(
+            WorldGenerator[GeneratedWorldParamsType], EmptyLevelGenerator(base_path=Path("/tmp/level_gen"), seed=0)
         )
 
     def _restart_godot_quietly(self):
@@ -288,7 +288,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
         *,
         episode_seed: int,
         world_path: Optional[str] = None,
-        world_params: Optional[GenerateWorldParams] = None,
+        world_params: Optional[GeneratedWorldParamsType] = None,
         starting_hit_points: float = 1.0,
     ) -> ObservationType:
         """Specify the world with `world_params` if available (necessary for the default goal evaluator to work),
@@ -362,7 +362,9 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
             if e.args != ("read of closed file",):
                 raise e
 
-    def _spawn_fresh_copy_of_env(self, run_uuid: str) -> "GodotEnv[ObservationType, ActionType]":
+    def _spawn_fresh_copy_of_env(
+        self, run_uuid: str
+    ) -> "GodotEnv[ObservationType, ActionType, GeneratedWorldParamsType]":
         "Spawns a new GodotEnv with the same initial arguments as this one."
         return GodotEnv(
             config=self.config,
@@ -389,11 +391,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType]):
             )
         return GodotEnvReplay.from_env(self._spawn_fresh_copy_of_env(self.process.run_uuid), world_path)
 
-    def _get_world_params_by_id(self, world_id: Optional[int]) -> GenerateWorldParams:
-        if world_id is not None:
-            already_generated = self.world_generator.load_already_generated_params(world_id)
-            if already_generated is not None:
-                return already_generated
+    def _get_world_params_by_id(self, world_id: Optional[int]) -> GeneratedWorldParamsType:
         return only(self.world_generator.generate_batch(world_id, 1))
 
 

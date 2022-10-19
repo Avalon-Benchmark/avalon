@@ -15,12 +15,12 @@ from avalon.common.errors import SwitchError
 from avalon.datagen.generate import get_first_run_action_record_path
 from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import ActionType
-from avalon.datagen.godot_env.actions import MouseKeyboardActionType
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import MouseKeyboardAction
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.goals import GoalProgressResult
 from avalon.datagen.godot_env.goals import NullGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_env.observations import ObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import DEBUG_CAMERA_ACTION_MESSAGE
@@ -37,11 +37,12 @@ from avalon.datagen.godot_generated_types import VRHumanPlayerSpec
 
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
+from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType
 
 
 @attr.s(auto_attribs=True, frozen=True, slots=True)
-class GodotEnvReplay(Generic[ObservationType, ActionType]):
-    env: GodotEnv[ObservationType, ActionType]
+class GodotEnvReplay(Generic[ObservationType, ActionType, GeneratedWorldParamsType]):
+    env: GodotEnv[ObservationType, ActionType, GeneratedWorldParamsType]
     action_log: GodotEnvActionLog[ActionType]
     world_path: Optional[str] = None
 
@@ -53,14 +54,13 @@ class GodotEnvReplay(Generic[ObservationType, ActionType]):
         action_type = get_action_type_from_config(reconstructed_config)
 
         env = cast(
-            GodotEnv[ObservationType, ActionType],
+            GodotEnv[ObservationType, ActionType, GeneratedWorldParamsType],
             GodotEnv(
                 config=reconstructed_config,
-                observation_type=AvalonObservationType,
+                observation_type=AvalonObservation,
                 action_type=action_type,
                 # TODO why do we need the null goal evaluator?
                 goal_evaluator=NullGoalEvaluator(),
-                gpu_id=0,
                 run_uuid=run_uuid,
                 is_logging_artifacts_on_error_to_s3=False,
             ),
@@ -70,7 +70,9 @@ class GodotEnvReplay(Generic[ObservationType, ActionType]):
         return cls(env, log, str(world_path))
 
     @classmethod
-    def from_env(cls, env: GodotEnv[ObservationType, ActionType], world_path: Optional[str]) -> "GodotEnvReplay":
+    def from_env(
+        cls, env: GodotEnv[ObservationType, ActionType, GeneratedWorldParamsType], world_path: Optional[str]
+    ) -> "GodotEnvReplay":
         action_record_path = str(get_first_run_action_record_path(env.process.config_path))
         log = GodotEnvActionLog.parse(action_record_path, env.action_type)
         return cls(env, log, world_path)
@@ -123,10 +125,10 @@ class GodotEnvReplay(Generic[ObservationType, ActionType]):
                 raise SwitchError(f"Invalid replay message {message}")
 
 
-def get_action_type_from_config(config: AvalonSimSpec) -> Union[Type[MouseKeyboardActionType], Type[VRActionType]]:
+def get_action_type_from_config(config: AvalonSimSpec) -> Union[Type[MouseKeyboardAction], Type[VRAction]]:
     if isinstance(config.player, (MouseKeyboardAgentPlayerSpec, MouseKeyboardHumanPlayerSpec)):
-        return MouseKeyboardActionType
+        return MouseKeyboardAction
     elif isinstance(config.player, (VRAgentPlayerSpec, VRHumanPlayerSpec)):
-        return VRActionType
+        return VRAction
     else:
         raise SwitchError(config.player)

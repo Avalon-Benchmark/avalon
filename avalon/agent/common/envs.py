@@ -50,7 +50,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         if env_params.include_rgb:
             env = wrappers.ImageTransformWrapper(env, key="rgb", greyscale=False, resolution=None)
     elif env_params.suite == "godot":
-        from avalon.agent.godot.godot_gym import AvalonGodotEnvWrapper
+        from avalon.agent.godot.godot_gym import AvalonEnv
         from avalon.agent.godot.godot_gym import GodotEnvironmentParams
         from avalon.agent.godot.godot_gym import GodotObsTransformWrapper
         from avalon.agent.godot.godot_gym import ScaleAndSquashAction
@@ -67,7 +67,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         assert egl_driver_path, "No EGL driver found! Maybe wrong AMI? Wrong docker command? Good luck."
         os.system(f"sudo ln -sf {egl_driver_path} /usr/lib/x86_64-linux-gnu/libEGL_nvidia.so.0")
 
-        env = AvalonGodotEnvWrapper(env_params)
+        env = AvalonEnv(env_params)
         # We don't use the TimeLimit wrapper because the time limit is dynamic,
         # so we trust that the godot env gives the proper TimeLimit.truncated signal
         # (which it should) for the timelimit boostrapping to work properly if enabled.

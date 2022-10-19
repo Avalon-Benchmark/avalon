@@ -30,9 +30,9 @@ from avalon.datagen.env_helper import get_debug_json_logs
 from avalon.datagen.env_helper import observation_video_array
 from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import DebugCameraAction
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import SAVE_SNAPSHOT_MESSAGE
@@ -48,6 +48,7 @@ from avalon.datagen.world_creation.entities.item import Item
 from avalon.datagen.world_creation.entities.utils import normalized
 from avalon.datagen.world_creation.tasks.eat import add_food_and_tree
 from avalon.datagen.world_creation.types import WorldType
+from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
 from avalon.datagen.world_creation.worlds.creation import create_world_for_skill_scenario
 from avalon.datagen.world_creation.worlds.export import export_world
 from avalon.datagen.world_creation.worlds.height_map import Point3DNP
@@ -56,8 +57,8 @@ from avalon.datagen.world_creation.worlds.obstacles.configure import make_ring
 from avalon.datagen.world_creation.worlds.world import World
 from avalon.datagen.world_creation.worlds.world_locations import WorldLocations
 
-AvalonEnv = GodotEnv[AvalonObservationType, VRActionType]
-ScenarioActions = Union[DebugCameraAction, VRActionType, Literal[10, 11]]
+AvalonEnv = GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams]
+ScenarioActions = Union[DebugCameraAction, VRAction, Literal[10, 11]]
 
 SnapshotContext = Tuple[Path, int, Optional[DebugCameraAction]]
 
@@ -155,7 +156,7 @@ def _add_cliff(height: float, rand: np.random.Generator, world: World, locations
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class ScenarioObservations:
     scenario: "Scenario"
-    observations: List[AvalonObservationType]
+    observations: List[AvalonObservation]
     snapshots: List[SnapshotContext]
     scene_checksum: str
     scene_path: str
@@ -358,7 +359,7 @@ class Scenario:
 
         return full_path
 
-    def observe(self, env: AvalonEnv, output_path: Path) -> Tuple[List[AvalonObservationType], List[SnapshotContext]]:
+    def observe(self, env: AvalonEnv, output_path: Path) -> Tuple[List[AvalonObservation], List[SnapshotContext]]:
         world_file = output_path / self.key / "main.tscn"
         # TODO figure out how to guarantee complete order invariance for levels run in the same GodotEnv
         # I was trying to ensure invarience in rng, regardless of observation order,
@@ -418,8 +419,8 @@ class Scenario:
 
 def get_vr_action(
     head_x: float = 0.0, head_z: float = 0.0, head_yaw: float = 0.0, head_pitch: float = 0.0
-) -> VRActionType:
-    return VRActionType(
+) -> VRAction:
+    return VRAction(
         head_x=head_x,
         head_y=0.0,
         head_z=head_z,
@@ -452,7 +453,7 @@ def _facing_2d(from_point: Point3DNP, to_point: Point3DNP) -> np.ndarray:
     return cast(np.ndarray, Rotation.from_euler("y", yaw).as_matrix().flatten())
 
 
-def read_human_recorded_actions(scenario_name: str) -> Iterable[VRActionType]:
+def read_human_recorded_actions(scenario_name: str) -> Iterable[VRAction]:
     action_log_path = Path(__file__).parent / f"data/recorded_actions/{scenario_name}.out"
     if not action_log_path.exists():
         error_message = f"{scenario_name} has no recorded actions"
@@ -461,14 +462,14 @@ def read_human_recorded_actions(scenario_name: str) -> Iterable[VRActionType]:
         ), f"cannot run unfinished human-recorded regression test: {error_message }"
         print(f"{error_message}, please record with record_scenario.py")
         return []
-    for message in GodotEnvActionLog.parse_message_log(action_log_path.as_posix(), VRActionType):
+    for message in GodotEnvActionLog.parse_message_log(action_log_path.as_posix(), VRAction):
         if message[0] == ACTION_MESSAGE:
             yield message[1]
         else:
             print(f"{scenario_name} non-action recorded: {message}")
 
 
-def rgbd_observations(observations: Sequence[AvalonObservationType]) -> np.ndarray:
+def rgbd_observations(observations: Sequence[AvalonObservation]) -> np.ndarray:
     return np.stack([o.rgbd for o in observations])
 
 

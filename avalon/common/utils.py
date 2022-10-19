@@ -151,7 +151,6 @@ def conv_out_size(in_size: int, stride: int, padding: int, kernel_size: int) -> 
     return int((in_size - kernel_size + 2 * padding) / stride + 1.0)
 
 
-# so named because we append to this path later, so this is the dir root of dir roots
 DATA_FOLDER = os.path.join(FILESYSTEM_ROOT, "data")
 
 

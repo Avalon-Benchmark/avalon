@@ -1,0 +1,96 @@
+[gd_scene load_steps=9 format=2]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 10, 10, 10 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.466667, 0.709804, 0.145098, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+material = SubResource( 3 )
+size = Vector3( 20, 20, 20 )
+
+[sub_resource type="SpatialMaterial" id=5]
+albedo_color = Color( 0.85098, 0.0862745, 0.937255, 1 )
+
+[sub_resource type="SphereMesh" id=6]
+material = SubResource( 5 )
+radius = 2.5
+height = 5.0
+
+[sub_resource type="SphereShape" id=4]
+radius = 2.5
+
+[sub_resource type="ProceduralSky" id=7]
+resource_local_to_scene = true
+sky_top_color = Color( 0.705882, 0.87451, 1, 1 )
+sky_horizon_color = Color( 1, 0.858824, 0.694118, 1 )
+sky_curve = 0.206137
+ground_bottom_color = Color( 1, 0.858824, 0.694118, 1 )
+ground_horizon_color = Color( 1, 0.858824, 0.694118, 1 )
+ground_curve = 0.112084
+sun_color = Color( 0.886275, 0.576471, 0.545098, 1 )
+sun_latitude = 160.0
+sun_longitude = 180.0
+sun_angle_max = 10.0
+sun_curve = 0.186603
+sun_energy = 5.0
+
+[sub_resource type="Environment" id=8]
+resource_local_to_scene = true
+background_mode = 2
+background_sky = SubResource( 7 )
+ambient_light_color = Color( 1, 1, 1, 1 )
+ambient_light_energy = 0.7
+ambient_light_sky_contribution = 0.0
+fog_color = Color( 0.847059, 0.901961, 0.960784, 1 )
+fog_sun_color = Color( 0.992157, 0.960784, 0.847059, 1 )
+fog_sun_amount = 1.0
+fog_depth_begin = 20.0
+fog_depth_end = 4000.0
+fog_depth_curve = 0.404918
+fog_height_min = 100.0
+fog_height_max = -90.0
+fog_height_curve = 3.03143
+tonemap_mode = 2
+tonemap_white = 12.0
+dof_blur_far_distance = 200.0
+dof_blur_far_transition = 10.0
+dof_blur_far_amount = 0.06
+dof_blur_far_quality = 2
+adjustment_brightness = 1.1
+adjustment_contrast = 1.1
+adjustment_saturation = 1.05
+
+[node name="level" type="Spatial"]
+
+[node name="cube" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0 )
+
+[node name="collision_shape" type="CollisionShape" parent="cube"]
+shape = SubResource( 1 )
+
+[node name="mesh_instance" type="MeshInstance" parent="cube"]
+mesh = SubResource( 2 )
+skeleton = NodePath("../collision_shape")
+material/0 = null
+
+[node name="sphere" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -7.5 )
+
+[node name="mesh_instance" type="MeshInstance" parent="sphere"]
+mesh = SubResource( 6 )
+skeleton = NodePath("../target_area/collision_shape")
+material/0 = null
+
+[node name="collision_shape" type="CollisionShape" parent="sphere"]
+shape = SubResource( 4 )
+disabled = true
+
+[node name="target_area" type="Area" parent="sphere"]
+
+[node name="collision_shape" type="CollisionShape" parent="sphere/target_area"]
+shape = SubResource( 4 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 8 )

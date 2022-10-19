@@ -2,12 +2,12 @@
 import pathlib as pathlib
 import shutil
 
-from avalon.agent.godot.godot_gym import AvalonGodotEnvWrapper
+from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.datagen.env_helper import display_video
 from avalon.datagen.world_creation.constants import AvalonTask
-from avalon.datagen.world_creation.world_generator import GenerateWorldParams
+from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 from avalon.datagen.world_creation.world_generator import generate_world
 
 # %%
@@ -16,7 +16,7 @@ OUTPUT_FOLDER = pathlib.Path("./output/").absolute()
 
 shutil.rmtree(OUTPUT_FOLDER)
 params = generate_world(
-    GenerateWorldParams(
+    GenerateAvalonWorldParams(
         AvalonTask.MOVE,
         difficulty=1,
         seed=42,
@@ -31,7 +31,7 @@ env_params = GodotEnvironmentParams(
     training_protocol=TrainingProtocolChoice.SINGLE_TASK_FIGHT,
     initial_difficulty=1,
 )
-env = AvalonGodotEnvWrapper(env_params)
+env = AvalonEnv(env_params)
 env.reset_nicely_with_specific_world(episode_seed=0, world_params=params)
 
 

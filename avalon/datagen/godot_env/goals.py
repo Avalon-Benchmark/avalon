@@ -9,11 +9,13 @@ from typing import TypeVar
 import attr
 
 from avalon.common.errors import SwitchError
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import AvalonTask
-from avalon.datagen.world_creation.world_generator import GenerateWorldParams
+from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
+from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
+from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType
 
 ObsType = TypeVar("ObsType")
 
@@ -26,7 +28,7 @@ class GoalProgressResult:
     world_path: Optional[str] = None
 
 
-class GoalEvaluator(Generic[ObsType]):
+class GoalEvaluator(Generic[ObsType, GeneratedWorldParamsType]):
     def calculate_next_is_done_and_reward(self, observation: ObsType) -> Tuple[bool, float]:
         result = self.calculate_goal_progress(observation)
         return result.is_done, result.reward
@@ -34,16 +36,16 @@ class GoalEvaluator(Generic[ObsType]):
     def calculate_goal_progress(self, observation: ObsType) -> GoalProgressResult:
         raise NotImplementedError()
 
-    def reset(self, observation: ObsType, world_params: Optional[GenerateWorldParams] = None) -> None:
+    def reset(self, observation: ObsType, world_params: Optional[GeneratedWorldParamsType] = None) -> None:
         raise NotImplementedError()
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class NullGoalEvaluator(GoalEvaluator[AvalonObservationType]):
-    def calculate_goal_progress(self, observation: AvalonObservationType) -> GoalProgressResult:
+class NullGoalEvaluator(GoalEvaluator[AvalonObservation, GeneratedAvalonWorldParams]):
+    def calculate_goal_progress(self, observation: AvalonObservation) -> GoalProgressResult:
         return GoalProgressResult(reward=0, is_done=False, log={})
 
-    def reset(self, observation: AvalonObservationType, world_params: Optional[GenerateWorldParams] = None) -> None:
+    def reset(self, observation: AvalonObservation, world_params: Optional[GeneratedAvalonWorldParams] = None) -> None:
         pass
 
 
@@ -51,11 +53,11 @@ FRAMES_PER_MINUTE = 600
 
 
 @attr.s(auto_attribs=True, collect_by_mro=True)
-class GodotGoalEvaluator(GoalEvaluator[AvalonObservationType]):
+class AvalonGoalEvaluator(GoalEvaluator[AvalonObservation, GeneratedAvalonWorldParams]):
     score_cost_per_frame: float = 1e-4
     frame_limit: int = 9000
 
-    def calculate_goal_progress(self, observation: AvalonObservationType) -> GoalProgressResult:
+    def calculate_goal_progress(self, observation: AvalonObservation) -> GoalProgressResult:
         remaining_frames = self.frame_limit - observation.frame_id.item() - 1
         if not self.is_all_food_eaten:  # type: ignore[has-type]
             self.score = max(
@@ -90,10 +92,10 @@ class GodotGoalEvaluator(GoalEvaluator[AvalonObservationType]):
             world_path=self.world_params.output,
         )
 
-    def get_reward(self, observation: AvalonObservationType) -> float:
+    def get_reward(self, observation: AvalonObservation) -> float:
         return observation.reward.item() - self.score_cost_per_frame
 
-    def get_level_frame_limit(self, world_params: GenerateWorldParams) -> int:
+    def get_level_frame_limit(self, world_params: GenerateAvalonWorldParams) -> int:
         if world_params.task in (AvalonTask.FIND, AvalonTask.GATHER, AvalonTask.NAVIGATE):
             return 15 * FRAMES_PER_MINUTE
         elif world_params.task in (AvalonTask.SURVIVE, AvalonTask.STACK, AvalonTask.CARRY, AvalonTask.EXPLORE):
@@ -101,7 +103,7 @@ class GodotGoalEvaluator(GoalEvaluator[AvalonObservationType]):
         else:
             return 5 * FRAMES_PER_MINUTE
 
-    def reset(self, observation: AvalonObservationType, world_params: Optional[GenerateWorldParams] = None) -> None:
+    def reset(self, observation: AvalonObservation, world_params: Optional[GenerateAvalonWorldParams] = None) -> None:
         assert world_params is not None
         self.world_params = world_params
         self.initial_hit_points = observation.hit_points.item()
@@ -136,7 +138,7 @@ TRAINING_FRAME_LIMITS_AT_ZERO_DIFFICULTY = {
 
 
 @attr.s(auto_attribs=True, collect_by_mro=True)
-class TrainingGodotGoalEvaluator(GodotGoalEvaluator):
+class TrainingAvalonGoalEvaluator(AvalonGoalEvaluator):
     energy_cost_coefficient: float = 1e-9
     body_ke_coefficient: float = 0.0
     body_pe_coefficient: float = 1.0
@@ -147,14 +149,14 @@ class TrainingGodotGoalEvaluator(GodotGoalEvaluator):
     head_pitch_coefficient: float = 0.0
     energy_cost_aggregator: Literal["sum", "max"] = "sum"
 
-    def get_level_frame_limit(self, world_params: GenerateWorldParams) -> int:
+    def get_level_frame_limit(self, world_params: GenerateAvalonWorldParams) -> int:
         super_frame_limit = super().get_level_frame_limit(world_params)
         dynamic_frame_limit = int(
             TRAINING_FRAME_LIMITS_AT_ZERO_DIFFICULTY[world_params.task] * 10 ** world_params.difficulty
         )
         return min(super_frame_limit, dynamic_frame_limit)
 
-    def get_reward(self, observation: AvalonObservationType) -> float:
+    def get_reward(self, observation: AvalonObservation) -> float:
         energy_cost = (
             self.energy_cost_coefficient
             * (

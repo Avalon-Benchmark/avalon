@@ -18,13 +18,13 @@ from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.datagen.env_helper import create_env
 from avalon.datagen.env_helper import get_action_type_from_config
-from avalon.datagen.godot_env.observations import AvalonObservationType
 from avalon.datagen.godot_env.goals import GoalProgressResult
-from avalon.datagen.godot_env.goals import GodotGoalEvaluator
+from avalon.datagen.godot_env.goals import AvalonGoalEvaluator
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.human_playback import get_observations_from_human_recording
 from avalon.datagen.human_playback import get_oculus_playback_config
 from avalon.datagen.world_creation.constants import AvalonTask
-from avalon.datagen.world_creation.world_generator import GenerateWorldParams
+from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 
 enable_debug_logging()
 
@@ -67,9 +67,9 @@ VALID_APK_VERSIONS = [
 
 
 def get_human_score(
-    world_params: GenerateWorldParams, observations: List[AvalonObservationType]
+    world_params: GenerateAvalonWorldParams, observations: List[AvalonObservation]
 ) -> GoalProgressResult:
-    goal_evaluator = GodotGoalEvaluator()
+    goal_evaluator = AvalonGoalEvaluator()
     goal_evaluator.reset(observations[0], world_params)
     for obs in observations[1:]:
         progress = goal_evaluator.calculate_goal_progress(obs)
@@ -124,7 +124,7 @@ def get_human_score_from_data(
         selected_features=selected_features,
     )
 
-    world_params = GenerateWorldParams(
+    world_params = GenerateAvalonWorldParams(
         task=AvalonTask[task.upper()], difficulty=float(difficulty), seed=int(seed), index=0, output=""
     )
     try:

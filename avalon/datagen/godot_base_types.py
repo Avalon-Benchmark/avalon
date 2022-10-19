@@ -41,6 +41,8 @@ class IntRange(AbstractRange):
         return IntRange(min_ge, max_lt)
 
 
+# TODO: this was missing, add it and verify nothing breaks
+# @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class DataConfigImplementation(AbstractDataConfig):
     video_min: int
     video_max: int
