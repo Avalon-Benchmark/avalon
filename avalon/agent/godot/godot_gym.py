@@ -31,12 +31,12 @@ from avalon.common.errors import SwitchError
 from avalon.common.utils import DATA_FOLDER
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.datagen.godot_base_types import Vector3
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
+from avalon.datagen.godot_env.goals import AvalonGoalEvaluator
 from avalon.datagen.godot_env.goals import GoalProgressResult
-from avalon.datagen.godot_env.goals import GodotGoalEvaluator
-from avalon.datagen.godot_env.goals import TrainingGodotGoalEvaluator
+from avalon.datagen.godot_env.goals import TrainingAvalonGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_generated_types import AvalonSimSpec
 from avalon.datagen.godot_generated_types import RecordingOptionsSpec
 from avalon.datagen.godot_generated_types import VRAgentPlayerSpec
@@ -45,8 +45,10 @@ from avalon.datagen.world_creation.constants import TRAIN_TASK_GROUPS
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
+from avalon.datagen.world_creation.world_generator import AvalonWorldGenerator
 from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
 from avalon.datagen.world_creation.world_generator import FixedWorldGenerator
+from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
 from avalon.datagen.world_creation.world_generator import LocalProcessWorldGenerator
 
 
@@ -229,7 +231,7 @@ def write_video_from_np_arrays(video_path: Path, arrays: List[np.ndarray], fps: 
         images[0].save(f, save_all=True, append_images=images[1:], optimize=False, duration=100, loop=0)
 
 
-class AvalonGodotEnvWrapper(GodotEnv[AvalonObservationType, VRActionType]):
+class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams]):
     def __init__(self, params: GodotEnvironmentParams):
         self.params = params
 
@@ -245,25 +247,25 @@ class AvalonGodotEnvWrapper(GodotEnv[AvalonObservationType, VRActionType]):
 
         self.episode_frames: List[np.ndarray] = []
         if params.mode == "train":
-            goal_evaluator: GodotGoalEvaluator = TrainingGodotGoalEvaluator(
+            goal_evaluator: AvalonGoalEvaluator = TrainingAvalonGoalEvaluator(
                 energy_cost_coefficient=params.energy_cost_coefficient,
                 head_pitch_coefficient=params.head_pitch_coefficient,
                 head_roll_coefficient=params.head_roll_coefficient,
             )
         else:
-            goal_evaluator = GodotGoalEvaluator()
+            goal_evaluator = AvalonGoalEvaluator()
 
         self.current_world_id: int = 0
 
         self.episode_goal_progress: List[GoalProgressResult] = []
-        self.episode_observations: List[AvalonObservationType] = []
-        self.episode_actions: List[VRActionType] = []
+        self.episode_observations: List[AvalonObservation] = []
+        self.episode_actions: List[VRAction] = []
         self.eval_world_ids: List[int] = []
 
         super().__init__(
             config=config,
-            observation_type=AvalonObservationType,
-            action_type=VRActionType,
+            observation_type=AvalonObservation,
+            action_type=VRAction,
             goal_evaluator=goal_evaluator,
             is_error_log_checked_after_each_step=params.is_debugging_godot,
             is_godot_restarted_on_error=not params.is_debugging_godot,
@@ -271,8 +273,11 @@ class AvalonGodotEnvWrapper(GodotEnv[AvalonObservationType, VRActionType]):
             is_logging_artifacts_on_error_to_s3=params.is_logging_artifacts_on_error_to_s3,
             s3_bucket_name=params.s3_bucket_name,
         )
+        # We manually indicate to mypy that self.world_generator will be the one we pass above as otherwise it
+        # infers the generic type WorldGenerator[GeneratedAvalonWorldParams] and does not locate Avalon-specific methods
+        self.world_generator: AvalonWorldGenerator
 
-    def act(self, action: VRActionType) -> Tuple[AvalonObservationType, GoalProgressResult]:
+    def act(self, action: VRAction) -> Tuple[AvalonObservation, GoalProgressResult]:
         observation, goal_progress = super().act(action)
         if self.params.goal_progress_path is not None:
             self.episode_goal_progress.append(goal_progress)
@@ -316,10 +321,10 @@ class AvalonGodotEnvWrapper(GodotEnv[AvalonObservationType, VRActionType]):
 
     def update_lame_observation(self, lame_observation: Dict[str, Any]):
         if self.params.is_frame_id_transformed_to_frames_remaining and "frame_id" in lame_observation:
-            assert isinstance(self.goal_evaluator, GodotGoalEvaluator)
+            assert isinstance(self.goal_evaluator, AvalonGoalEvaluator)
             lame_observation["frame_id"] = self.goal_evaluator.frame_limit - lame_observation["frame_id"] - 1
 
-    def step(self, action: Dict[str, np.ndarray]) -> tuple[AvalonObservationType, float, bool, dict]:
+    def step(self, action: Dict[str, np.ndarray]) -> tuple[AvalonObservation, float, bool, dict]:
         observation, goal_progress = self.act(self.action_type.from_input(action))
         lame_observation = self.observation_context.lamify(observation)
         self.update_lame_observation(lame_observation)
@@ -440,6 +445,13 @@ class AvalonGodotEnvWrapper(GodotEnv[AvalonObservationType, VRActionType]):
         else:
             return self.world_generator.get_task()
 
+    def _get_world_params_by_id(self, world_id: Optional[int]) -> GeneratedAvalonWorldParams:
+        if world_id is not None:
+            already_generated = self.world_generator.load_already_generated_params(world_id)
+            if already_generated is not None:
+                return already_generated
+        return super()._get_world_params_by_id(world_id)
+
 
 def _transform_observation_rgbd(x: NDArray, greyscale: bool = False) -> NDArray:
     # flip y
@@ -551,7 +563,7 @@ class ScaleAndSquashAction(gym.ActionWrapper):
 
 # Note: the rate of update of difficulty (per global env step) depends on the number of workers.
 class CurriculumWrapper(Wrapper):
-    def __init__(self, env: AvalonGodotEnvWrapper, task_difficulty_update: float, meta_difficulty_update: float):
+    def __init__(self, env: AvalonEnv, task_difficulty_update: float, meta_difficulty_update: float):
         super().__init__(env)
         self._env = env
         self.difficulties: DefaultDict[AvalonTask, float] = defaultdict(float)

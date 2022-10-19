@@ -14,7 +14,7 @@ To follow this tutorial in full, you'll want to:
 2. install the dependencies locally or get it running in Docker (see the main README)
 3. download our copy of Godot (see the main README) in order to debug levels visually and locally
 
-This tutorial assumes you're on Ubuntu, but Godot runs on all major operating systems (including OSX and Windows)
+This tutorial assumes you're on Ubuntu, but you should be able to complete this tutorial on macOS as well. If you're on Windows, you'll have to use Docker.
 
 ## The task
 We will be implementing a simplified version of the `use_object_knock_down` task from the **dm-hard-eight** suite. In their [paper](https://arxiv.org/abs/1909.01387), this is referred to as **Baseball**. In its full incarnation, the task requires 7 high-level steps to complete the level, which are summarised in this image from the paper:
@@ -50,7 +50,7 @@ Before we get cracking on the new task, let's see if we can generate a world wit
 
 To do that, we need a way to actually test the worlds that we're building. Godot can be a bit fiddly when you edit files underneath it while the editor is running, 
 so we find it best to copy the `godot` subdirectory to a new location:
-`rsync -r ./standalone/avalon/avalon/datagen/godot/ /tmp/baseball`
+`rsync -r ./avalon/datagen/godot/ /tmp/baseball`
 
 The contents of that subdirectory have everything to play the world directly in Godot on your machine. It's also where we'll generate all our worlds. Remember - if you do change something in the `godot` subdirectory that you want to keep, you'll need to sync it over again.
 

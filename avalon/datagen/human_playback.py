@@ -31,12 +31,12 @@ from avalon.common.errors import SwitchError
 from avalon.datagen.env_helper import create_env
 from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import AttrsAction
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.actions import _from_bytes
 from avalon.datagen.godot_env.actions import _to_bytes
 from avalon.datagen.godot_env.observations import FAKE_TYPE_IMAGE
 from avalon.datagen.godot_env.observations import NP_DTYPE_MAP
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_env.observations import FeatureSpecDict
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
 from avalon.datagen.godot_generated_types import CLOSE_MESSAGE
@@ -64,8 +64,8 @@ class PlaybackError(NamedTuple):
 class PlaybackResult(NamedTuple):
     is_error: bool
     errors: Dict[int, List[PlaybackError]]
-    recorded_observations: List[AvalonObservationType]
-    playback_observations: List[AvalonObservationType]
+    recorded_observations: List[AvalonObservation]
+    playback_observations: List[AvalonObservation]
     human_inputs: List[AttrsAction]
     actions: List[AttrsAction]
 
@@ -133,7 +133,7 @@ def get_replay_log_from_human_recording(
 
 def get_observations_from_human_recording(
     observations_path: Path, selected_features: OrderedDictType[str, Tuple[int, Tuple[int, ...]]]
-) -> List[AvalonObservationType]:
+) -> List[AvalonObservation]:
     file_size = os.stat(observations_path).st_size
     observations = []
     with open(observations_path, "rb") as record_log:
@@ -150,9 +150,9 @@ def get_observations_from_human_recording(
 
             cleaned_feature_data = {
                 feature.name: feature_data.get(feature.name, np.array([]))
-                for feature in attr.fields(AvalonObservationType)
+                for feature in attr.fields(AvalonObservation)
             }
-            observations.append(AvalonObservationType(**cleaned_feature_data))
+            observations.append(AvalonObservation(**cleaned_feature_data))
     return observations
 
 
@@ -172,7 +172,7 @@ def get_world_path_from_world_id(root_path: Path, world_id: str) -> str:
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class MouseKeyboardHumanInputType(AttrsAction):
+class MouseKeyboardHumanInputAction(AttrsAction):
     is_move_forward_pressed: float
     is_move_backward_pressed: float
     is_move_left_pressed: float
@@ -211,7 +211,7 @@ def _from_bytes_with_double(value_type: Type, value_bytes: bytes) -> Tuple[Union
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class VRHumanInputType(AttrsAction):
+class VRHumanInputAction(AttrsAction):
     human_height: float
     arvr_origin_position_x: float
     arvr_origin_position_y: float
@@ -270,7 +270,7 @@ class VRHumanInputType(AttrsAction):
     is_jump_pressed: float
 
     @classmethod
-    def from_bytes(cls: Type["VRHumanInputType"], action_bytes: bytes) -> "VRHumanInputType":
+    def from_bytes(cls: Type["VRHumanInputAction"], action_bytes: bytes) -> "VRHumanInputAction":
         fields: Dict[str, Any] = {}
         _size, remaining_bytes = _from_bytes_with_double(int, action_bytes)
         for field in attr.fields(cls):
@@ -289,7 +289,7 @@ class VRHumanInputType(AttrsAction):
 
 
 def parse_human_input(
-    path: Path, human_input_type: Union[Type[VRHumanInputType], Type[MouseKeyboardHumanInputType]]
+    path: Path, human_input_type: Union[Type[VRHumanInputAction], Type[MouseKeyboardHumanInputAction]]
 ) -> Sequence[AttrsAction]:
     human_inputs = []
     with open(path, "rb") as f:
@@ -399,13 +399,13 @@ def validate_oculus_playback_recording(
     config = get_oculus_playback_config(is_using_human_input)
     assert config.player is not MouseKeyboardAgentPlayerSpec and config.player is not MouseKeyboardHumanPlayerSpec
 
-    action_type: Union[Type[VRHumanInputType], Type[VRActionType]]
+    action_type: Union[Type[VRHumanInputAction], Type[VRAction]]
     if is_using_human_input:
         action_path = human_input_path
-        action_type = VRHumanInputType
+        action_type = VRHumanInputAction
     else:
         action_path = action_record_path
-        action_type = VRActionType
+        action_type = VRAction
 
     env = create_env(config, action_type)
     selected_features = env.observation_context.selected_features
@@ -439,7 +439,7 @@ def validate_oculus_playback_recording(
     for message in replay_log.messages:
         if message[0] in (ACTION_MESSAGE, HUMAN_INPUT_MESSAGE):
             # note: mypy cannot infer this type on its own
-            message = cast(Tuple[Literal[3, 9], Union[VRActionType, VRHumanInputType]], message)
+            message = cast(Tuple[Literal[3, 9], Union[VRAction, VRHumanInputAction]], message)
             action = message[1]
             obs, _ = env.act(action)
             actions.append(action)
@@ -449,7 +449,7 @@ def validate_oculus_playback_recording(
         else:
             raise SwitchError(f"Invalid replay message {message}")
 
-    human_inputs = [x for x in parse_human_input(human_input_path, VRHumanInputType)]
+    human_inputs = [x for x in parse_human_input(human_input_path, VRHumanInputAction)]
     errors = defaultdict(list)
     for i, (agent_ob, player_ob) in enumerate(
         # note: when coming from human input, there's an extra observation

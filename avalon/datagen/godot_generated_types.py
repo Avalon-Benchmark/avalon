@@ -1,12 +1,12 @@
 # GENERATED FILE
 # See generate_godot_code.py for details
 
-import attr
 from typing import Final
 from typing import Optional
 
-from avalon.datagen.godot_base_types import *
+import attr
 
+from avalon.datagen.godot_base_types import *
 
 BRIDGE_LOG_SIGNAL: Final = "Establishing Bridge"
 READY_LOG_SIGNAL: Final = "GODATA!"
@@ -106,6 +106,7 @@ class HumanPlayerSpec(PlayerSpec):
     pass
 
 
+# TODO: should SimSpec still inherit from DataConfigImplementation?
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class SimSpec(SpecBase, DataConfigImplementation):
     episode_seed: Optional[int]

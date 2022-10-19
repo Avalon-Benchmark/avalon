@@ -6,13 +6,14 @@ from avalon.contrib.testing_utils import fixture
 from avalon.contrib.testing_utils import temp_path_
 from avalon.contrib.testing_utils import use
 from avalon.datagen.env_helper import create_vr_benchmark_config
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.goals import NullGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_generated_types import AvalonSimSpec
+from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
 
-AvalonEnv = GodotEnv[AvalonObservationType, VRActionType]
+AvalonEnv = GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams]
 
 
 @fixture
@@ -52,12 +53,10 @@ def avalon_config_(
 def godot_env_(avalon_config: AvalonSimSpec) -> Generator[AvalonEnv, None, None]:
     env = GodotEnv(
         config=avalon_config,
-        action_type=VRActionType,
-        observation_type=AvalonObservationType,
+        action_type=VRAction,
+        observation_type=AvalonObservation,
         goal_evaluator=NullGoalEvaluator(),
         is_dev_flag_added=True,
-        gpu_id=0,
-        is_logging_artifacts_on_error_to_s3=False,
     )
     if not "PYTEST_CURRENT_TEST" in os.environ:
         print(f"GodotEnv log: {env.process.log_path}")

@@ -28,8 +28,8 @@ from avalon.datagen.avalon_godot_tests.scenario import rgbd_observations
 from avalon.datagen.env_helper import observation_video_array
 from avalon.datagen.env_helper import rgbd_to_video_array
 from avalon.datagen.godot_env.actions import DebugCameraAction
-from avalon.datagen.godot_env.actions import VRActionType
-from avalon.datagen.godot_env.observations import AvalonObservationType
+from avalon.datagen.godot_env.actions import VRAction
+from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_generated_types import LOAD_SNAPSHOT_MESSAGE
 from avalon.datagen.godot_generated_types import SAVE_SNAPSHOT_MESSAGE
 
@@ -40,7 +40,7 @@ class SnapshotObservations:
     context: SnapshotContext
     index: int
     end_frame: Optional[int]
-    observations: List[AvalonObservationType]
+    observations: List[AvalonObservation]
 
     @property
     def dir(self) -> Path:
@@ -55,7 +55,7 @@ class SnapshotObservations:
         return self.observations[1:]
 
     @property
-    def expected_observations(self) -> List[AvalonObservationType]:
+    def expected_observations(self) -> List[AvalonObservation]:
         # TODO not sure why end_frame-1 is necessary
         return self.original.observations[
             self.start_frame - 1 : self.end_frame - 1 if self.end_frame is not None else None
@@ -229,8 +229,8 @@ def observe_snapshots(original: ScenarioObservations, get_env: Callable[[], Aval
 
 
 def observe_snapshot_chunk(
-    env: AvalonEnv, snapshot: SnapshotContext, actions: Sequence[Union[DebugCameraAction, VRActionType]]
-) -> List[AvalonObservationType]:
+    env: AvalonEnv, snapshot: SnapshotContext, actions: Sequence[Union[DebugCameraAction, VRAction]]
+) -> List[AvalonObservation]:
     snapshot_path, _frame, camera_action = snapshot
     obs, _ = env.load_snapshot(snapshot_path)
     observations = [obs]

@@ -6,9 +6,7 @@ export var fly_speed: float
 export var loop_angle_increment: float
 
 
-func init(
-	_fly_speed: float, _glide_steps: int, _turn_steps: int, _loop_angle_increment: float
-) -> CyclingBehavior:
+func init(_fly_speed: float, _glide_steps: int, _turn_steps: int, _loop_angle_increment: float) -> CyclingBehavior:
 	.init_super(_glide_steps, _turn_steps)
 	fly_speed = _fly_speed
 	loop_angle_increment = _loop_angle_increment

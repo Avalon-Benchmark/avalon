@@ -25,7 +25,7 @@ from avalon.datagen.data_config import AbstractDataConfig
 from avalon.datagen.errors import GodotError
 from avalon.datagen.godot_generated_types import READY_LOG_SIGNAL
 from avalon.datagen.godot_generated_types import SimSpec
-from avalon.datagen.world_creation.world_generator import GenerateWorldParams
+from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 
 GODOT_ERROR_LOG_PATH = f"{FILESYSTEM_ROOT}/godot"
 DATAGEN_PATH = os.path.dirname(__file__)
@@ -258,7 +258,7 @@ class InteractiveGodotProcess:
 
         self.process = _popen_process_group(godot_bash_args, self.log_path)
 
-    def save_artifacts(self, recent_worlds: Deque[GenerateWorldParams]) -> Path:
+    def save_artifacts(self, recent_worlds: Deque[GenerateAvalonWorldParams]) -> Path:
         tar_path = Path(self.artifact_path)
         with tarfile.open(tar_path, "x:gz") as tar:
             tar.add(self.action_record_path, arcname=Path(self.action_record_path).name)

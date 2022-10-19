@@ -21,7 +21,7 @@ from avalon.datagen.generate import InteractiveGodotProcess
 from avalon.datagen.generate import wait_until_true
 from avalon.datagen.godot_env._bridge import GodotEnvBridge
 from avalon.datagen.godot_env._bridge import _BridgeKillSwitch
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.actions import _to_bytes
 from avalon.datagen.godot_generated_types import READY_LOG_SIGNAL
 from avalon.datagen.godot_utils import create_env_from_artifacts
@@ -117,10 +117,10 @@ def test_kill_switch_watches_messages(
 ):
     godot_env = godot_env_with_reset
 
-    def blocking_to_bytes(_: VRActionType) -> bytes:
+    def blocking_to_bytes(_: VRAction) -> bytes:
         return _to_bytes(int, 4)
 
-    monkeypatch.setattr(VRActionType, "to_bytes", blocking_to_bytes)
+    monkeypatch.setattr(VRAction, "to_bytes", blocking_to_bytes)
 
     with pytest.raises(GodotError, match=r"Invalid number of bytes.*") as e:
         godot_env.act(get_vr_action())

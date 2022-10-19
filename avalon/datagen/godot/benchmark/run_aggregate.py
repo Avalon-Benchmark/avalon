@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-from typing import List
-from typing import Tuple
-
 import pathlib
 import statistics
+from typing import List
+from typing import Tuple
 
 CONFIGS = ["basic", "fancy"]
 DRIVERS = ["GLES2", "GLES3"]
@@ -52,13 +51,13 @@ def show(value_id: int) -> None:
 
 
 def main() -> None:
-    print("single:")
+    print("single:")  # script
     show(0)
     print()
-    print("multi:")
+    print("multi:")  # script
     show(1)
     print()
-    print("nproc:")
+    print("nproc:")  # script
     show(2)
 
 

@@ -146,7 +146,7 @@ class GodotObservationContext(Generic[ObservationType]):
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class AvalonObservationType(AttrsObservation):
+class AvalonObservation(AttrsObservation):
     rgbd: npt.NDArray[np.uint8]
     episode_id: npt.NDArray[np.int32]
     frame_id: npt.NDArray[np.int32]

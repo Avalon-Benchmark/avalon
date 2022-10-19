@@ -21,7 +21,7 @@ from avalon.datagen.avalon_godot_tests.scenario import ScenarioObservations
 from avalon.datagen.avalon_godot_tests.scenario import get_vr_action
 from avalon.datagen.avalon_godot_tests.scenario import read_human_recorded_actions
 from avalon.datagen.godot_env.actions import DebugCameraAction
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.world_creation.entities.animals import ALL_PREDATOR_CLASSES
 from avalon.datagen.world_creation.entities.animals import ALL_PREY_CLASSES
 from avalon.datagen.world_creation.entities.animals import Alligator
@@ -50,7 +50,7 @@ from avalon.datagen.world_creation.entities.tools.weapons import LargeStick
 from avalon.datagen.world_creation.entities.tools.weapons import Stick
 from avalon.datagen.world_creation.types import Point3DNP
 
-_ScenarioActions = Union[DebugCameraAction, VRActionType]
+_ScenarioActions = Union[DebugCameraAction, VRAction]
 
 
 @fixture
@@ -150,7 +150,7 @@ def predator_chase_behaviors_() -> List[Scenario]:
 def climb_behaviors_() -> List[Scenario]:
     def climb_scene(
         animal_type: Type[Animal],
-        actions: List[VRActionType],
+        actions: List[VRAction],
         behavior: str,
         detection_radius_override: Optional[int] = None,
     ):
@@ -236,7 +236,7 @@ def item_interaction_behaviors_() -> List[Scenario]:
         scenario: str,
         is_recorded: bool,
         items: List[Item],
-        actions: List[VRActionType] = [],
+        actions: List[VRAction] = [],
         animal_position: Point3DNP = np.zeros(3),
     ) -> Scenario:
         if is_recorded:

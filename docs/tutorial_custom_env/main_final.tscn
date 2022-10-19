@@ -1,0 +1,98 @@
+[gd_scene load_steps=13 format=2]
+
+[ext_resource path="res://sphere.gd" type="Script" id=1]
+
+[sub_resource type="BoxShape" id=9]
+extents = Vector3( 10, 5, 1 )
+
+[sub_resource type="BoxShape" id=10]
+extents = Vector3( 1, 5, 10 )
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 10, 10, 10 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.466667, 0.709804, 0.145098, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+material = SubResource( 3 )
+size = Vector3( 20, 20, 20 )
+
+[sub_resource type="SpatialMaterial" id=5]
+albedo_color = Color( 0.85098, 0.0862745, 0.937255, 1 )
+
+[sub_resource type="SphereMesh" id=6]
+material = SubResource( 5 )
+radius = 0.5
+height = 1.0
+
+[sub_resource type="SphereShape" id=4]
+radius = 0.5
+
+[sub_resource type="SphereShape" id=11]
+
+[sub_resource type="ProceduralSky" id=7]
+
+[sub_resource type="Environment" id=8]
+background_mode = 2
+background_sky = SubResource( 7 )
+ambient_light_color = Color( 1, 1, 1, 1 )
+
+[node name="level" type="Spatial"]
+
+[node name="bounds" type="Spatial" parent="."]
+
+[node name="wall1" type="StaticBody" parent="bounds"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -10 )
+
+[node name="collision_shape" type="CollisionShape" parent="bounds/wall1"]
+shape = SubResource( 9 )
+
+[node name="wall2" type="StaticBody" parent="bounds"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10 )
+
+[node name="collision_shape" type="CollisionShape" parent="bounds/wall2"]
+shape = SubResource( 9 )
+
+[node name="wall3" type="StaticBody" parent="bounds"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, 0 )
+
+[node name="collision_shape" type="CollisionShape" parent="bounds/wall3"]
+shape = SubResource( 10 )
+
+[node name="wall4" type="StaticBody" parent="bounds"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, 0 )
+
+[node name="collision_shape" type="CollisionShape" parent="bounds/wall4"]
+shape = SubResource( 10 )
+
+[node name="cube" type="StaticBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0 )
+
+[node name="collision_shape" type="CollisionShape" parent="cube"]
+shape = SubResource( 1 )
+
+[node name="mesh_instance" type="MeshInstance" parent="cube"]
+mesh = SubResource( 2 )
+skeleton = NodePath("../collision_shape")
+material/0 = null
+
+[node name="sphere" type="KinematicBody" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.5, -7.5 )
+script = ExtResource( 1 )
+
+[node name="mesh_instance" type="MeshInstance" parent="sphere"]
+mesh = SubResource( 6 )
+skeleton = NodePath("")
+material/0 = null
+
+[node name="collision_shape" type="CollisionShape" parent="sphere"]
+shape = SubResource( 4 )
+
+[node name="target_area" type="Area" parent="sphere"]
+
+[node name="collision_shape" type="CollisionShape" parent="sphere/target_area"]
+shape = SubResource( 11 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource( 8 )

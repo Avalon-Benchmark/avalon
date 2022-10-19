@@ -19,9 +19,7 @@ var rotation_dist: UniformDistribution
 var hop_frequency_dist: ChoicesDistribution
 
 
-func init(
-	_rng_key: String, _hop_frequency: float, _hop: Vector2, _hop_count: int
-) -> AnimalBehavior:
+func init(_rng_key: String, _hop_frequency: float, _hop: Vector2, _hop_count: int) -> AnimalBehavior:
 	rng_key = _rng_key
 	hop_frequency = _hop_frequency
 	hop_speed = _hop

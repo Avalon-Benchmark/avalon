@@ -11,9 +11,7 @@ func get_logic_nodes() -> Array:
 	return [pursue_behavior]
 
 
-func init(
-	_pursue_behavior: AnimalBehavior, _knock_back: Vector2 = Vector2(-2, 2)
-) -> AnimalBehavior:
+func init(_pursue_behavior: AnimalBehavior, _knock_back: Vector2 = Vector2(-2, 2)) -> AnimalBehavior:
 	pursue_behavior = _pursue_behavior
 	knock_back = _knock_back
 	return self

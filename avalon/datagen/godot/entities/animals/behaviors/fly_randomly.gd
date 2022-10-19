@@ -85,9 +85,7 @@ static func seek_desired_altitude(animal: Animal, delta: float) -> Transform:
 	)
 
 
-static func correct_course(
-	transform: Transform, current_rotation: Vector3, desired_pitch: float
-) -> Transform:
+static func correct_course(transform: Transform, current_rotation: Vector3, desired_pitch: float) -> Transform:
 	var scale = transform.basis.get_scale()
 	transform.basis = Basis(Vector3(desired_pitch, current_rotation.y, 0)).scaled(scale)
 	return transform

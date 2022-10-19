@@ -12,13 +12,13 @@ from typing import Sequence
 import sentry_sdk
 import torch
 
-from avalon.agent.godot.godot_gym import AvalonGodotEnvWrapper
+from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.common.log_utils import enable_debug_logging
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
-from avalon.datagen.godot_env.actions import VRActionType
+from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.godot_env import GodotEnv
 
 EVAL_TEMP_PATH = "/tmp/avalon_eval"
@@ -43,7 +43,7 @@ def do_eval_rollouts(policy: RandomActionDistribution, env: GodotEnv) -> Dict[st
     frame_count = 1
     scores_by_world_index: Dict[str, float] = {}
     while True:
-        action = VRActionType.from_input(policy.sample())
+        action = VRAction.from_input(policy.sample())
         observation, goal_progress = env.act(action)
         frame_count += 1
         world_index = goal_progress.log["world_index"]
@@ -69,7 +69,7 @@ def run_policy_on_world_ids(
     params = GodotEnvironmentParams(
         mode="test", fixed_worlds_load_from_path=Path(eval_world_dir), env_index=process_index, env_count=num_processes
     )
-    env = AvalonGodotEnvWrapper(params)
+    env = AvalonEnv(params)
     result = do_eval_rollouts(policy, env)
     return result
 
