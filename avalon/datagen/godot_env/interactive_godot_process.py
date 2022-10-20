@@ -219,7 +219,7 @@ class InteractiveGodotProcess:
             resolution = (resolution[0] * 2, resolution[1] * 2)
 
         bash_args = [
-            DATAGEN_SCRIPT_PATH ,
+            DATAGEN_SCRIPT_PATH,
             f"--thread_count=4",
             f"-U",
             f"--input_pipe_path={input_pipe_path}",
@@ -358,7 +358,7 @@ class InteractiveGodotProcess:
                 return True
 
         try:
-            wait_until_true(wait_for_ready, sleep_inc=0.0001)
+            wait_until_true(wait_for_ready, sleep_inc=0.0001, max_wait_sec=20)
         except TimeoutError as e:
             err = f"did not observe ready message {log_signal}: {str(e)}"
             _raise_godot_error(log_path=self.log_path, artifact_path=self.artifact_path, details=err)

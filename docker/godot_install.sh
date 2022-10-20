@@ -23,7 +23,7 @@ mv -f ./godot.egl.opt.tools.64 $EDITOR
 chmod +x /usr/local/bin/godot-*
 
 ln -s $EDITOR /usr/local/bin/godot
-echo "export GODOT_BINARY_PATH=/usr/local/bin/godot" >> /home/user/.bashrc
+#echo "export GODOT_BINARY_PATH=/usr/local/bin/godot" >> /home/user/.bashrc
 
 popd
 
