@@ -6,7 +6,7 @@ set -x
 pushd /tmp
 
 GODOT=3.4.4
-PATCH=0.9.1
+PATCH=0.9.2
 
 RUNNER=/usr/local/bin/godot-runner-$GODOT-$PATCH
 EDITOR=/usr/local/bin/godot-editor-$GODOT-$PATCH
