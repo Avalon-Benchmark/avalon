@@ -2,6 +2,7 @@ import glob
 import hashlib
 import itertools
 import os
+import time
 from enum import Enum
 from hashlib import md5
 from itertools import groupby
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Any
 from typing import Callable
 from typing import Dict
+from typing import Final
 from typing import Iterable
 from typing import Iterator
 from typing import KeysView
@@ -27,7 +29,9 @@ from IPython.display import display
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.contrib.utils import TEMP_DIR
 
-TMP_DATA_DIR = os.path.join(TEMP_DIR, "wandb")
+TMP_DATA_DIR: Final = os.path.join(TEMP_DIR, "wandb")
+
+AVALON_PACKAGE_DIR: Final = os.path.abspath(f"{__file__}/../..")
 
 
 class _SupportsLessThan(Protocol):
@@ -189,3 +193,17 @@ def dir_checksum(dir_path: Path, glob: str = "*") -> str:
             for chunk in iter(lambda: f.read(2 ** 20), b""):
                 hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
+def wait_until_true(
+    callback: Callable[[], Optional[bool]],
+    max_wait_sec: float = 5,
+    sleep_inc: float = 0.25,
+):
+    """Repeatedly call callback() until it returns True or max_wait_sec is reached"""
+    waited_for_sec = 0.0000
+    while waited_for_sec <= max_wait_sec:
+        if callback():
+            return
+        time.sleep(sleep_inc)
+        waited_for_sec += sleep_inc
+    raise TimeoutError(f"could not complete within {max_wait_sec} seconds")

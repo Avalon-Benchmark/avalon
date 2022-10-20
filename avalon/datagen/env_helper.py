@@ -18,8 +18,8 @@ from loguru import logger
 from numpy.typing import NDArray
 
 from avalon.agent.godot.godot_gym import create_base_benchmark_config
+from avalon.common.utils import wait_until_true
 from avalon.common.visual_utils import visualize_arraylike_as_video
-from avalon.datagen.generate import wait_until_true
 from avalon.datagen.godot_env.actions import AttrsAction
 from avalon.datagen.godot_env.actions import MouseKeyboardAction
 from avalon.datagen.godot_env.actions import VRAction

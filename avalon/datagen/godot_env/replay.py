@@ -12,7 +12,6 @@ import attr
 from numpy import typing as npt
 
 from avalon.common.errors import SwitchError
-from avalon.datagen.generate import get_first_run_action_record_path
 from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import ActionType
 from avalon.datagen.godot_env.actions import MouseKeyboardAction
@@ -20,6 +19,7 @@ from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.goals import GoalProgressResult
 from avalon.datagen.godot_env.goals import NullGoalEvaluator
 from avalon.datagen.godot_env.godot_env import GodotEnv
+from avalon.datagen.godot_env.interactive_godot_process import get_first_run_action_record_path
 from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.godot_env.observations import ObservationType
 from avalon.datagen.godot_generated_types import ACTION_MESSAGE
@@ -34,7 +34,6 @@ from avalon.datagen.godot_generated_types import MouseKeyboardAgentPlayerSpec
 from avalon.datagen.godot_generated_types import MouseKeyboardHumanPlayerSpec
 from avalon.datagen.godot_generated_types import VRAgentPlayerSpec
 from avalon.datagen.godot_generated_types import VRHumanPlayerSpec
-
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
 from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType

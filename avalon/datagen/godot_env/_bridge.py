@@ -22,10 +22,10 @@ from loguru import logger
 from numpy import typing as npt
 
 from avalon.datagen.errors import GodotError
-from avalon.datagen.generate import InteractiveGodotProcess
 from avalon.datagen.godot_env.actions import ActionType
 from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.godot_env.actions import _to_bytes
+from avalon.datagen.godot_env.interactive_godot_process import InteractiveGodotProcess
 from avalon.datagen.godot_env.observations import FAKE_TYPE_IMAGE
 from avalon.datagen.godot_env.observations import NP_DTYPE_MAP
 from avalon.datagen.godot_env.observations import FeatureSpecDict

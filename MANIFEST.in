@@ -1,0 +1,10 @@
+prune docker
+prune docker_torchbeast
+prune docs
+prune notebooks
+prune scripts
+
+prune avalon/server
+prune avalon/datagen/avalon_godot_tests
+
+global-exclude .* *.ini  test_*.py conftest.py

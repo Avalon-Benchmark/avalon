@@ -58,7 +58,8 @@ from avalon.agent.torchbeast.model import DictActionHead
 from avalon.common.log_utils import logger
 from avalon.common.visual_utils import encode_video
 from avalon.common.wandb_utils import get_latest_checkpoint_filename
-from avalon.datagen.generate import GODOT_ERROR_LOG_PATH
+from avalon.datagen.godot_env.interactive_godot_process import GODOT_ERROR_LOG_PATH
+
 
 os.environ["OMP_NUM_THREADS"] = "1"
 

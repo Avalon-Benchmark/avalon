@@ -17,12 +17,12 @@ from avalon.datagen.avalon_godot_tests.conftest import AvalonEnv
 from avalon.datagen.avalon_godot_tests.conftest import godot_env_
 from avalon.datagen.avalon_godot_tests.scenario import get_vr_action
 from avalon.datagen.errors import GodotError
-from avalon.datagen.generate import InteractiveGodotProcess
-from avalon.datagen.generate import wait_until_true
 from avalon.datagen.godot_env._bridge import GodotEnvBridge
 from avalon.datagen.godot_env._bridge import _BridgeKillSwitch
 from avalon.datagen.godot_env.actions import VRAction
 from avalon.datagen.godot_env.actions import _to_bytes
+from avalon.datagen.godot_env.interactive_godot_process import InteractiveGodotProcess
+from avalon.datagen.godot_env.interactive_godot_process import wait_until_true
 from avalon.datagen.godot_generated_types import READY_LOG_SIGNAL
 from avalon.datagen.godot_utils import create_env_from_artifacts
 
@@ -191,7 +191,7 @@ def artifact_path_() -> Generator[Path, None, None]:
 @fixture
 @use(artifact_path_)
 def mock_create_error_artifact_path_(artifact_path: Path, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("avalon.datagen.generate.create_error_artifact_path", lambda: artifact_path)
+    monkeypatch.setattr("avalon.datagen.godot_env.interactive_godot_process.create_error_artifact_path", lambda: artifact_path)
 
 
 @integration_test

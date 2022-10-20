@@ -3,22 +3,24 @@ import os
 import subprocess
 import tarfile
 import tempfile
-import time
 import uuid
 from pathlib import Path
 from posixpath import basename
 from signal import SIGKILL
 from signal import Signals
 from signal import valid_signals
-from typing import Callable
 from typing import Deque
+from typing import Final
 from typing import Iterable
 from typing import List
+from typing import Mapping
 from typing import Optional
 from typing import Tuple
 
 from avalon.common.log_utils import log_to_sentry
 from avalon.common.log_utils import logger
+from avalon.common.utils import AVALON_PACKAGE_DIR
+from avalon.common.utils import wait_until_true
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.contrib.utils import TEMP_DIR
 from avalon.datagen.data_config import AbstractDataConfig
@@ -27,33 +29,19 @@ from avalon.datagen.godot_generated_types import READY_LOG_SIGNAL
 from avalon.datagen.godot_generated_types import SimSpec
 from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 
+# TODO: Consider linking binaries to `godot_editor` and `godot_runner` allowing for more fine-grained control/inspection from python
+GODOT_BINARY_PATH_ENV_FLAG = "GODOT_BINARY_PATH"
+GODOT_BINARY_PATH: Final = os.environ.get(GODOT_BINARY_PATH_ENV_FLAG, f"{AVALON_PACKAGE_DIR}/bin/godot")
+
 GODOT_ERROR_LOG_PATH = f"{FILESYSTEM_ROOT}/godot"
-DATAGEN_PATH = os.path.dirname(__file__)
-EXPERIMENT_DIR = os.path.dirname(DATAGEN_PATH)
-OLD_GODOT_PATH = f"{DATAGEN_PATH}/old_godot"
-NEW_GODOT_PATH = f"{DATAGEN_PATH}/godot"
+
+DATAGEN_SCRIPT_PATH = f"{AVALON_PACKAGE_DIR}/datagen/godot/datagen.sh"
 
 _ACTION_REPLAY_FILENAME = "actions_replay.out"
 
 
 def _create_json_from_config(config: AbstractDataConfig) -> str:
     return json.dumps(config.to_dict(), indent=2)
-
-
-def _is_test_env() -> bool:
-    return "PYTEST_CURRENT_TEST" in os.environ
-
-
-def _move_dir_and_ignore_if_exists(tmp_dir: str, local_cache_dir: str):
-    try:
-        os.rename(tmp_dir, local_cache_dir)
-    except OSError as e:
-        if e.errno == 39:
-            logger.info(
-                f"{local_cache_dir} already exists and was probably created by someone else. Our datagen should be deterministic so we'll skip updating {local_cache_dir}"
-            )
-        else:
-            raise
 
 
 ERROR_ALLOWLIST = (
@@ -68,6 +56,7 @@ def _read_log(log_path: str) -> Tuple[List[str], bool]:
     """Read the godot log and check for errors"""
     with open(log_path, "r") as infile:
         log_lines = infile.readlines()
+
     is_disallowed_error_logged = False
     for l in log_lines:
         if "ERROR" in l and not any(x in l for x in ERROR_ALLOWLIST):
@@ -102,13 +91,14 @@ def _raise_godot_error(
     raise GodotError(error_message)
 
 
-def _popen_process_group(bash_cmd: Iterable[str], log_path: str):
+def _popen_process_group(bash_cmd: Iterable[str], log_path: str, env: Mapping[str, str] = {}):
     with open(log_path, "wb") as log:
         return subprocess.Popen(
             list(bash_cmd),
             start_new_session=True,
             stdout=log,
             stderr=log,
+            env=env,
         )
 
 
@@ -146,9 +136,9 @@ class InteractiveGodotProcess:
     def __init__(
         self,
         config: SimSpec,
+        gpu_id: int,
         keep_log: bool = True,
         is_dev_flag_added: bool = False,
-        gpu_id: Optional[int] = None,
         run_uuid: Optional[str] = None,
     ):
         self.gpu_id = gpu_id
@@ -220,16 +210,16 @@ class InteractiveGodotProcess:
         input_pipe_path: str,
         output_pipe_path: str,
         extra_flags: Tuple[str, ...] = tuple(),
-    ):
-        if self.gpu_id is not None:
-            extra_flags = extra_flags + tuple([f"--cuda-gpu-id={self.gpu_id}"])
-        else:
-            assert False
+    ) -> Tuple[List[str], Mapping[str, str]]:
+        assert self.gpu_id is not None, "Refusing to run godot process without a gpu_id"
+        extra_flags = extra_flags + tuple([f"--cuda-gpu-id={self.gpu_id}"])
+
         resolution = (self.config.recording_options.resolution_x, self.config.recording_options.resolution_y)
         if self.config.recording_options.is_adding_debugging_views:
             resolution = (resolution[0] * 2, resolution[1] * 2)
-        return [
-            f"{NEW_GODOT_PATH}/datagen.sh",
+
+        bash_args = [
+            DATAGEN_SCRIPT_PATH ,
             f"--thread_count=4",
             f"-U",
             f"--input_pipe_path={input_pipe_path}",
@@ -238,8 +228,16 @@ class InteractiveGodotProcess:
             *extra_flags,
             self.config_path,
         ]
+        bash_env = {
+            GODOT_BINARY_PATH_ENV_FLAG: GODOT_BINARY_PATH,
+        }
+        return bash_args, bash_env
 
     def start(self):
+        assert os.path.exists(GODOT_BINARY_PATH), (
+            f"Cannot run avalon: Godot binary has not been installed to to {GODOT_BINARY_PATH_ENV_FLAG}={GODOT_BINARY_PATH}. "
+            f"Please run `python -m avalon.install_godot_binary (runner|editor)` and try again."
+        )
         # we open a file here so that we can watch
         # create the file because we want to open it now
         Path(self.log_path).touch()
@@ -250,13 +248,15 @@ class InteractiveGodotProcess:
             config_file.write(_create_json_from_config(self.config))
 
         extra_flags = ("--dev",) if self.is_dev_flag_added else tuple()
-        godot_bash_args = self._get_godot_command(self.action_pipe_path, self.observation_pipe_path, extra_flags)
+        godot_bash_args, godot_bash_env = self._get_godot_command(
+            self.action_pipe_path, self.observation_pipe_path, extra_flags
+        )
         logger.debug(f"{self.prefix} process group: {' '.join(godot_bash_args)}' &>> {self.log_path}")
 
-        debug_bash_cmd = " ".join(self._get_godot_command(self.action_record_path, "/tmp/debug_output"))
+        debug_bash_cmd = " ".join(self._get_godot_command(self.action_record_path, "/tmp/debug_output")[0])
         logger.debug(f"{self.prefix} TO DEBUG RUN: {debug_bash_cmd}")
 
-        self.process = _popen_process_group(godot_bash_args, self.log_path)
+        self.process = _popen_process_group(godot_bash_args, self.log_path, godot_bash_env)
 
     def save_artifacts(self, recent_worlds: Deque[GenerateAvalonWorldParams]) -> Path:
         tar_path = Path(self.artifact_path)
@@ -383,18 +383,3 @@ class InteractiveGodotProcess:
                 os.remove(self.log_path)
 
         return True
-
-
-def wait_until_true(
-    callback: Callable[[], Optional[bool]],
-    max_wait_sec: float = 5,
-    sleep_inc: float = 0.25,
-):
-    """Repeatedly call callback() until it returns True or max_wait_sec is reached"""
-    waited_for_sec = 0.0000
-    while waited_for_sec <= max_wait_sec:
-        if callback():
-            return
-        time.sleep(sleep_inc)
-        waited_for_sec += sleep_inc
-    raise TimeoutError(f"could not complete within {max_wait_sec} seconds")

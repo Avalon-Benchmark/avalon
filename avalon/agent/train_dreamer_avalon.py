@@ -11,7 +11,7 @@ from avalon.agent.godot.godot_eval import test
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.common.error_utils import capture_exception
-from avalon.datagen.generate import GODOT_ERROR_LOG_PATH
+from avalon.datagen.godot_env.interactive_godot_process import GODOT_ERROR_LOG_PATH
 
 FRAGMENT_LENGTH = 30
 

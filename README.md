@@ -51,9 +51,16 @@ For a full example on how to create random worlds, take actions as an agent, and
 
 As Avalon is designed as a high-performance RL environment, it's tailored to running in the cloud on headless linux servers with Nvidia GPUs. However, it should also work on macOS.
 
-Avalon relies on [a custom Godot binary](https://github.com/Avalon-Benchmark/godot) optimized for headless rendering and performance - make sure you run `python -m avalon.install_godot_binary runner` after the installation. If you intend to inspect, debug or build custom levels, you'll also want the accompanying editor: `python -m avalon.install_godot_binary editor`. 
+Avalon relies on [a custom Godot binary](https://github.com/Avalon-Benchmark/godot) optimized for headless rendering and performance. If you intend to inspect, debug or build custom levels, you'll also want the accompanying editor:
+```sh
+pip install avalon-rl==1.0.0
 
-Avalon requires Python >= 3.9.
+# needed to actually run environments
+python -m avalon.install_godot_binary editor
+```
+
+> Note: the binary will be installed in the package under `avalon/bin/godot` by default to avoid cluttering your system.
+> Pure-pip binary packaging is a work-in-progress.
 
 ### Ubuntu
 

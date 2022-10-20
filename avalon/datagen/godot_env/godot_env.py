@@ -23,18 +23,17 @@ from sentry_sdk import capture_exception
 from avalon.common.utils import only
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.datagen.errors import GodotError
-from avalon.datagen.generate import InteractiveGodotProcess
 from avalon.datagen.godot_env._bridge import GodotEnvBridge
 from avalon.datagen.godot_env.action_log import GodotEnvActionLog
 from avalon.datagen.godot_env.actions import ActionType
 from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.godot_env.goals import GoalEvaluator
 from avalon.datagen.godot_env.goals import GoalProgressResult
+from avalon.datagen.godot_env.interactive_godot_process import InteractiveGodotProcess
 from avalon.datagen.godot_env.observations import FeatureDataDict
 from avalon.datagen.godot_env.observations import GodotObservationContext
 from avalon.datagen.godot_env.observations import ObservationType
 from avalon.datagen.godot_generated_types import SimSpec
-
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
 from avalon.datagen.world_creation.world_generator import EmptyLevelGenerator

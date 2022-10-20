@@ -13,19 +13,24 @@ RESOLUTION='96x96'
 CHECK_ENV=''
 CHILD_PID=''
 
-GODOT_BIN='/usr/local/bin/godot'
-GODOT_CFG=()
-GODOT_CMD=(
-    "$GODOT_BIN"
-    '--audio-driver'    'Dummy'
-    '--fixed-fps'       '10'
-)
-
-
 THIS_FILE=$(realpath "$0")
 THIS_PATH=$(dirname "${THIS_FILE}")
 
 cd "$THIS_PATH"
+
+if test -z "$GODOT_BINARY_PATH"
+then
+    # NOTE: Duplicated in generate.py
+    GODOT_BINARY_PATH=$(realpath $THIS_FILE/../../bin/avalon_godot)
+fi
+
+# /usr/local/bin/godot
+GODOT_CFG=()
+GODOT_CMD=(
+    "$GODOT_BINARY_PATH"
+    '--audio-driver'    'Dummy'
+    '--fixed-fps'       '10'
+)
 
 
 if [[ ($# == 0) || ($1 == -h) || ($1 == --help) ]]
@@ -121,9 +126,9 @@ fi
 
 if [[ "$CHECK_ENV" != '0' ]]
 then
-    if ! realpath -e "$GODOT_BIN"
+    if ! realpath -e "$GODOT_BINARY_PATH"
     then
-        echo "godot runtime not found at '$GODOT_BIN'"
+        echo "godot runtime not found at '$GODOT_BINARY_PATH'"
         exit 201
     fi
     echo
