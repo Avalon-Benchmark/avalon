@@ -2,11 +2,16 @@ import os
 import platform
 import random
 import re
+import shutil
 import subprocess
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Any
+from typing import ContextManager
+from typing import Generator
+from uuid import uuid4
 
 import numpy as np
 import sh
@@ -147,3 +152,43 @@ def run_local_command(
 
 def is_on_osx():
     return platform.system().lower() == "darwin"
+
+
+def create_temp_file_path(cleanup: bool = True) -> ContextManager[Path]:
+    @contextmanager
+    def context() -> Generator[Path, None, None]:
+        random_id = uuid4()
+        output_path = os.path.join(TEMP_DIR, str(random_id))
+        try:
+            yield Path(output_path)
+        finally:
+            if cleanup and os.path.exists(output_path):
+                if os.path.isfile(output_path):
+                    os.remove(output_path)
+                else:
+                    shutil.rmtree(output_path)
+
+    # noinspection PyTypeChecker
+    return context()
+
+
+def temp_dir(base_dir: str, is_uuid_concatenated: bool = False) -> ContextManager[Path]:
+    @contextmanager
+    def context() -> Generator[Path, None, None]:
+        random_id = uuid4()
+        if is_uuid_concatenated:
+            output_path = Path(base_dir.rstrip("/") + "_" + str(random_id))
+        else:
+            output_path = Path(base_dir) / str(random_id)
+        output_path.mkdir(parents=True, exist_ok=True)
+        try:
+            yield output_path
+        finally:
+            if output_path.exists():
+                try:
+                    shutil.rmtree(str(output_path))
+                except OSError:
+                    os.unlink(str(output_path))
+
+    # noinspection PyTypeChecker
+    return context()

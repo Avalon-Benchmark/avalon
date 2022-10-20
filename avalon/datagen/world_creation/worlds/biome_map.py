@@ -7,8 +7,8 @@ from typing import cast
 
 import attr
 import numpy as np
-from IPython.core.display import HTML
-from IPython.core.display import display
+from IPython.display import HTML
+from IPython.display import display
 from matplotlib import pyplot as plt
 from scipy.interpolate import RegularGridInterpolator
 from scipy.spatial.transform import Rotation

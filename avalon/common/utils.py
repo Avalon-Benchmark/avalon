@@ -22,7 +22,7 @@ from typing import ValuesView
 from typing import cast
 
 import numpy as np
-from IPython.core.display import display
+from IPython.display import display
 
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.contrib.utils import TEMP_DIR

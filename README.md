@@ -9,7 +9,7 @@
 
 ```bash
 # build the docker image for PPO or Dreamer
-docker build -f ./docker/Dockerfile . --tag=avalon/ppo
+docker build -f ./docker/Dockerfile . --tag=avalon/training
 
 # optionally, use the following to build an image that can be used to run Impala using torchbeast (https://github.com/facebookresearch/torchbeast)
 docker build -f ./docker_torchbeast/Dockerfile . --tag=avalon/torchbeast
@@ -29,11 +29,14 @@ docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabili
 
 ## Installing locally (with pip)
 
-Alternatively, the requirements in `docker/20_requirements.txt` and `docker/21_requirements.txt` can be manually installed locally:
-```sh
-pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 -r 20_requirements.txt -r 21_requirements.txt
-```
-You will also need to pull out the packages that are pip installed in `docker/41_pip_extras.sh`.
+must have nvidia gpu!
+
+apt packages:
+libegl-dev  libglew-dev libglfw3-dev libnvidia-gl libopengl-dev libosmesa6 mesa-utils-extra
+
+godot
+
+pytorch cuda (training only)
 
 TODO: godot server install (hopefully will be wrapped up in pip).
 

@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 import pytest
 
-from avalon.contrib.testing_utils import temp_dir
+from avalon.contrib.utils import temp_dir
 
 # note: using relative imports because this server runs independent from the rest of standalone/avalon
 from .server_state import APK_VERSIONS_PATH
