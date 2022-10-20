@@ -16,18 +16,18 @@ from avalon.datagen.world_creation.worlds.export import export_world
 enable_debug_logging()
 
 # %%
-
 difficulty = 0.5
 size_in_meters = 50.0
 world_type = WorldType.CONTINENT
 
+# The export config you use depends on your use case, ee datagen/world_creation/configs/export.py for others
 base = get_oculus_export_config()
-
 
 export_configs = [
     base,
 ]
 
+# %%
 for i, export_config in enumerate(export_configs):
     rand = np.random.default_rng(0)
 
@@ -41,14 +41,9 @@ for i, export_config in enumerate(export_configs):
         visibility_height=FOOD_TREE_VISIBLE_HEIGHT,
     )
 
-    add_food_tree_for_simple_task(world, locations)
-    world.add_spawn(rand, difficulty, locations.spawn, locations.goal)
+    world = add_food_tree_for_simple_task(world, locations)
+    world = world.add_spawn(rand, difficulty, locations.spawn, locations.goal)
 
     output_path = Path(f"/tmp/profiling_levels/level_{export_config.name}")
     output_path.mkdir(parents=True, exist_ok=True)
     export_world(output_path, rand, world)
-
-# %%
-
-# TODO: talk about export configs
-# get_oculus_export_config vs other one?

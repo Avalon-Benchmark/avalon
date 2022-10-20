@@ -46,7 +46,6 @@ if base_output_path.exists():
 base_output_path.mkdir(parents=True, exist_ok=True)
 
 # %%
-
 actual_worlds = generate_worlds(
     base_output_path=base_output_path,
     tasks=tasks,
@@ -61,7 +60,6 @@ actual_worlds = generate_worlds(
 )
 
 # %%
-
 NUM_ACTIONS = 20
 RESOLUTION = 512
 
@@ -70,5 +68,3 @@ all_observations = visualize_worlds_in_folder(world_paths, RESOLUTION, NUM_ACTIO
 
 for obs in all_observations:
     display_video(obs, size=(RESOLUTION, RESOLUTION))
-
-# %%

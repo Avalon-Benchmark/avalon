@@ -1,6 +1,6 @@
 # %%
-import pathlib as pathlib
 import shutil
+from pathlib import Path
 
 from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
@@ -11,10 +11,10 @@ from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldPar
 from avalon.datagen.world_creation.world_generator import generate_world
 
 # %%
+OUTPUT_FOLDER = Path("./output/").absolute()
+if OUTPUT_FOLDER.exists():
+    shutil.rmtree(OUTPUT_FOLDER)
 
-OUTPUT_FOLDER = pathlib.Path("./output/").absolute()
-
-shutil.rmtree(OUTPUT_FOLDER)
 params = generate_world(
     GenerateAvalonWorldParams(
         AvalonTask.MOVE,
@@ -24,8 +24,8 @@ params = generate_world(
         output=str(OUTPUT_FOLDER),
     )
 )
-# %%
 
+# %%
 env_params = GodotEnvironmentParams(
     resolution=256,
     training_protocol=TrainingProtocolChoice.SINGLE_TASK_FIGHT,

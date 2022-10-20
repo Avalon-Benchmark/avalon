@@ -15,9 +15,9 @@ from rliable import metrics
 from tabulate import tabulate
 
 from avalon.common.log_utils import logger
+from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.datagen.world_creation.constants import TASKS_BY_TASK_GROUP
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
-from science.common.s3_utils import SimpleS3Client
 
 s3_client = SimpleS3Client()
 FIXED_WORLD_KEY = "avalon_worlds__0824_full.tar.gz"

@@ -47,16 +47,18 @@ def show(value_id: int) -> None:
             for world_id, world_name in WORLDS.items():
                 value = get_performance(config, driver, world_id)[value_id]
                 values.append(int(value))
-            print(f"{driver} ({config}) & {values[0]:8,} & {values[1]:8,} & {values[2]:8,} & {values[3]:8,} \\\\")
+            print(
+                f"{driver} ({config}) & {values[0]:8,} & {values[1]:8,} & {values[2]:8,} & {values[3]:8,} \\\\"
+            )  # script
 
 
 def main() -> None:
     print("single:")  # script
     show(0)
-    print()
+    print()  # script
     print("multi:")  # script
     show(1)
-    print()
+    print()  # script
     print("nproc:")  # script
     show(2)
 

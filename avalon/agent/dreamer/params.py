@@ -41,7 +41,7 @@ class DreamerParams(OffPolicyParams):
     """
 
     # overrides
-    project: str = "zack_dreamer_new"
+    project: str = "avalon_dreamer"
     clip_grad_norm: float = 100.0
     reward_loss_scale: float = 1
     discount: float = 0.99

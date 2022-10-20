@@ -31,7 +31,7 @@ else:
 
 assert APK_VERSION != "", "Run `git rev-parse HEAD` and set the APK version to be the most recent git hash."
 
-logger.info(f"{APK_VERSION}=")
+logger.info(f"{APK_VERSION=}")
 
 worlds_path = Path(f"{FILESYSTEM_ROOT}/avalon/worlds/{APK_VERSION}")
 worlds_path.mkdir(parents=True, exist_ok=True)
@@ -40,25 +40,25 @@ worlds_path.mkdir(parents=True, exist_ok=True)
 
 tasks = [
     AvalonTask.EAT,
-    AvalonTask.MOVE,
-    AvalonTask.JUMP,
-    AvalonTask.CLIMB,
-    AvalonTask.DESCEND,
-    AvalonTask.SCRAMBLE,
-    AvalonTask.STACK,
-    AvalonTask.BRIDGE,
-    AvalonTask.PUSH,
-    AvalonTask.THROW,
-    AvalonTask.HUNT,
-    AvalonTask.FIGHT,
-    AvalonTask.AVOID,
-    AvalonTask.EXPLORE,
-    AvalonTask.OPEN,
-    AvalonTask.CARRY,
-    AvalonTask.NAVIGATE,
-    AvalonTask.FIND,
-    AvalonTask.SURVIVE,
-    AvalonTask.GATHER,
+    # AvalonTask.MOVE,
+    # AvalonTask.JUMP,
+    # AvalonTask.CLIMB,
+    # AvalonTask.DESCEND,
+    # AvalonTask.SCRAMBLE,
+    # AvalonTask.STACK,
+    # AvalonTask.BRIDGE,
+    # AvalonTask.PUSH,
+    # AvalonTask.THROW,
+    # AvalonTask.HUNT,
+    # AvalonTask.FIGHT,
+    # AvalonTask.AVOID,
+    # AvalonTask.EXPLORE,
+    # AvalonTask.OPEN,
+    # AvalonTask.CARRY,
+    # AvalonTask.NAVIGATE,
+    # AvalonTask.FIND,
+    # AvalonTask.SURVIVE,
+    # AvalonTask.GATHER,
 ]
 
 # %%
@@ -101,13 +101,12 @@ if RELEASE_BUILD:
         add_worlds_to_server(practice_worlds)
     if len(actual_worlds) > 0:
         add_worlds_to_server(actual_worlds)
-
-# make sure this apk version is valid
-add_apk_version_to_server(APK_VERSION)
+    # make sure this apk version is valid
+    add_apk_version_to_server(APK_VERSION)
 
 # %%
 
-godot_path = Path("datagen/godot")
+godot_path = Path("avalon/datagen/godot")
 tmp_path = Path(f"{TEMP_DIR}/avalon/apks")
 output_path = Path(f"{FILESYSTEM_ROOT}/avalon/apks")
 apk_script = f"{os.getcwd()}/scripts/apk.sh"

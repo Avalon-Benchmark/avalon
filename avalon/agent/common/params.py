@@ -56,7 +56,7 @@ class Params:
     obs_first: bool = True
 
     train_gpu: int = 0  # currently this does nothing (but will happen automatically)
-    inference_gpus: tuple[int] = (0,)  # only applied if there are async worker managers
+    inference_gpus: tuple[int, ...] = (0,)  # only applied if there are async worker managers
 
     # training
     is_training: bool = True

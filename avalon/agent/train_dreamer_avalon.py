@@ -56,7 +56,7 @@ class DreamerGodotParams(DreamerParams):
     min_fragment_len: int = FRAGMENT_LENGTH
     max_fragment_len: int = FRAGMENT_LENGTH
     train_gpu: int = 0
-    inference_gpus: tuple[int] = (1,)
+    inference_gpus: tuple[int, ...] = (1,)
     actor_grad: str = "reinforce"
     log_rollout_metrics_every: int = 100
     is_training: bool = True

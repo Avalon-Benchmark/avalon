@@ -5,6 +5,8 @@ from typing import Optional
 from typing import cast
 
 import boto3
+from botocore import UNSIGNED
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from avalon.contrib.aws_auth import load_aws_keys
@@ -23,12 +25,19 @@ class SimpleS3Client:
             access_key, secret_key = os.environ["AWS_ACCESS_KEY_ID"], os.environ["AWS_SECRET_ACCESS_KEY"]
         else:
             access_key, secret_key = load_aws_keys()
+
+        # Allow anonymous access, e.g. when the bucket is public
+        config = None
+        if access_key is None and secret_key is None:
+            config = Config(signature_version=UNSIGNED)
+
         # Create a new session to make client creation thread-safe.
         self.client = boto3.session.Session().client(
             "s3",
             region_name=region,
             aws_access_key_id=access_key,
             aws_secret_access_key=secret_key,
+            config=config,
         )
 
     def save(self, key: str, data: bytes):

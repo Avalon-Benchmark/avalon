@@ -10,7 +10,7 @@ from ray.rllib.agents.ppo import PPOTrainer
 from ray.rllib.algorithms.callbacks import DefaultCallbacks
 from ray.tune import register_env
 
-from avalon.agent.godot.godot_gym import AvalonGodotEnvWrapper
+from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import CurriculumWrapper
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import GodotObsTransformWrapper
@@ -107,7 +107,7 @@ def env_creator(env_config):
     )
 
     # This is the core Avalon environment
-    env = AvalonGodotEnvWrapper(env_params)
+    env = AvalonEnv(env_params)
     # This is a standard wrapper we use to scale/clip the observations; it should always be used.
     env = GodotObsTransformWrapper(env, greyscale=env_params.greyscale)
     if env_params.mode == "train":
