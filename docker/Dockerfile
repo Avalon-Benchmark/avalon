@@ -22,6 +22,7 @@ RUN apt-get clean
 
 RUN python3.9 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONHASHSEED=0
 RUN pip install -U pip wheel
 RUN pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 torch==1.12.0+cu113 torchvision==0.13.0+cu113
 
@@ -36,8 +37,3 @@ RUN pip install -e /opt/projects/avalon[train]
 
 WORKDIR /opt/projects/avalon
 
-# from bawr
-# apt-get install libegl-dev  libglew-dev libglfw3-dev libnvidia-gl libopengl-dev libosmesa6 mesa-utils-extra --no-install-recommends
-
-# CUDA_VISIBLE_DEVICES=6 python notebooks/avalon_simplest_example.sync.py
-# CUDA_VISIBLE_DEVICES=6 python -m avalon.agent.train_ppo_avalon

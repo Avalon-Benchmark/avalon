@@ -24,7 +24,7 @@ class OnPolicyParams(Params):
 @attr.s(auto_attribs=True, frozen=True)
 class PPOParams(OnPolicyParams):
     # Default overrides
-    project: str = "zack_zack_ppo"
+    project: str = "avalon_ppo"
     # don't routinely change these!
     obs_first: bool = True
     time_limit_bootstrapping: bool = True

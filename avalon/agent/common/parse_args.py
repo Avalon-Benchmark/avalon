@@ -52,6 +52,9 @@ def cast_argument_to_paramater_type(key: str, value: str, params: Any) -> Any:
     elif dtype == tuple[str, ...]:
         # use comma-separated list with no spaces
         return tuple(value.split(","))
+    elif dtype == tuple[int, ...]:
+        # use comma-separated list with no spaces
+        return tuple(value.split(","))
     else:
         assert type(dtype) == str, (key, dtype, type(dtype))
         # We got a forward type declaration, either from an explicit quote-wrapped type, or
