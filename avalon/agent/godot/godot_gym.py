@@ -108,8 +108,8 @@ CURRICULUM_BASE_PATH = Path(DATA_FOLDER) / "curriculum"
 
 class TrainingProtocolChoice(Enum):
     MULTI_TASK_ALL = "MULTI_TASK_ALL"
-    MULTI_TASK_EASY = "MULTI_TASK_EASY"
-    MULTI_TASK_BASIC = "MULTI_TASK_BASIC"
+    MULTI_TASK_EASY = "MULTI_TASK_EASY"  # Just MOVE and EAT
+    MULTI_TASK_BASIC = "MULTI_TASK_BASIC"  # All non-compositional tasks
     MULTI_TASK_COMPOSITIONAL = "MULTI_TASK_COMPOSITIONAL"
     SINGLE_TASK_EAT = "SINGLE_TASK_EAT"
     SINGLE_TASK_MOVE = "SINGLE_TASK_MOVE"
@@ -163,47 +163,70 @@ def task_groups_from_training_protocol(
 class GodotEnvironmentParams(EnvironmentParams):
     suite: str = "godot"
     seed: int = 0
+    # whether to use per-task curriculum learning. requires a wrapper.
+    is_task_curriculum_used: bool = True
+    # how much to update the task difficulty per successful or failed episode.
     task_difficulty_update: float = 0.01
+    # whether to use a meta-curriculum. requires a wrapper.
+    is_meta_curriculum_used: bool = False
+    # if using the meta curriculum, the update size
     meta_difficulty_update: float = 0.01
+    # initial difficulty value
     initial_difficulty: float = 0
+    # can use to give a small per-step penalty for using energy (by moving)
     energy_cost_coefficient: float = 0
+    # energy cost for each axis
+    head_roll_coefficient: float = 1e-6
+    # energy cost for each axis
+    head_pitch_coefficient: float = 1e-6
+    energy_cost_aggregator: Literal["sum", "max"] = "sum"
+    # rgbd image will have resolution (resolution * resolution)
     resolution: int = 96
     greyscale: bool = False
+    # dense reward is probably broken; we only use sparse
     is_reward_dense: bool = False
+    # the episode will continue for this many steps after eating a food
     num_frames_alive_after_food_is_gone: int = 20
     level_output_base_path: str = f"{FILESYSTEM_ROOT}/data/level_gen"
+    # which tasks to train on
     training_protocol: TrainingProtocolChoice = TrainingProtocolChoice.MULTI_TASK_BASIC
-    is_task_curriculum_used: bool = True
-    is_meta_curriculum_used: bool = False
+    # debug output
     is_debugging_godot: bool = False
+    # debug output
     is_video_logged: bool = False
+    # debug output
     is_action_logged: bool = False
+    # debug output
     is_logging_artifacts_on_error_to_s3: bool = True
     s3_bucket_name: Optional[str] = S3_AVALON_ERROR_BUCKET
-    head_roll_coefficient: float = 1e-6
-    head_pitch_coefficient: float = 1e-6
+    # debug output
     goal_progress_path: Optional[Path] = None
-    energy_cost_aggregator: Literal["sum", "max"] = "sum"
 
     is_frame_id_transformed_to_frames_remaining: bool = True
 
+    # which for godot to use
     gpu_id: int = 0
 
-    # Test world params
-    fixed_worlds_s3_key: Optional[str] = None  # fill this in if you want to use fixed worlds for testing
-    fixed_worlds_load_from_path: Optional[Path] = None  # this will be auto-filled
+    # Evaluation world params
+    # fill this in if you want to use fixed worlds for testing
+    fixed_worlds_s3_key: Optional[str] = None
+    # this will be auto-filled
+    fixed_worlds_load_from_path: Optional[Path] = None
     fixed_world_min_difficulty: float = 0
     fixed_world_max_difficulty: float = 1
     val_episodes_per_task: int = 11
     test_episodes_per_task: int = 101
+    # difficulty bin size for eval logging histograms
     eval_difficulty_bin_size: float = 0.1
 
     @property
     def is_fixed_generator(self) -> bool:
+        """Use the `fixed` world genenerator for evaluation."""
         return self.mode != "train"
 
     @property
     def num_fixed_worlds_per_task(self) -> int:
+        """How many evaluation worlds to run per task."""
         if self.mode == "test":
             return self.test_episodes_per_task
         elif self.mode == "val":
@@ -507,7 +530,7 @@ class GodotObsTransformWrapper(gym.ObservationWrapper):
         if "rgbd" in env.observation_space.spaces:
             shape = env.observation_space.spaces["rgbd"].shape
             shape = (1 if greyscale else shape[2], shape[0], shape[1])
-            self.observation_space.spaces["rgbd"] = gym.spaces.Box(low=-0.5, high=0.5, shape=shape, dtype=np.uint8)
+            self.observation_space.spaces["rgbd"] = gym.spaces.Box(low=0, high=255, shape=shape, dtype=np.uint8)
 
         # really these are vector keys
         self.scalar_keys = {
@@ -517,10 +540,7 @@ class GodotObsTransformWrapper(gym.ObservationWrapper):
         }
         self.vec_len = sum(self.scalar_keys.values())
         assert len(env.observation_space.spaces) == len(self.observation_space.spaces) + len(self.scalar_keys)
-        # TODO: these ranges aren't quite right
         self.observation_space["scalars"] = gym.spaces.Box(low=-1, high=1, shape=(self.vec_len,), dtype=np.float32)
-
-        # TODO: do we need to change the other spaces too? are the min/maxes actually used anywhere?
 
     def observation(self, observation: Dict[str, Any]):
         transformed = {k: self.transforms[k](v) if k in self.transforms else v for k, v in observation.items()}
@@ -534,7 +554,10 @@ class GodotObsTransformWrapper(gym.ObservationWrapper):
                 continue
             scalar_outputs[i : i + len(v)] = v
             i += len(v)
-        # assert len(scalar_outputs) == len(self.scalar_keys)
+        # Enforce the bounds of the scalar space
+        scalar_outputs = np.clip(
+            scalar_outputs, self.observation_space["scalars"].low, self.observation_space["scalars"].high  # type: ignore
+        )
         out["scalars"] = scalar_outputs
         return out
 
