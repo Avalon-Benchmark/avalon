@@ -23,9 +23,9 @@ import numpy as np
 from avalon.common.errors import SwitchError
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
-from avalon.contrib.testing_utils import temp_dir
 from avalon.contrib.utils import TEMP_DIR
 from avalon.contrib.utils import is_git_repo_clean_on_notebook
+from avalon.contrib.utils import temp_dir
 from avalon.datagen.world_creation.tests.fixtures import ChecksumManifest
 from avalon.datagen.world_creation.tests.fixtures import get_current_reference_manifest
 from avalon.datagen.world_creation.tests.helpers import create_indoor_world

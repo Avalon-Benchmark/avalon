@@ -6,10 +6,10 @@ from pathlib import Path
 
 from loguru import logger
 
-from avalon.contrib.testing_utils import create_temp_file_path
 from avalon.contrib.testing_utils import temp_file_path_
 from avalon.contrib.testing_utils import use
 from avalon.contrib.utils import TESTS_FOLDER
+from avalon.contrib.utils import create_temp_file_path
 
 MYPY_CACHE_NAME = ".mypy_cache"
 

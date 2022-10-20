@@ -13,7 +13,7 @@ from loguru import logger
 
 from avalon.common.utils import TEMP_DIR
 from avalon.contrib.s3_utils import SimpleS3Client
-from avalon.contrib.testing_utils import create_temp_file_path
+from avalon.contrib.utils import create_temp_file_path
 from avalon.datagen.errors import ImpossibleWorldError
 from avalon.datagen.world_creation.configs.export import ExportConfig
 from avalon.datagen.world_creation.configs.export import get_eval_agent_export_config

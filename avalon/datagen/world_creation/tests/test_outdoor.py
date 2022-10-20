@@ -2,10 +2,10 @@ from pathlib import Path
 
 import attr
 
-from avalon.contrib.testing_utils import create_temp_file_path
 from avalon.contrib.testing_utils import slow_integration_test
 from avalon.contrib.testing_utils import temp_path_
 from avalon.contrib.testing_utils import use
+from avalon.contrib.utils import create_temp_file_path
 from avalon.datagen.world_creation.configs.export import get_eval_agent_export_config
 from avalon.datagen.world_creation.tests.fixtures import ChecksumManifest
 from avalon.datagen.world_creation.tests.fixtures import outdoor_world_catalog_id_

@@ -1,5 +1,3 @@
-import os
-import subprocess
 from typing import Any
 from typing import List
 from typing import Tuple
@@ -58,14 +56,6 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         assert isinstance(env_params, GodotEnvironmentParams)
         assert env_params.time_limit is None, "godot has its own time limit"
         assert env_params.action_repeat == 1
-
-        egl_driver_path = (
-            subprocess.run("mount | grep x86_64 | grep EGL | cut -d ' ' -f 3", capture_output=True, shell=True)
-            .stdout.decode("UTF-8")
-            .strip()
-        )
-        assert egl_driver_path, "No EGL driver found! Maybe wrong AMI? Wrong docker command? Good luck."
-        os.system(f"sudo ln -sf {egl_driver_path} /usr/lib/x86_64-linux-gnu/libEGL_nvidia.so.0")
 
         env = AvalonEnv(env_params)
         # We don't use the TimeLimit wrapper because the time limit is dynamic,

@@ -1,44 +1,43 @@
-# syntax = docker/dockerfile:1.2
-
 FROM ubuntu:20.04
 
-WORKDIR /tmp
+RUN apt-get update && DEBIAN_FRONTEND="noninteractive" TZ="America/New_York" apt-get install -yqq \
+    htop \
+    python3.9 \
+    python3.9-dev \
+    python3.9-distutils \
+    python3.9-venv \
+    wget \
+    unzip \
+    git
 
-CMD ["/main.sh"]
-EXPOSE 8888
+RUN apt-get -yqq install --no-install-recommends \
+    libegl-dev \
+    libopengl-dev \
+    libglew-dev \
+    libglfw3-dev \
+    libosmesa6 \
+    mesa-utils-extra
 
-COPY ./docker/00_* /tmp/
-RUN bash 00_apt_install.sh
+RUN apt-get clean
 
-COPY ./docker/01_* /tmp/
-RUN bash 01_user_config.sh
+RUN python3.9 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install -U pip wheel
+RUN pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 torch==1.12.0+cu113 torchvision==0.13.0+cu113
 
-COPY ./docker/99_container_main.sh /main.sh
-RUN chmod ugo+x /main.sh
+COPY ./docker/godot_install.sh /tmp/
+RUN bash /tmp/godot_install.sh
 
+COPY ./docker/gl_setup.sh /tmp/
+RUN bash /tmp/gl_setup.sh
 
-
-COPY ./docker/20_* /tmp/
-RUN bash 20_pip_torch.sh
-
-COPY ./docker/21_* /tmp/
-RUN  bash 21_pip_install.sh
-
-COPY ./docker/40_* /tmp/
-RUN  bash 40_apt_extras.sh
-
-COPY ./docker/41_* /tmp/
-RUN  bash 41_pip_extras.sh
-
-COPY ./docker/50_* /tmp/
-RUN  bash 50_godot.sh
-
-COPY ./docker/80_* /tmp/
-RUN  bash 80_temporary_fixes.sh
-
-
-RUN mkdir -p /opt/projects/avalon
-RUN chown -R user:user /opt/projects
+COPY . /opt/projects/avalon
+RUN pip install -e /opt/projects/avalon[train]
 
 WORKDIR /opt/projects/avalon
-USER user
+
+# from bawr
+# apt-get install libegl-dev  libglew-dev libglfw3-dev libnvidia-gl libopengl-dev libosmesa6 mesa-utils-extra --no-install-recommends
+
+# CUDA_VISIBLE_DEVICES=6 python notebooks/avalon_simplest_example.sync.py
+# CUDA_VISIBLE_DEVICES=6 python -m avalon.agent.train_ppo_avalon

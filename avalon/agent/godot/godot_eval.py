@@ -31,8 +31,8 @@ from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import TEMP_BUCKET_NAME
 from avalon.contrib.s3_utils import SimpleS3Client
-from avalon.contrib.testing_utils import create_temp_file_path
 from avalon.contrib.utils import TEMP_DIR
+from avalon.contrib.utils import create_temp_file_path
 
 BIG_SEPARATOR = "-" * 80
 RESULT_TAG = "DATALOADER:0 TEST RESULTS"

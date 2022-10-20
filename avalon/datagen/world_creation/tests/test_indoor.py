@@ -8,12 +8,12 @@ import pytest
 from deepdiff import DeepDiff
 
 from avalon.common.utils import only
-from avalon.contrib.testing_utils import create_temp_file_path
 from avalon.contrib.testing_utils import integration_test
 from avalon.contrib.testing_utils import slow_integration_test
 from avalon.contrib.testing_utils import temp_file_path_
 from avalon.contrib.testing_utils import temp_path_
 from avalon.contrib.testing_utils import use
+from avalon.contrib.utils import create_temp_file_path
 from avalon.datagen.errors import ImpossibleWorldError
 from avalon.datagen.world_creation.geometry import BuildingTile
 from avalon.datagen.world_creation.indoor.building import Building

@@ -18,7 +18,7 @@ from networkx.algorithms.approximation import traveling_salesman_problem
 from scipy import stats
 from scipy.ndimage import convolve
 from scipy.spatial import Delaunay
-from scipy.spatial.qhull import QhullError
+from scipy.spatial import QhullError
 
 from avalon.common.errors import SwitchError
 from avalon.common.utils import only
