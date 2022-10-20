@@ -61,27 +61,23 @@ On Linux, a Nvidia GPU is required, as the linux builds are set up for headless 
 
 ```
 sudo apt install --no-install-recommends libegl-dev libglew-dev libglfw3-dev libnvidia-gl libopengl-dev libosmesa6 mesa-utils-extra
-git clone https://github.com/Avalon-Benchmark/avalon.git
-cd avalon
-pip install -e .
+pip install avalon-rl
 python -m avalon.install_godot_binary runner
-python scripts/check_install.py
+python -m avalon.common.check_install
 ```
 
 If you're looking to use our RL code, you'll need additionally:
 - [pytorch>=1.12.0](https://pytorch.org/get-started/locally/) with CUDA
-- the `avalon-rl[train]` extras package: `pip install -e .[train]`
+- the `avalon-rl[train]` extras package: `pip install avalon-rl[train]`
 
 ### Mac
 
 On Mac, a Nvidia GPU is not required, but the environment rendering is not headless - you'll see a godot window pop up for each environment you have open.
 
 ```
-git clone https://github.com/Avalon-Benchmark/avalon.git
-cd avalon
-pip install -e .[extras]
+pip install avalon-rl
 python -m avalon.install_godot_binary runner
-python scripts/check_install.py
+python -m avalon.common.check_install
 ```
 
 ### Docker
@@ -97,38 +93,28 @@ docker build -f ./docker/Dockerfile . --tag=avalon/training
 docker run -it --gpus 'all,"capabilities=compute,utility,graphics"' avalon/training bash
 
 # in the container, try running
-python scripts/check_install.py
+python -m avalon.common.check_install
 
 # or launch eg a PPO training run with
 python -m avalon.agent.train_ppo_avalon
 ```
 
 
-## Examples
-
-**Using Avalon via the OpenAI Gym interface**
-See [gym_interface_example](./notebooks/gym_interface_example.sync.ipynb) for an example of how to create random worlds, 
-take actions as an agent, and display the resulting observations.
-
-**World generation**
-To generate a simple world see [create_simple_world](./notebooks/create_simple_world.sync.ipynb).
-To debug and evaluate generated worlds see [evaluate_worlds](./notebooks/evaluate_worlds.sync.ipynb).
-
-**Evaluation**
-[create_human_scores](./notebooks/create_human_scores.sync.ipynb) demonstrates how scores were calculated from the recorded
-human runs. 
-
-To reproduce our results from the paper using the model checkpoints, you can run [avalon_results](./notebooks/avalon_results.sync.ipynb). 
-Note, you'll need a wandb api key in order to run this notebook. See [Getting started](#getting-started) above for more info.
-
-**Building for VR**
-To build a version of Avalon for the Meta Quest 2, see [create_oculus_build](./notebooks/create_oculus_build.sync.ipynb). Note that out of habit some parts of code refer to this as "oculus".
-
 ## Tutorials
 
-- [Using Avalon with rllib](./notebooks/rllib_tutorial.sync.ipynb)
-- [Adding new procedurally-generated tasks to Avalon](./docs/tutorial_add_task/)
-- [Making a custom environment on top of Godot](./docs/tutorial_custom_env)
+- [**Using Avalon via the OpenAI Gym interface**](./notebooks/gym_interface_example.sync.ipynb): an example of how to create random worlds, 
+take actions as an agent, and display the resulting observations.
+
+- [**Training a PPO Agent on Avalon using RLlib**](./notebooks/rllib_tutorial.sync.ipynb): an example of how to use Avalon with an external RL library/codebase.
+
+- [**Training PPO and Dreamer Agents using the Avalon RL library**](./docs/avalon_baselines.md): train RL agents using our own fast, tuned implementations!
+
+- [**Building for VR**](*./notebooks/create_oculus_build.sync.ipynb):
+to build a version of Avalon for the Meta Quest 2.
+
+- [**Adding custom procedurally-generated tasks to Avalon**](./docs/tutorial_add_task/)
+
+- [**Making an entirely custom non-Avalon RL environment using Godot**](./docs/tutorial_custom_env)
 
 # Resources
 
