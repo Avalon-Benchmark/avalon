@@ -992,8 +992,8 @@ gdscript/warnings/treat_warnings_as_errors=true
 window/size/width=64
 window/size/height=64
 window/size/resizable=false
-window/size/test_width=96
-window/size/test_height=96
+window/size/test_width=512
+window/size/test_height=512
 window/vsync/use_vsync=false
 window/stretch/aspect="keep"
 

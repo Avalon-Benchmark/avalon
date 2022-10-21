@@ -29,6 +29,7 @@ from avalon.datagen.world_creation.tasks.hunt import ForceWeapons
 from avalon.datagen.world_creation.types import DebugVisualizationConfig
 from avalon.datagen.world_creation.world_generator import GENERATION_FUNCTION_BY_TASK
 from avalon.datagen.world_creation.worlds.compositional import ForcedComposition
+from avalon.datagen.world_creation.worlds.export import get_world_slug
 
 _BASE_FIGHT_DATA = ForceFight(
     weapon_value=2,
@@ -204,11 +205,7 @@ def generate_worlds(
                 seed = curr_seed
 
                 task_name = task.value.lower()
-                difficulty_str = float_to_str(difficulty)
-                if is_practice:
-                    world_id = f"practice__{task_name}__{seed}__{difficulty_str}"
-                else:
-                    world_id = f"{task_name}__{seed}__{difficulty_str}"
+                world_id = get_world_slug(task_name, seed, difficulty, is_practice)
 
                 output_path = base_output_path / world_id
 

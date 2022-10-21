@@ -15,6 +15,7 @@ from godot_parser import Node as GDNode
 from godot_parser import Vector3 as GDVector3
 from scipy.spatial.transform import Rotation
 
+from avalon.common.utils import float_to_str
 from avalon.common.utils import only
 from avalon.datagen.godot_base_types import FloatRange
 from avalon.datagen.world_creation.configs.flora import FloraConfig
@@ -44,6 +45,13 @@ from avalon.datagen.world_creation.worlds.terrain import _create_static_body
 from avalon.datagen.world_creation.worlds.terrain import create_multimesh_instance
 from avalon.datagen.world_creation.worlds.world import World
 from avalon.datagen.world_creation.worlds.world import get_spawn
+
+
+def get_world_slug(task_name: str, seed: float, difficulty: float, is_practice: bool = False) -> str:
+    slug = f"{task_name}__{seed}__{float_to_str(difficulty)}"
+    if is_practice:
+        return f"practice__{slug}"
+    return slug
 
 
 # rand is required because technically we generate the biome map and terrain first, then export
