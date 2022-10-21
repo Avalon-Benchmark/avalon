@@ -79,7 +79,7 @@ On Mac, a Nvidia GPU is not required, but the environment rendering is not headl
 ```
 git clone https://github.com/Avalon-Benchmark/avalon.git
 cd avalon
-pip install -e .[extras]
+pip install -e ".[extras]"
 python -m avalon.install_godot_binary runner
 python scripts/check_install.py
 ```
