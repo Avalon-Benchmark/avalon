@@ -55,7 +55,10 @@ class ObservationModel(PPOModel):
             img_size = assert_not_none(obs_space["rgbd"].shape)[1]
             img_channels = assert_not_none(obs_space["rgbd"].shape)[0]
             self.image_encoder = ImpalaConvNet(
-                input_channels=img_channels, img_dim=img_size, out_dim=encoder_output_dim
+                input_channels=img_channels,
+                img_dim=img_size,
+                out_dim=encoder_output_dim,
+                num_base_channels=self.params.model_params.num_cnn_base_channels,
             )
 
         # Collect remaining vectors
@@ -128,14 +131,14 @@ IMPALA_RES_OUT_LOOKUP = {64: 8, 84: 11, 96: 12}
 class ImpalaConvNet(nn.Module):
     """This is used in godot PPO."""
 
-    def __init__(self, out_dim: int = 256, img_dim: int = 96, input_channels: int = 4):
+    def __init__(self, out_dim: int = 256, img_dim: int = 96, input_channels: int = 4, num_base_channels: int = 16):
         super().__init__()
 
         feat_convs: list[Module] = []
         resnet1: list[Module] = []
         resnet2: list[Module] = []
 
-        for num_ch in [16, 32, 32]:
+        for num_ch in [num_base_channels, num_base_channels * 2, num_base_channels * 2]:
             sub_feats_convs: list[Module] = []
             sub_feats_convs.append(
                 nn.Conv2d(
@@ -185,7 +188,7 @@ class ImpalaConvNet(nn.Module):
         if img_dim not in IMPALA_RES_OUT_LOOKUP:
             raise NotImplementedError()
         res_out_dim = IMPALA_RES_OUT_LOOKUP[img_dim]
-        self.fc = nn.Linear(res_out_dim * res_out_dim * 32, out_dim)
+        self.fc = nn.Linear(res_out_dim * res_out_dim * num_base_channels * 2, out_dim)
 
     def forward(self, x: torch.Tensor):
         for i, fconv in enumerate(self.feat_convs):

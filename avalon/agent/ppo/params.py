@@ -10,6 +10,7 @@ from avalon.agent.common.params import Params
 class ObservationModelParams:
     encoder_output_dim: int = 256
     num_mlp_layers: int = 2
+    num_cnn_base_channels: int = 16
 
 
 @attr.s(auto_attribs=True, frozen=True)
