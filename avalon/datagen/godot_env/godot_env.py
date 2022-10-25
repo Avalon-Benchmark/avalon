@@ -34,6 +34,7 @@ from avalon.datagen.godot_env.observations import FeatureDataDict
 from avalon.datagen.godot_env.observations import GodotObservationContext
 from avalon.datagen.godot_env.observations import ObservationType
 from avalon.datagen.godot_generated_types import SimSpec
+
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
 from avalon.datagen.world_creation.world_generator import EmptyLevelGenerator

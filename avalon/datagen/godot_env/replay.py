@@ -34,6 +34,7 @@ from avalon.datagen.godot_generated_types import MouseKeyboardAgentPlayerSpec
 from avalon.datagen.godot_generated_types import MouseKeyboardHumanPlayerSpec
 from avalon.datagen.godot_generated_types import VRAgentPlayerSpec
 from avalon.datagen.godot_generated_types import VRHumanPlayerSpec
+
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import STARTING_HIT_POINTS
 from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType

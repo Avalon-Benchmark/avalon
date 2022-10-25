@@ -194,6 +194,7 @@ def dir_checksum(dir_path: Path, glob: str = "*") -> str:
                 hash_md5.update(chunk)
     return hash_md5.hexdigest()
 
+
 def wait_until_true(
     callback: Callable[[], Optional[bool]],
     max_wait_sec: float = 5,
