@@ -39,7 +39,7 @@ class RandomActionDistribution:
 @torch.no_grad()
 def do_eval_rollouts(policy: RandomActionDistribution, env: GodotEnv) -> Dict[str, float]:
     # DO ROLLOUTS
-    observation = env.reset()
+    observation, _ = env.reset()
     frame_count = 1
     scores_by_world_index: Dict[str, float] = {}
     while True:

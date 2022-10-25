@@ -351,7 +351,9 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
         observation, goal_progress = self.act(self.action_type.from_input(action))
         lame_observation = self.observation_context.lamify(observation)
         self.update_lame_observation(lame_observation)
-        return lame_observation, goal_progress.reward, goal_progress.is_done, goal_progress.log
+        terminated = goal_progress.is_done
+        truncated = False
+        return lame_observation, goal_progress.reward, terminated, truncated, goal_progress.log
 
     def reset(self):
         world_id = None
@@ -595,8 +597,8 @@ class CurriculumWrapper(Wrapper):
         self.meta_difficulty = 0.0
 
     def step(self, action: Dict[str, torch.Tensor]):
-        observation, reward, done, info = self.env.step(action)  # type: ignore[misc]
-        if done:
+        observation, reward, terminated, truncated, info = self.env.step(action)  # type: ignore[misc]
+        if terminated or truncated:
             task = AvalonTask[info["task"]]
             update_step = self.task_difficulty_update  # * np.random.uniform()
             if info["success"] == 1:
@@ -611,4 +613,4 @@ class CurriculumWrapper(Wrapper):
             self.meta_difficulty = max(min(self.meta_difficulty, 1.0), 0.0)
             self._env.set_task_difficulty(task, self.difficulties[task])
             self._env.set_meta_difficulty(self.meta_difficulty)
-        return observation, reward, done, info
+        return observation, reward, terminated, truncated, info

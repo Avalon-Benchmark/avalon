@@ -79,16 +79,18 @@ class DummyEnv:
     def reset(self):
         self._step = 0
         obs = np.zeros((3, 84, 84), dtype=np.float32)
-        return obs
+        info = dict()
+        return obs, info
 
     def step(self, action):
         obs = np.zeros((3, 84, 84), dtype=np.float32)
         # obs = self.observation_space.sample()
         reward = self._random.uniform(0, 1).astype(np.float32)
         self._step += 1
-        done = self._step >= 1000
+        terminated = self._step >= 1000
+        truncated = False
         info = {}
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def close(self):
         pass
@@ -124,15 +126,17 @@ class Test1:
     def reset(self):
         self._step = 0
         obs = np.zeros((1,), dtype=np.float32)
-        return obs
+        info = dict()
+        return obs, info
 
     def step(self, action):
         obs = np.zeros((1,), dtype=np.float32)
         reward = float(1)
         self._step += 1
-        done = self._step >= self.num_steps
+        terminated = self._step >= self.num_steps
+        truncated = False
         info = {}
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def close(self):
         pass
@@ -160,7 +164,8 @@ class Test2:
     def reset(self):
         self._step = 0
         obs = np.zeros((1,), dtype=np.float32)
-        return obs
+        info = dict()
+        return obs, info
 
     def step(self, action):
         assert isinstance(action, int)
@@ -173,13 +178,14 @@ class Test2:
         else:
             assert False
         self._step += 1
-        done = self._step >= self.num_steps
+        terminated = self._step >= self.num_steps
+        truncated = False
         info = {}
         # high is non-inclusive.
         obs = np.random.randint(0, 2, size=(1,)).astype(np.float32) * 2 - 1
         # obs = np.random.uniform(-1, 1, size=(1,))
         self.last_obs = obs
-        return obs.astype(dtype=np.float32), reward, done, info
+        return obs.astype(dtype=np.float32), reward, terminated, truncated, info
 
     def close(self):
         pass
@@ -204,7 +210,8 @@ class TestHybridAction:
     def reset(self):
         self._step = 0
         obs = np.zeros((1,)).astype(np.float32)
-        return obs
+        info = dict()
+        return obs, info
 
     def step(self, action):
         # TODO: continuous actions come in as an array, discrete come in as integers.
@@ -220,11 +227,12 @@ class TestHybridAction:
         reward = -1 * (self.last_obs.item() - (continuous * (discrete * 2 - 1))) ** 2
 
         self._step += 1
-        done = self._step >= self.num_steps
+        terminated = self._step >= self.num_steps
+        truncated = False
         info = {}
         obs = np.random.uniform(-1, 1, size=(1,)).astype(np.float32)
         self.last_obs = obs
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def close(self):
         pass

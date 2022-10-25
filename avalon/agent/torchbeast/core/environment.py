@@ -44,7 +44,8 @@ class Environment:
         self.episode_return = torch.zeros(1, 1).to(self.device)
         self.episode_step = torch.zeros(1, 1, dtype=torch.int32).to(self.device)
         initial_done = torch.ones(1, 1, dtype=torch.uint8).to(self.device)
-        initial_frame = _format_frame(self.gym_env.reset()).to(self.device)
+        obs, _ = self.gym_env.reset()
+        initial_frame = _format_frame(obs).to(self.device)
         return dict(
             frame=initial_frame,
             reward=initial_reward,
@@ -55,19 +56,19 @@ class Environment:
         )
 
     def step(self, action):
-        frame, reward, done, info = self.gym_env.step(action)
+        frame, reward, terminated, truncated, info = self.gym_env.step(action)
         self.episode_step += 1
         self.episode_return += reward
         episode_step = self.episode_step
         episode_return = self.episode_return
-        if done:
-            frame = self.gym_env.reset()
+        if terminated or truncated:
+            frame, _ = self.gym_env.reset()
             self.episode_return = torch.zeros(1, 1).to(self.device)
             self.episode_step = torch.zeros(1, 1, dtype=torch.int32).to(self.device)
 
         frame = _format_frame(frame).to(self.device)
         reward = torch.tensor(reward).view(1, 1).to(self.device)
-        done = torch.tensor(done).view(1, 1).to(self.device)
+        done = torch.tensor(terminated or truncated).view(1, 1).to(self.device)
 
         return dict(
             frame=frame,

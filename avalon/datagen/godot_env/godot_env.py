@@ -91,6 +91,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
         is_godot_restarted_on_error: bool = False,
         is_dev_flag_added: bool = False,
         run_uuid: Optional[str] = None,
+        render_mode="rgb_array",
     ):
         self.config = config
         self.action_type = action_type
@@ -132,6 +133,9 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
         self._bridge.select_and_cache_features(self.observation_context.selected_features)
         self.seed_nicely(0)
         self.recent_worlds: Deque[GeneratedWorldParamsType] = deque()
+
+        assert render_mode == "rgb_array", "only rgb_array rendering is currently supported"
+        self.render_mode = render_mode
 
     def _create_world_generator(self) -> WorldGenerator[GeneratedWorldParamsType]:
         return cast(
@@ -193,7 +197,9 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
     def step(self, action: Dict[str, np.ndarray]):
         observation, goal_progress = self.act(self.action_type.from_input(action))
         lame_observation = self.observation_context.lamify(observation)
-        return lame_observation, goal_progress.reward, goal_progress.is_done, goal_progress.log
+        terminated = goal_progress.is_done
+        truncated = False
+        return lame_observation, goal_progress.reward, terminated, truncated, goal_progress.log
 
     def act(self, action: ActionType) -> Tuple[ObservationType, GoalProgressResult]:
         """Same as `step` with observations in the ObservationType format."""

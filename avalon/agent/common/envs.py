@@ -85,7 +85,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         assert env_params.action_repeat == 1
         # Annoyingly, gym envs apply their own time limit already.
         logger.info("time limit arg ignored in gym envs")
-        env = gym.make(assert_not_none(env_params.task))
+        env = gym.make(assert_not_none(env_params.task), render_mode="rgb_array")
         # Hacky. Relies on the TimeWrapper being the outermost wrapper. Not sure the better way.
         assert isinstance(env, (ElapsedTimeWrapper, TimeLimit))
         max_steps = env._max_episode_steps
@@ -160,6 +160,7 @@ class DeepMindControl(gym.Env):
         camera: Any = None,
         include_state: bool = False,
         include_rgb: bool = True,
+        render_mode="rgb_array",
     ):
         from dm_control import suite
 
@@ -176,6 +177,9 @@ class DeepMindControl(gym.Env):
         # TODO: fix!
         # We just ignore all scalar spaces, because this is how danijar did it (presumably accidentally).
         self.scalar_spaces: List[str] = []
+        if render_mode != "rgb_array":
+            raise ValueError("Only render mode 'rgb_array' is supported.")
+        self.render_mode = render_mode
 
     @property
     def observation_space(self) -> gym.spaces.Dict:  # type: ignore[override]
@@ -206,9 +210,10 @@ class DeepMindControl(gym.Env):
         if self.include_rgb:
             obs["rgb"] = self.render()
         reward = time_step.reward or 0
-        done = time_step.last()
+        terminated = time_step.last()
+        truncated = False
         info = {"discount": np.array(time_step.discount, np.float32)}
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def reset(self):  # type: ignore
         time_step = self._env.reset()
@@ -219,11 +224,10 @@ class DeepMindControl(gym.Env):
             obs |= state
         if self.include_rgb:
             obs["rgb"] = self.render()
-        return obs
+        info = {"discount": np.array(time_step.discount, np.float32)}
+        return obs, info
 
     def render(self, *args, **kwargs):  # type: ignore
-        if kwargs.get("mode", "rgb_array") != "rgb_array":
-            raise ValueError("Only render mode 'rgb_array' is supported.")
         return self._env.physics.render(*self._size, camera_id=self._camera)
 
 
@@ -338,21 +342,21 @@ class Atari(gym.Env):
         return cast(gym.spaces.Box, self._env.action_space)
 
     def step(self, action: int):  # type: ignore
-        image, reward, done, info = self._env.step(action)
+        image, reward, terminated, truncated, info = self._env.step(action)
         if self._grayscale:
             image = image[..., None]
         # info["is_terminal"] = done
         # info["is_first"] = False
         # info["is_last"] = done
         # image = rearrange(image, "h w c -> c h w")
-        return image, reward, done, info
+        return image, reward, terminated, truncated, info
 
     def reset(self):  # type: ignore
-        image = self._env.reset()
+        image, info = self._env.reset()
         if self._grayscale:
             image = image[..., None]
         # image = rearrange(image, "h w c -> c h w")
-        return image
+        return image, info
 
     def close(self):  # type: ignore
         return self._env.close()

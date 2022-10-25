@@ -64,13 +64,13 @@ class DictObsActionWrapper(Wrapper[DictObservationType, DictActionType]):
         self.action_key = action_key
 
     def reset(self, *args, **kwargs) -> DictObservationType:  # type: ignore[no-untyped-def]
-        observation = self.env.reset(*args, **kwargs)
-        return self.observation(observation)
+        observation, info = self.env.reset(*args, **kwargs)
+        return self.observation(observation), info
 
     def step(self, action: DictActionType) -> tuple[DictObservationType, float, bool, dict]:
         unwrapped_action = self.action(action)
-        observation, reward, done, info = self.env.step(unwrapped_action)
-        return self.observation(observation), reward, done, info
+        observation, reward, terminated, truncated, info = self.env.step(unwrapped_action)
+        return self.observation(observation), reward, terminated, truncated, info
 
     def action(self, action: DictActionType) -> Union[NDArray, DictActionType]:
         if self.wrapped_action:
@@ -91,16 +91,20 @@ class PixelObsWrapper(gym.ObservationWrapper):
 
     def __init__(self, env: gym.Env):
         super().__init__(env)
-        pixels: NDArray = self.env.render(mode="rgb_array")
-        # Some envs (eg CartPole-v1) won't render without being reset first.
-        if pixels is None:
+        assert (
+            env.render_mode == "rgb_array"
+        ), 'PixelObsWrapper only works on environments with render_mode=="rgb_array"'
+        try:
+            pixels: NDArray = self.env.render()
+        except gym.error.ResetNeeded:
+            # If the environment is freshly initialized we need to reset it first.
             self.env.reset()
-            pixels = self.env.render(mode="rgb_array")
+            pixels = self.env.render()
         self.observation_space = spaces.Box(shape=pixels.shape, low=0, high=255, dtype=pixels.dtype)
         self._env = env
 
     def observation(self, observation: NDArray) -> NDArray:
-        obs: NDArray = self.env.render(mode="rgb_array")
+        obs: NDArray = self.env.render()
         return obs
 
 
@@ -260,12 +264,12 @@ class TimeLimit(gym.Wrapper[GenericObservationType, GenericActionType]):
     def step(self, action: GenericActionType) -> tuple[GenericObservationType, float, bool, dict]:
         assert self._max_episode_steps is not None, "max_episode_steps must be set"
         assert self._elapsed_steps is not None, "Cannot call env.step() before calling reset()"
-        observation, reward, done, info = self.env.step(action)
+        observation, reward, terminated, truncated, info = self.env.step(action)
         self._elapsed_steps += 1
         if self._elapsed_steps >= self._max_episode_steps:
-            info["TimeLimit.truncated"] = not done
-            done = True
-        return observation, reward, done, info
+            truncated = True
+            info["TimeLimit.truncated"] = truncated
+        return observation, reward, terminated, truncated, info
 
     def reset(self, *args, **kwargs) -> GenericObservationType:
         self._elapsed_steps = 0
@@ -290,14 +294,14 @@ class ElapsedTimeWrapper(gym.Wrapper[DictObservationType, GenericActionType]):
 
     def step(self, action: GenericActionType) -> tuple[DictObservationType, float, bool, dict]:
         assert self._elapsed_steps is not None, "Cannot call env.step() before calling reset()"
-        observation, reward, done, info = self.env.step(action)
+        observation, reward, terminated, truncated, info = self.env.step(action)
         self._elapsed_steps += 1
-        return self.observation(observation), reward, done, info
+        return self.observation(observation), reward, terminated, truncated, info
 
     def reset(self, *args, **kwargs) -> DictObservationType:
         self._elapsed_steps = 0
-        observation = self.env.reset(*args, **kwargs)
-        return self.observation(observation)
+        observation, info = self.env.reset(*args, **kwargs)
+        return self.observation(observation), info
 
 
 class NormalizeActions(gym.ActionWrapper):
@@ -356,10 +360,10 @@ class ActionRepeat(gym.Wrapper[GenericObservationType, GenericActionType]):
         total_reward = 0
         current_step = 0
         while current_step < self._amount and not done:
-            obs, reward, done, info = self.env.step(action)
+            obs, reward, terminated, truncated, info = self.env.step(action)
             total_reward += reward
             current_step += 1
-        return obs, total_reward, done, info
+        return obs, total_reward, terminated, truncated, info
 
 
 class DictFrameStack(gym.ObservationWrapper):
@@ -394,10 +398,10 @@ class DictFrameStack(gym.ObservationWrapper):
 
     def reset(self, **kwargs):
         self.history: dict[str, Deque] = defaultdict(lambda: deque(maxlen=self.num_stack))
-        obs = self.env.reset(**kwargs)
+        obs, info = self.env.reset(**kwargs)
         # We'll initialize the buffer with copies of the first frame
         [self.add_to_history(obs) for _ in range(self.num_stack - 1)]
-        return self.observation(obs)
+        return self.observation(obs), info
 
     def observation(self, obs: Dict[str, NDArray]) -> Dict[str, NDArray]:
         self.add_to_history(obs)

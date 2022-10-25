@@ -297,18 +297,20 @@ class RolloutManager:
         to_store: AlgorithmInferenceExtraInfoBatch,
         i: int,
     ) -> Tuple[StepData, str]:
-        step_obs, done, step_data, episode_id = worker.get_step_data(
+        step_obs, terminated, truncated, step_data, episode_id = worker.get_step_data(
             actions=map_structure(lambda x: x[i], step_actions),
         )
         step_data = self.model.build_algorithm_step_data(step_data, extra_info=map_structure(lambda x: x[i], to_store))
 
-        if done and self.params.time_limit_bootstrapping and step_data.info.get("TimeLimit.truncated", False) is True:
+        # Ensure that `truncated` is accurate
+        assert not step_data.info.get("TimeLimit.truncated") or truncated
+        if truncated and self.params.time_limit_bootstrapping:
             step_data = attr.evolve(step_data, reward=step_data.reward + self.time_limit_bootstrapping(step_data.info))
 
         # Store the new observation+done for inference
         for k, v in step_obs.items():
             self.next_obs[k][i] = v
-        self.dones[i] = done
+        self.dones[i] = terminated or truncated
         return step_data, episode_id
 
     @property
@@ -377,11 +379,13 @@ class EnvironmentContainer:
 
     def get_step_data(self, actions: Action) -> Tuple[Observation, bool, StepData, str]:
         result = self.get_result()
-        received_obs, reward, done, info, episode_id = result
+        received_obs, reward, terminated, truncated, info, episode_id = result
         received_obs = {k: torch.from_numpy(v) for k, v in received_obs.items()}
 
+        # Ensure that `truncated` is accurate
+        assert not info.get("TimeLimit.truncated") or truncated
         # is_terminal indicates if a true environment termination happened (not a time limit)
-        is_terminal = done and not info.get("TimeLimit.truncated", False)
+        is_terminal = terminated
         assert isinstance(reward, (int, float))
 
         stored_obs: Dict[str, Tensor] = {}
@@ -391,7 +395,7 @@ class EnvironmentContainer:
                 stored_obs[k] = self.next_obs[k]
                 self.next_obs[k] = v
             else:
-                if done:
+                if terminated or truncated:
                     # We need to handle this case differently. received_obs is actually from the next ep;
                     # it wouldn't be good to store that as part of this one.
                     # Instead we store the "terminal observation" which is the one received along with the done signal.
@@ -403,7 +407,7 @@ class EnvironmentContainer:
 
         self.ready_for_new_step = True
         self.remaining_steps = max(0, self.remaining_steps - 1)
-        if done:
+        if terminated or truncated:
             self.remaining_episodes = max(0, self.remaining_episodes - 1)
         if self.remaining_steps == 0 and self.remaining_episodes == 0:
             self.ready_for_new_step = False
@@ -412,14 +416,14 @@ class EnvironmentContainer:
         step_data = StepData(
             observation=stored_obs,
             reward=reward,
-            done=done,
+            done=terminated or truncated,
             is_terminal=is_terminal,
             info=info,
             action=actions,
         )
         # We return the unmodified `received_obs` here to be used for the next inference pass.
         # At a reset, this will be the new observation from the next episode, which is indeed what we want for inference.
-        return received_obs, done, step_data, episode_id
+        return received_obs, terminated, truncated, step_data, episode_id
 
     def send_step(self, action: Action):
         assert self.waiting_on_result is False
@@ -546,15 +550,15 @@ class EnvironmentContainerProcess:
         """Perform a single step of the environment."""
         self.lazy_init_env()
         assert self.env is not None
-        next_obs, reward, done, info = self.env.step(action)  # type: ignore
+        next_obs, reward, terminated, truncated, info = self.env.step(action)  # type: ignore
         self.episode_rewards += reward
         episode_id = self.episode_id
 
-        if done:
+        if terminated or truncated:
+            next_obs, info = self.env.reset()
             info["final_episode_length"] = self.episode_steps
             info["final_episode_rewards"] = self.episode_rewards
             info["terminal_observation"] = next_obs
-            next_obs = self.env.reset()
 
             self.episode_steps = 0
             self.episode_rewards = 0
@@ -562,4 +566,4 @@ class EnvironmentContainerProcess:
 
         self.episode_steps += self.env_params.action_repeat
 
-        return next_obs, reward, done, info, episode_id
+        return next_obs, reward, terminated, truncated, info, episode_id

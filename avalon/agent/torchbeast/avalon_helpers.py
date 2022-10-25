@@ -54,9 +54,9 @@ class DictifyAtari(gym.Wrapper):
     def step(self, action: np.ndarray):
         """Repeat action, sum reward, and max over last observations."""
         action_dict = spaces.utils.unflatten(self.action_space, action)
-        obs, reward, done, info = self.env.step(action_dict["discrete"])
+        obs, reward, terminated, truncated, info = self.env.step(action_dict["discrete"])
 
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def reset(self, **kwargs):
         return self.env.reset(**kwargs)
@@ -405,8 +405,8 @@ class CurriculumWrapper(Wrapper):
             self.load_curriculum_state_from_file_if_exists()
 
     def step(self, action: Dict[str, torch.Tensor]):
-        observation, reward, done, info = self.env.step(action)
-        if done:
+        observation, reward, terminated, truncated, info = self.env.step(action)
+        if terminated or truncated:
             task = AvalonTask[info["task"]]
             update_step = self.task_difficulty_update  # * np.random.uniform()
             if info["success"] == 1:
@@ -422,7 +422,7 @@ class CurriculumWrapper(Wrapper):
             self.env.set_task_difficulty(task, self.difficulties[task])
             self.env.set_meta_difficulty(self.meta_difficulty)
             self.save_curriculum_state_to_file()
-        return observation, reward, done, info
+        return observation, reward, terminated, truncated, info
 
     def save_curriculum_state_to_file(self):
         with open(self.env.curriculum_save_path, "wb") as f:

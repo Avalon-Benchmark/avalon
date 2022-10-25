@@ -16,7 +16,7 @@ dependencies = [
   "boto3 >= 1.20.47",
   "einops >= 0.3.2",
   "godot-parser >= 0.1.6",
-  "gym == 0.25.2",
+  "gym >= 0.26.0",
   "IPython >= 8.5.0",
   "loguru >= 0.6.0",
   "matplotlib >= 3.5.1",
