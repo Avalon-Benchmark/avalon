@@ -33,7 +33,7 @@ RUN bash /tmp/gl_setup.sh
 
 COPY . /opt/projects/avalon
 RUN pip install -e /opt/projects/avalon
-RUN python -m avalon.install_godot_binary editor
+RUN python -m avalon.install_godot_binary
 
 FROM base as dev
 

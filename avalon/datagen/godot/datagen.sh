@@ -21,7 +21,7 @@ cd "$THIS_PATH"
 if test -z "$GODOT_BINARY_PATH"
 then
     # NOTE: Duplicated in generate.py
-    GODOT_BINARY_PATH=$(realpath $THIS_FILE/../../bin/avalon_godot)
+    GODOT_BINARY_PATH=$(realpath $THIS_FILE/../../bin/godot)
 fi
 
 # /usr/local/bin/godot

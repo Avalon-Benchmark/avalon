@@ -56,7 +56,7 @@ Avalon relies on [a custom Godot binary](https://github.com/Avalon-Benchmark/god
 pip install avalon-rl==1.0.0
 
 # needed to actually run environments
-python -m avalon.install_godot_binary editor
+python -m avalon.install_godot_binary
 ```
 
 > Note: the binary will be installed in the package under `avalon/bin/godot` by default to avoid cluttering your system.
@@ -69,7 +69,7 @@ On Linux, a Nvidia GPU is required, as the linux builds are set up for headless 
 ```
 sudo apt install --no-install-recommends libegl-dev libglew-dev libglfw3-dev libnvidia-gl libopengl-dev libosmesa6 mesa-utils-extra
 pip install avalon-rl
-python -m avalon.install_godot_binary runner
+python -m avalon.install_godot_binary
 python -m avalon.common.check_install
 ```
 
@@ -83,7 +83,7 @@ On Mac, a Nvidia GPU is not required, but the environment rendering is not headl
 
 ```
 pip install avalon-rl
-python -m avalon.install_godot_binary runner
+python -m avalon.install_godot_binary
 python -m avalon.common.check_install
 ```
 

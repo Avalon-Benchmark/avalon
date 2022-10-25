@@ -30,8 +30,11 @@ from avalon.datagen.godot_generated_types import SimSpec
 from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 
 # TODO: Consider linking binaries to `godot_editor` and `godot_runner` allowing for more fine-grained control/inspection from python
-GODOT_BINARY_PATH_ENV_FLAG = "GODOT_BINARY_PATH"
+GODOT_BINARY_PATH_ENV_FLAG: Final = "GODOT_BINARY_PATH"
 GODOT_BINARY_PATH: Final = os.environ.get(GODOT_BINARY_PATH_ENV_FLAG, f"{AVALON_PACKAGE_DIR}/bin/godot")
+
+GODOT_EDITOR_PATH_ENV_FLAG: Final = "GODOT_EDITOR_PATH"
+GODOT_EDITOR_PATH: Final = os.environ.get("GODOT_EDITOR_PATH", f"{GODOT_BINARY_PATH}_editor")
 
 GODOT_ERROR_LOG_PATH = f"{FILESYSTEM_ROOT}/godot"
 
@@ -236,7 +239,7 @@ class InteractiveGodotProcess:
     def start(self):
         assert os.path.exists(GODOT_BINARY_PATH), (
             f"Cannot run avalon: Godot binary has not been installed to to {GODOT_BINARY_PATH_ENV_FLAG}={GODOT_BINARY_PATH}. "
-            f"Please run `python -m avalon.install_godot_binary (runner|editor)` and try again."
+            f"Please run `python -m avalon.install_godot_binary` and try again."
         )
         # we open a file here so that we can watch
         # create the file because we want to open it now
