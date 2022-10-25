@@ -340,7 +340,7 @@ def get_oculus_config_for_human_playback() -> AvalonSimSpec:
 
 def get_oculus_playback_config(is_using_human_input: bool):
     # NOTE: make sure you get the type of player correct in config.json
-    config = AvalonSimSpec.from_dict(json.load(open("datagen/godot/android/config.json", "r")))
+    config = AvalonSimSpec.from_dict(json.load(open(Path(__file__).parent / "godot/android/config.json", "r")))
 
     # update player to be agent player
     with config.mutable_clone() as config:

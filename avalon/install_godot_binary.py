@@ -58,11 +58,10 @@ builds: Final[Dict[Tuple[Platform, BinaryType], str]] = {
     ("macos", EDITOR): "macos-editor.zip",
 }
 
+
 def available_builds() -> List[BinaryType]:
     this_platform = get_platform()
     return [build for plat, build in builds.keys() if plat == this_platform]
-
-
 
 
 def get_godot_binary_path() -> Path:
@@ -84,7 +83,7 @@ def _extract_singular_as(zipped: Path, target: Path, is_symlinked: bool = False)
     print(f"Linking {_friendly_path(extracted_destination)} to {_friendly_path(target)}")
     if target.exists():
         os.remove(target)
-    os.symlink(extracted_destination, target)
+    os.symlink(extracted_destination.relative_to(target.parent), target)
 
 
 def fetch_binary(build: str, target: Path):

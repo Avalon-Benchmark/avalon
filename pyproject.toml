@@ -5,9 +5,10 @@ requires = ["setuptools >= 62.4.0", "setuptools_scm[toml] >= 7.0.5"]
 name = "avalon-rl"
 version = "1.0.0"
 readme = "README.md"
+license = {"file" = "LICENSE"}
 description = "Avalon: A Benchmark for RL Generalization Using Procedurally Generated Worlds"
 authors = [
-  {name = "Generally Intelligent", email = "contact@generallyintelligent.com"}
+  {name = "Generally Intelligent", email = "avalon@generallyintelligent.com"}
 ]
 
 requires-python = ">=3.9"
@@ -45,7 +46,9 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "deepdiff >= 5.8.1",
+  "jupyter-ascending >= 0.1.23",
   "mypy >= 0.971",
+  "notebook >= 6.4.8",
   "pytest >= 6.2.5",
   "pytest-forked >= 1.4.0",
   "pytest-integration >= 0.2.2",

@@ -1,7 +1,14 @@
 #!/bin/bash
 set -e
 set -u
+set -x
 
+
+# This is needed so this script runs both in the public image (root user) as well as the private one (non-root)
+sudo () {
+    [[ $EUID = 0 ]] || set -- command sudo "$@"
+    "$@"
+}
 
 export OCULUS_BASE=/opt/oculus
 export EDITOR_BASE=/opt/oculus/godot
@@ -12,6 +19,7 @@ if [[ ! -d "$OCULUS_BASE" ]]
 then
 mkdir "$OCULUS_BASE"
 pushd "$OCULUS_BASE"
+sudo apt-get install -yqq gnupg rsync
 sudo tee /etc/apt/sources.list.d/monado.list << EOF
 deb https://ppa.launchpadcontent.net/monado-xr/monado/ubuntu focal main
 deb-src https://ppa.launchpadcontent.net/monado-xr/monado/ubuntu focal main

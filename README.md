@@ -12,7 +12,7 @@ Avalon is unique among existing RL benchmarks in that the reward function, world
 
 Avalon includes a highly efficient game engine, a library of baselines, and a benchmark with scoring metrics evaluated against hundreds of hours of human performance, all of which are open-source and publicly available. We find that standard RL baselines make progress on most tasks but are still far from human performance, suggesting Avalon is challenging enough to advance the quest for generalizable RL.
 
-Check out [our research paper](https://openreview.net/pdf?id=TzNuIdrHoU) for a deeper explanation of why we built Avalon.
+Check out [our research paper](https://arxiv.org/abs/2210.13417) for a deeper explanation of why we built Avalon.
 
 ## Quickstart
 
@@ -89,21 +89,30 @@ python -m avalon.common.check_install
 
 ### Docker
 
-We also have a Docker image set up to run Avalon and train our RL baselines. It requires a Nvidia GPU on the host.
+We also have Docker images set up to run Avalon and train our RL baselines. They require a Nvidia GPU on the host.
 
+#### Training image
 ```bash
-# build the docker image
-docker build -f ./docker/Dockerfile . --tag=avalon/training
+docker build -f ./docker/Dockerfile . --target train --tag=avalon/train
 
 # start the container with an interactive bash terminal
 # to enable wandb, add `-e WANDB_API_KEY=<your wandb key>`
-docker run -it --gpus 'all,"capabilities=compute,utility,graphics"' avalon/training bash
+docker run -it --gpus 'all,"capabilities=compute,utility,graphics"' avalon/train bash
 
 # in the container, try running
 python -m avalon.common.check_install
 
 # or launch eg a PPO training run with
 python -m avalon.agent.train_ppo_avalon
+```
+
+#### Dev image
+You can use the `dev` image to explore the bundled notebooks or to build on top of Avalon
+```bash
+docker build -f ./docker/Dockerfile . --target dev --tag=avalon/dev
+
+# by default, this starts a jupyter notebook with your local repo copy mapped into the container
+docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabilities=compute,utility,graphics"' avalon/dev 
 ```
 
 
@@ -132,7 +141,7 @@ to build a version of Avalon for the Meta Quest 2.
 * [Evaluation worlds](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon_worlds__2f788115-ea32-4041-8cae-6e7cd33091b7.tar.gz)
 * [Custom Godot engine build](https://github.com/Avalon-Benchmark/godot/releases/)
 
-All checkpoints are listed [here](./docs/checkpoints.md).
+Final baseline model weights can be found in the [results notebook](notebooks/avalon_results.sync.ipynb).
 
 ## Citing Avalon
 
