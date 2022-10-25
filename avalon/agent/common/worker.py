@@ -15,11 +15,6 @@ import gym
 import numpy as np
 import sentry_sdk
 import torch
-from loguru import logger
-from torch import Tensor
-from tree import map_structure
-
-from avalon.agent.common import wandb_lib
 from avalon.agent.common.envs import build_env
 from avalon.agent.common.get_algorithm_cls import get_algorithm_cls
 from avalon.agent.common.params import EnvironmentParams
@@ -35,9 +30,13 @@ from avalon.agent.common.types import AlgorithmInferenceExtraInfoBatch
 from avalon.agent.common.types import Info
 from avalon.agent.common.types import Observation
 from avalon.agent.common.types import StepData
+from avalon.agent.common.util import get_checkpoint_file
 from avalon.agent.common.util import postprocess_uint8_to_float
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.common.error_utils import capture_exception
+from loguru import logger
+from torch import Tensor
+from tree import map_structure
 
 numpy_to_torch_dtype_dict = {
     bool: torch.bool,
@@ -116,12 +115,9 @@ class AsyncRolloutManager:
         algorithm_cls = get_algorithm_cls(self.params)
         model = algorithm_cls(params, self.obs_space, self.action_space)
 
-        if self.params.resume_from_run:
-            project = self.params.resume_from_project if self.params.resume_from_project else self.params.project
-            checkpoint = wandb_lib.download_file(
-                self.params.resume_from_run, project, self.params.resume_from_filename
-            )
-            model.load_state_dict(torch.load(checkpoint, map_location=rollout_device))
+        if self.params.resume_from:
+            checkpoint_path = get_checkpoint_file(self.params.resume_from)
+            model.load_state_dict(torch.load(checkpoint_path, map_location=self.params.train_device))
             logger.info("RESUMED MODEL FROM CHECKPOINT")
 
         # You cannot have initialized cuda in the parent process before forking for this to work.

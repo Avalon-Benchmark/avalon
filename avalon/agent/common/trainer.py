@@ -15,10 +15,6 @@ from typing import Protocol
 import attr
 import torch
 import wandb
-from loguru import logger
-from torch.utils.data import DataLoader
-from tree import map_structure
-
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.action_model import visualize_actions
 from avalon.agent.common.dataloader import ReplayDataset
@@ -32,12 +28,16 @@ from avalon.agent.common.storage import TrajectoryStorage
 from avalon.agent.common.types import Algorithm
 from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.types import ParamsType
+from avalon.agent.common.util import get_checkpoint_file
 from avalon.agent.common.util import pack_1d_list
 from avalon.agent.common.util import postprocess_uint8_to_float
 from avalon.agent.common.worker import AsyncRolloutManager
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.agent.ppo.params import OnPolicyParams
+from loguru import logger
+from torch.utils.data import DataLoader
+from tree import map_structure
 
 # Just a temporary reminder to not use <1.11
 assert int(torch.__version__.split(".")[1]) >= 11
@@ -114,12 +114,9 @@ class Trainer(ABC, Generic[ParamsType]):
         assert self.params.action_space is not None
         algorithm = algorithm_cls(self.params, self.params.observation_space, self.params.action_space)
 
-        if self.params.resume_from_run:
-            project = self.params.resume_from_project if self.params.resume_from_project else self.params.project
-            checkpoint = wandb_lib.download_file(
-                self.params.resume_from_run, project, self.params.resume_from_filename
-            )
-            algorithm.load_state_dict(torch.load(checkpoint, map_location=self.params.train_device))
+        if self.params.resume_from:
+            checkpoint_path = get_checkpoint_file(self.params.resume_from)
+            algorithm.load_state_dict(torch.load(checkpoint_path, map_location=self.params.train_device))
             logger.info("RESUMED MODEL FROM CHECKPOINT")
 
         logger.info(f"model has {sum(p.numel() for p in algorithm.parameters() if p.requires_grad)} params")

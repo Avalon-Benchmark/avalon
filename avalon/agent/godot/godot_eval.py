@@ -1,4 +1,3 @@
-import json
 import os
 import shutil
 import tarfile
@@ -16,10 +15,6 @@ import attrs
 import numpy as np
 import torch
 import wandb
-from matplotlib import pyplot as plt
-from matplotlib.pyplot import bar
-from numpy import typing as npt
-
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.params import Params
 from avalon.agent.common.storage import LambdaStorage
@@ -33,6 +28,9 @@ from avalon.contrib.s3_utils import TEMP_BUCKET_NAME
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import TEMP_DIR
 from avalon.contrib.utils import create_temp_file_path
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import bar
+from numpy import typing as npt
 
 BIG_SEPARATOR = "-" * 80
 RESULT_TAG = "DATALOADER:0 TEST RESULTS"
@@ -263,24 +261,24 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
         logger.info(test_log)
         logger.info(BIG_SEPARATOR)
 
-    if env_params.fixed_worlds_load_from_path:
-        # Special logging for the fixed evaluation worlds
-        project = params.resume_from_project if params.resume_from_project else params.project
-        # TODO: make this get the current wandb run_id or some other identifier if we're not loading a run
-        run_id = params.resume_from_run
-        filename = params.resume_from_filename
-        fixed_world_key = env_params.fixed_worlds_s3_key if env_params.fixed_worlds_s3_key else "test"
-        result_key = f"avalon_eval__{project}_{run_id}_{filename}__{fixed_world_key}__final"
-        record_data = {
-            "wandb_run": f"{project}/{run_id}/{filename}",
-            "baseline": "PPO",
-            "data_key": fixed_world_key,
-            "all_results": world_scores,
-        }
-        logger.debug(record_data)
-
-        logger.info(f"Saving result to '{result_key}'")
-        s3_client = SimpleS3Client()
-        s3_client.save(result_key, json.dumps(record_data).encode())
+    # if env_params.fixed_worlds_load_from_path:
+    #     # Special logging for the fixed evaluation worlds
+    #     project = params.resume_from_project if params.resume_from_project else params.project
+    #     # TODO: make this get the current wandb run_id or some other identifier if we're not loading a run
+    #     run_id = params.resume_from_run
+    #     filename = params.resume_from_filename
+    #     fixed_world_key = env_params.fixed_worlds_s3_key if env_params.fixed_worlds_s3_key else "test"
+    #     result_key = f"avalon_eval__{project}_{run_id}_{filename}__{fixed_world_key}__final"
+    #     record_data = {
+    #         "wandb_run": f"{project}/{run_id}/{filename}",
+    #         "baseline": "PPO",
+    #         "data_key": fixed_world_key,
+    #         "all_results": world_scores,
+    #     }
+    #     logger.debug(record_data)
+    #
+    #     logger.info(f"Saving result to '{result_key}'")
+    #     s3_client = SimpleS3Client()
+    #     s3_client.save(result_key, json.dumps(record_data).encode())
 
     return test_log

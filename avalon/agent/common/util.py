@@ -7,8 +7,30 @@ from typing import Union
 import attr
 import numpy as np
 import torch
+from avalon.agent.common import wandb_lib
 from numpy.typing import NDArray
 from torch import Tensor
+
+
+def get_checkpoint_file(protocol_path: str) -> str:
+    """Gets a string path to the checkpoint file.
+    - protocol_path:
+        a string specifying the possible places to resume from, either local file or wandb run
+        valid formats include:
+            wandb://{project}/{run}/{file_name}
+            file://{absolute_file_path}
+        for example:
+            wandb://untitled-ai/sf3189ytcfg/checkpoint.pt
+            file:///home/user/runs/good_run/checkpoint.pt
+    """
+    protocol, path = protocol_path.split("://")
+    if protocol == "wandb":
+        project, run_id, filename = path.split("/")
+        return wandb_lib.download_file(run_id, project, filename)
+    elif protocol == "file":
+        return path
+    else:
+        raise ValueError(f"protocol {protocol} in {protocol_path} is not currently supported")
 
 
 def pack_1d_list(sequence: List, out_cls: Type):

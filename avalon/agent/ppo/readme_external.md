@@ -11,5 +11,5 @@ To train (replicates paper training result):
 `python -m agent.train_ppo_godot`
 
 To evaluate on fixed human-baseline worlds (replicates paper evaluations):
-`python -m agent.train_ppo_godot --is_training False --is_testing True --env_params.fixed_worlds_s3_key S3_KEY --resume_from_run WANDB_RUN_ID --resume_from_project WANDB_PROJECT --env_params.fixed_worlds_load_from_path /tmp/science/avalon/worlds/viewable_worlds/`
+`python -m agent.train_ppo_godot --is_training False --is_testing True --env_params.fixed_worlds_s3_key S3_KEY --resume_from wandb://WANDB_PROJECT/WANDB_RUN_ID/final.pt --env_params.fixed_worlds_load_from_path /tmp/science/avalon/worlds/viewable_worlds/`
 

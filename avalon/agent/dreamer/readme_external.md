@@ -34,10 +34,10 @@ Avalon easy:
 `python -m agent.train_dreamer_avalon --env_params.task_difficulty_update 0 --env_params.training_protocol MULTI_TASK_EASY`
 
 Avalon random world eval:
-`python -m agent.train_dreamer_avalon --is_training False --is_testing True --resume_from_run WANDB_RUN_ID `
+`python -m agent.train_dreamer_avalon --is_training False --is_testing True --resume_from wandb://WANDB_PROJECT/WANDB_RUN_ID/final.pt`
 
 Avalon fixed human-baseline world eval (this is how we did the evaluations for the paper results):
-`python -m agent.train_dreamer_avalon --is_training False --is_testing True --env_params.fixed_worlds_s3_key WORLD_KEY --resume_from_run WANDB_RUN_ID --env_params.fixed_worlds_load_from_path /tmp/science/avalon/worlds/viewable_worlds/`
+`python -m agent.train_dreamer_avalon --is_training False --is_testing True --env_params.fixed_worlds_s3_key WORLD_KEY --resume_from wandb://WANDB_PROJECT/WANDB_RUN_ID/final.pt --env_params.fixed_worlds_load_from_path /tmp/science/avalon/worlds/viewable_worlds/`
 
 
 ## Implementation verification

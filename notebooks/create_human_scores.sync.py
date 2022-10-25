@@ -1,3 +1,7 @@
+"""
+This file computes scores for the human gameplay rollouts,
+which just contain the raw observations (?) and need to be run through a GoalEvaluator to generate a score.
+"""
 # %%
 import gzip
 import json

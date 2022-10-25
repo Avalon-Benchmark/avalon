@@ -1,3 +1,8 @@
+"""
+This notebook generates a bunch of worlds and shows videos of them.
+
+Useful for testing out or getting a feel for the world generators.
+"""
 # %%
 import shutil
 from pathlib import Path

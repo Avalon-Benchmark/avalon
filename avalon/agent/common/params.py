@@ -61,9 +61,14 @@ class Params:
     # training
     is_training: bool = True
     batch_size: int = 100
-    resume_from_run: Optional[str] = None  # set this if you want to resume from an existing run
-    resume_from_project: Optional[str] = None  # set this to resume from a different project than `project`
-    resume_from_filename: str = "final.pt"
+    # a string specifying the possible places to resume from, either local file or wandb run
+    # valid formats include:
+    #     wandb://{project}/{run}/{file_name}
+    #     file://{absolute_file_path}
+    # for example:
+    #     wandb://untitled-ai/sf3189ytcfg/checkpoint.pt
+    #     file:///home/user/runs/good_run/checkpoint.pt
+    resume_from: Optional[str] = None
     checkpoint_every: int = 10_000
     total_env_steps: int = 1_000_000
     discount = 0.98

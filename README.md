@@ -118,15 +118,23 @@ docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabili
 
 ## Tutorials
 
+Using Avalon in your own RL code:
 - [**Using Avalon via the OpenAI Gym interface**](./notebooks/gym_interface_example.sync.ipynb): an example of how to create random worlds, 
 take actions as an agent, and display the resulting observations.
 
 - [**Training a PPO Agent on Avalon using RLlib**](./notebooks/rllib_tutorial.sync.ipynb): an example of how to use Avalon with an external RL library/codebase.
 
-- [**Training PPO and Dreamer Agents using the Avalon RL library**](./docs/avalon_baselines.md): train RL agents using our own fast, tuned implementations!
 
-- [**Building for VR**](*./notebooks/create_oculus_build.sync.ipynb):
-to build a version of Avalon for the Meta Quest 2.
+Using our RL library:
+- [**Training PPO and Dreamer Agents using the Avalon RL library**](./docs/avalon_baselines.md): train RL agents using our own fast, tuned implementations!
+- [**Reproducing the RL results from our paper**](./docs/avalon_baselines.md#reproducing-our-paper-results)
+
+
+Building on Avalon or creating new tasks:
+- [**Generating and inspecting an Avalon world**](./notebooks/create_simple_world.sync.ipynb)
+
+- [**Building Avalon for VR**](./notebooks/create_oculus_build.sync.ipynb):
+to build an Avalon `.apk` to load on the Meta Quest 2.
 
 - [**Adding custom procedurally-generated tasks to Avalon**](./docs/tutorial_add_task/)
 
