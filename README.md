@@ -146,6 +146,12 @@ All checkpoints are listed [here](./docs/checkpoints.md).
 }
 ```
 
+## License
+
+- Human rollout dataset: [CC-BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+- [Modifications](https://github.com/Avalon-Benchmark/godot) to the Godot engine: [MIT](https://opensource.org/licenses/MIT)
+- All code in this repository and all other associated resources (model checkpoints, etc): [GPLv3](https://www.gnu.org/licenses/gpl-3.0.en.html)
+
 ## About Generally Intelligent
 
 Avalon was developed by Generally Intelligent, independent research company developing general-purpose AI agents with human-like intelligence that can be safely deployed in the real world. Check out our [about](https://generallyintelligent.com/about) page to learn more, or our [careers](https://generallyintelligent.com/careers) page if you're interested in working with us!
