@@ -14,7 +14,6 @@ import numpy as np
 from loguru import logger
 
 from avalon.common.log_utils import logger
-from avalon.common.utils import float_to_str
 from avalon.datagen.errors import ImpossibleWorldError
 from avalon.datagen.world_creation.configs.export import get_eval_agent_export_config
 from avalon.datagen.world_creation.configs.export import get_oculus_export_config
@@ -171,7 +170,7 @@ def generate_worlds(
 ) -> List[GeneratedWorld]:
     assert (
         os.getenv("PYTHONHASHSEED", None) is not None
-    ), "PYTHONHASHSEED must be set for worlds to be generated deterministically."
+    ), f"PYTHONHASHSEED must be set for worlds to be generated deterministically."
     total_errors = 0
     all_impossible_world_errors = []
     all_unhandled_errors = []

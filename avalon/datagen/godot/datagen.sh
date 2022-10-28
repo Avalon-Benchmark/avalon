@@ -20,7 +20,7 @@ cd "$THIS_PATH"
 
 if test -z "$GODOT_BINARY_PATH"
 then
-    # NOTE: Duplicated in generate.py
+    # NOTE: Duplicated in interactive_godot_process.py
     GODOT_BINARY_PATH=$(realpath $THIS_FILE/../../bin/godot)
 fi
 

@@ -117,9 +117,9 @@ func spawn() -> void:
 
 
 func before_physics() -> void:
-	if is_recording_enabled_for_world():
-		var current_observation = observation_handler.get_current_observation(player, frame)
+	var current_observation = observation_handler.get_current_observation(player, frame)
 
+	if is_recording_enabled_for_world():
 		var interactive_observation = observation_handler.get_interactive_observation_from_current_observation(
 			current_observation,
 			episode,
@@ -130,25 +130,33 @@ func before_physics() -> void:
 		)
 		recorder.record_observation(frame, interactive_observation)
 
-		if visual_effect_handler and not is_player_on_entry_world:
-			visual_effect_handler.react(current_observation)
+	if visual_effect_handler and not is_player_on_entry_world:
+		visual_effect_handler.react(current_observation)
 
-		if (
-			not is_player_on_entry_world
-			and (current_observation["is_done"] or max_frames_to_complete_level < frame)
-		):
-			var world_id = WorldTools.get_world_id_from_world_path(current_world_path)
-			var result = WorldTools.get_task_success_result(
-				world_id,
-				current_observation["is_done"],
-				current_observation["is_dead"],
-				max_frames_to_complete_level < frame,
-				current_observation["hit_points"] > player.starting_hit_points
-			)
-			print("finished %s with result: %s" % [world_id, result])
+	if (
+		not is_player_on_entry_world
+		and (current_observation["is_done"] or max_frames_to_complete_level < frame)
+	):
+		var world_id = WorldTools.get_world_id_from_world_path(current_world_path)
+		var result = WorldTools.get_task_success_result(
+			world_id,
+			current_observation["is_done"],
+			current_observation["is_dead"],
+			max_frames_to_complete_level < frame,
+			current_observation["hit_points"] > player.starting_hit_points
+		)
+		print("finished %s with result: success=%s health=%.2f time=%d/%s" % [
+			world_id,
+			result,
+			current_observation["hit_points"],
+			frame,
+			max_frames_to_complete_level,
+		])
+
+		if is_recording_enabled_for_world():
 			recorder.record_result(frame, result)
 
-			advance_episode(initial_scene_path)
+		advance_episode(initial_scene_path)
 
 	log_debug_info()
 

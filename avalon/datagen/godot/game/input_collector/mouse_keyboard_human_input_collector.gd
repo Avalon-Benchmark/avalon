@@ -22,6 +22,7 @@ var is_mouse_mode_toggled: bool = false
 var is_active_hand_toggled: bool = false
 
 const MOUSE_SENSITIVITY = 0.004
+const MOUSE_PAN_DEADZONE = 0.01
 const SCROLL_SENSITIVITY = 0.05
 
 var _current_hand = CONST.RIGHT_HAND
@@ -58,6 +59,10 @@ func is_left_hand_active():
 	return _current_hand == CONST.LEFT_HAND
 
 
+func _init():
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+
 func reset():
 	mouse_x = 0.0
 	mouse_y = 0.0
@@ -86,7 +91,6 @@ func to_normalized_relative_action(player):
 	action.is_jumping = is_jump_pressed
 	action.is_eating = is_eat_pressed
 	action.is_crouching = is_crouch_pressed
-
 	action.head_delta_position.x += 1.0 if is_move_right_pressed else 0.0
 	action.head_delta_position.x -= 1.0 if is_move_left_pressed else 0.0
 	action.head_delta_position.z -= 1.0 if is_move_forward_pressed else 0.0
@@ -138,6 +142,15 @@ func to_normalized_relative_action(player):
 
 
 func read_input_from_event(event: InputEvent) -> void:
+	if event is InputEventPanGesture:
+		if abs(event.delta.y) > MOUSE_PAN_DEADZONE:
+			if event.delta.y > 0:
+				Input.action_press("wheel_up")
+				Input.action_release("wheel_up")
+			else:
+				Input.action_press("wheel_down")
+				Input.action_release("wheel_down")
+
 	if event is InputEventMouseMotion and Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 		mouse_x += -event.relative.x * MOUSE_SENSITIVITY
 		mouse_y += -event.relative.y * MOUSE_SENSITIVITY

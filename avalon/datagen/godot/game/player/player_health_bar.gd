@@ -9,4 +9,4 @@ func _physics_process(_delta: float):
 	var player = Globals.get_player()
 	if player:
 		value = player.hit_points
-		label.text = "%s" % clamp(player.hit_points, 0, INF)
+		label.text = "%.2f" % clamp(player.hit_points, 0, INF)

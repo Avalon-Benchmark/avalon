@@ -36,11 +36,11 @@ dependencies = [
   "sh >= 1.14.2",
   "shapely >= 1.7.0",
   "tqdm >= 4.62.3",
-  # "triangle @ git+https://github.com/drufat/triangle.git@v20200424",  # mac can't install recent versions from pip
   "trimesh[easy] >= 3.15.5",
   "wandb >= 0.12.21",
   "moviepy >= 1.0.3",
   "imageio >= 2.15.0",
+  "fire >= 0.4.0"
 ]
 
 [project.optional-dependencies]

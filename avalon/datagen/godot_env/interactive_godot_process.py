@@ -39,6 +39,7 @@ GODOT_EDITOR_PATH: Final = os.environ.get("GODOT_EDITOR_PATH", f"{GODOT_BINARY_P
 GODOT_ERROR_LOG_PATH = f"{FILESYSTEM_ROOT}/godot"
 
 DATAGEN_SCRIPT_PATH = f"{AVALON_PACKAGE_DIR}/datagen/godot/datagen.sh"
+GODOT_PROJECT_FILE_PATH = f"{AVALON_PACKAGE_DIR}/datagen/godot/project.godot"
 
 _ACTION_REPLAY_FILENAME = "actions_replay.out"
 

@@ -5,33 +5,23 @@ const TOGGLE_EVENT := "toggle_help"
 const BACKGROUND := Color(0.745098, 0.745098, 0.745098, 0.5)
 
 const non_wasd_bindings = [
-	{"Climb Up": "move_forward"},
-	{"Climb Down": "move_backward"},
-	{"Grab/Release": "grab"},
-	"eat",
 	"throw",
-	"jump",
+	"eat",
 	"crouch",
+	"jump",
+	"grab",
+	{"Toggle hand": "toggle_active_hand"},
 	{"Extend hand": "wheel_up"},
 	{"Retract hand": "wheel_down"},
-	"toggle_active_hand",
-	{"Reset back to world selection": "reset"},
-	{"Toggle this Popup": TOGGLE_EVENT},
-	# TODO remove or make use of unbound bindings:
-	# "move_toggle_rotation",
-	# "toggle_mouse_capture",
-	# "toggle_free_movement",
-	# "save",
-	# "mouse_left",
-	# "mouse_right",
+	{"Reset": "reset"},
+	{"Toggle mouse": "toggle_mouse_capture"},
+	{"Toggle this help popup": TOGGLE_EVENT},
 ]
 
 
 func _init():
 	add_child(describe_controls())
-	set_as_minsize()
-	var center_x = get_rect().size.x / 2
-	set_position(Vector2(center_x, 20))
+	set_position(Vector2(20, 40))
 
 
 func _ready():
@@ -46,8 +36,8 @@ func describe_controls():
 	var styles = StyleBoxFlat.new()
 	styles.bg_color = Color.gray
 	add_stylebox_override("panel", styles)
-	vbox.add_child(new_label("Keyboard and Mouse Controls:"))
 	vbox.add_child(control_desc("Movement", wasd()))
+	vbox.add_child(new_label("Actions:", 20, 5))
 	for binding in non_wasd_bindings:
 		var control: Control
 		if binding is String:
@@ -59,6 +49,16 @@ func describe_controls():
 		else:
 			HARD.stop("invalid binging %s" % binding)
 		vbox.add_child(control)
+
+	var hints_text = PoolStringArray(
+		[
+			"Hints:",
+			"Grab the sign arrows to select a world.",
+			"Grab the center pillar to teleport there.",
+		]
+	)
+	var hint_label = new_label(hints_text.join("\n"), 20, 5)
+	vbox.add_child(hint_label)
 
 	var container = MarginContainer.new()
 	var margin_value = 10
@@ -72,18 +72,20 @@ func describe_controls():
 
 static func control_desc(label_text: String, details: Control) -> Control:
 	var row = HBoxContainer.new()
-	row.add_child(new_label(label_text + ":"))
+	row.add_child(new_label(label_text + ":", 20, 5))
 
 	details.size_flags_horizontal = Control.SIZE_EXPAND + Control.SIZE_SHRINK_END
 	row.add_child(details)
 	return row
 
 
-static func new_label(label_text: String) -> Label:
+static func new_label(label_text: String, pad_x: int = 0, pad_y: int = 0) -> Label:
 	var label = Label.new()
 	label.align = Label.ALIGN_FILL
 	label.text = label_text
 	label.add_color_override("font_color", Color.darkslategray)
+	var size = label.get_combined_minimum_size()
+	label.rect_min_size = Vector2(size.x + pad_x, size.y + pad_y)
 	return label
 
 
@@ -113,7 +115,7 @@ static func binding_repr(name: String) -> Control:
 			for i in len(bindings):
 				reprs.append(new_button(input_event_as_text(bindings[i])))
 				if i < len(bindings) - 1:
-					reprs.append(new_label(", "))
+					reprs.append(new_label(","))
 			return row(reprs)
 
 

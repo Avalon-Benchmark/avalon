@@ -133,8 +133,7 @@ Using our RL library:
 Building on Avalon or creating new tasks:
 - [**Generating and inspecting an Avalon world**](./notebooks/create_simple_world.sync.ipynb)
 
-- [**Building Avalon for VR**](./notebooks/create_oculus_build.sync.ipynb):
-to build an Avalon `.apk` to load on the Meta Quest 2.
+- [**Running Avalon in VR**](./docs/running_in_vr.md): Generate and play worlds on an Oculus Quest.
 
 - [**Adding custom procedurally-generated tasks to Avalon**](./docs/tutorial_add_task/)
 
