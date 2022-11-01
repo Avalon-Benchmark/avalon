@@ -191,7 +191,9 @@ def artifact_path_() -> Generator[Path, None, None]:
 @fixture
 @use(artifact_path_)
 def mock_create_error_artifact_path_(artifact_path: Path, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr("avalon.datagen.godot_env.interactive_godot_process.create_error_artifact_path", lambda: artifact_path)
+    monkeypatch.setattr(
+        "avalon.datagen.godot_env.interactive_godot_process.create_error_artifact_path", lambda: artifact_path
+    )
 
 
 @integration_test

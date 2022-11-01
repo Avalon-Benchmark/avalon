@@ -7,9 +7,10 @@ from typing import Union
 import attr
 import numpy as np
 import torch
-from avalon.agent.common import wandb_lib
 from numpy.typing import NDArray
 from torch import Tensor
+
+from avalon.agent.common import wandb_lib
 
 
 def get_checkpoint_file(protocol_path: str) -> str:

@@ -15,6 +15,10 @@ import attrs
 import numpy as np
 import torch
 import wandb
+from matplotlib import pyplot as plt
+from matplotlib.pyplot import bar
+from numpy import typing as npt
+
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.params import Params
 from avalon.agent.common.storage import LambdaStorage
@@ -28,9 +32,6 @@ from avalon.contrib.s3_utils import TEMP_BUCKET_NAME
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import TEMP_DIR
 from avalon.contrib.utils import create_temp_file_path
-from matplotlib import pyplot as plt
-from matplotlib.pyplot import bar
-from numpy import typing as npt
 
 BIG_SEPARATOR = "-" * 80
 RESULT_TAG = "DATALOADER:0 TEST RESULTS"

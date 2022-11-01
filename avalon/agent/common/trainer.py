@@ -15,6 +15,10 @@ from typing import Protocol
 import attr
 import torch
 import wandb
+from loguru import logger
+from torch.utils.data import DataLoader
+from tree import map_structure
+
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.action_model import visualize_actions
 from avalon.agent.common.dataloader import ReplayDataset
@@ -35,9 +39,6 @@ from avalon.agent.common.worker import AsyncRolloutManager
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.agent.ppo.params import OnPolicyParams
-from loguru import logger
-from torch.utils.data import DataLoader
-from tree import map_structure
 
 # Just a temporary reminder to not use <1.11
 assert int(torch.__version__.split(".")[1]) >= 11

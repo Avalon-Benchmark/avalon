@@ -27,7 +27,6 @@ from typing import Any
 from typing import Dict
 from typing import Set
 
-import nest
 import numpy as np
 import sentry_sdk
 import torch
@@ -37,6 +36,7 @@ from torch import nn
 from torch.nn import functional as F
 
 import libtorchbeast
+import nest
 from avalon.agent.godot.godot_gym import CURRICULUM_BASE_PATH
 from avalon.agent.ppo.observation_model import ImpalaConvNet
 from avalon.agent.torchbeast.avalon_helpers import IS_PROPRIOCEPTION_USED
@@ -59,7 +59,6 @@ from avalon.common.log_utils import logger
 from avalon.common.visual_utils import encode_video
 from avalon.common.wandb_utils import get_latest_checkpoint_filename
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_ERROR_LOG_PATH
-
 
 os.environ["OMP_NUM_THREADS"] = "1"
 

@@ -15,6 +15,10 @@ import gym
 import numpy as np
 import sentry_sdk
 import torch
+from loguru import logger
+from torch import Tensor
+from tree import map_structure
+
 from avalon.agent.common.envs import build_env
 from avalon.agent.common.get_algorithm_cls import get_algorithm_cls
 from avalon.agent.common.params import EnvironmentParams
@@ -34,9 +38,6 @@ from avalon.agent.common.util import get_checkpoint_file
 from avalon.agent.common.util import postprocess_uint8_to_float
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.common.error_utils import capture_exception
-from loguru import logger
-from torch import Tensor
-from tree import map_structure
 
 numpy_to_torch_dtype_dict = {
     bool: torch.bool,
