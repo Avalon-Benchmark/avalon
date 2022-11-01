@@ -82,9 +82,7 @@ static func node_all_children(node: Node, type_filter: String = "") -> Array:
 	return children
 
 
-static func path_list(
-	path: String, include_dir := true, sort := true, skip_hidden := true
-) -> PoolStringArray:
+static func path_list(path: String, include_dir := true, sort := true, skip_hidden := true) -> PoolStringArray:
 	var diter := Directory.new()
 	var error := OK
 	var files := []

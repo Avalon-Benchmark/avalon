@@ -24,9 +24,7 @@ export var last_seen_ocean_step := -1
 var left_or_right_dist: ChoicesDistribution
 
 
-func init(
-	_rng_key: String, movement_steps: int, _speed, _turn_rotation_speed: float = 1
-) -> CyclingBehavior:
+func init(_rng_key: String, movement_steps: int, _speed, _turn_rotation_speed: float = 1) -> CyclingBehavior:
 	.init_super(movement_steps, 2)
 	rng_key = _rng_key
 	turn_rotation_speed = _turn_rotation_speed

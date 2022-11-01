@@ -227,9 +227,7 @@ func _convert_to_interactive_observation(
 	return observed_data
 
 
-func _limit_to_selected_features(
-	observation: Dictionary, selected_features: Dictionary
-) -> Dictionary:
+func _limit_to_selected_features(observation: Dictionary, selected_features: Dictionary) -> Dictionary:
 	if len(selected_features) == 0:
 		return observation
 	var result := {}

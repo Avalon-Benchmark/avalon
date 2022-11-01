@@ -145,13 +145,18 @@ func before_physics() -> void:
 			max_frames_to_complete_level < frame,
 			current_observation["hit_points"] > player.starting_hit_points
 		)
-		print("finished %s with result: success=%s health=%.2f time=%d/%s" % [
-			world_id,
-			result,
-			current_observation["hit_points"],
-			frame,
-			max_frames_to_complete_level,
-		])
+		print(
+			(
+				"finished %s with result: success=%s health=%.2f time=%d/%s"
+				% [
+					world_id,
+					result,
+					current_observation["hit_points"],
+					frame,
+					max_frames_to_complete_level,
+				]
+			)
+		)
 
 		if is_recording_enabled_for_world():
 			recorder.record_result(frame, result)

@@ -105,9 +105,7 @@ func _open():
 	closed_mesh.visible = false
 
 
-func _is_impact_velocity_sufficient(
-	body: Node, velocity_threshold: float, action: String = "open"
-) -> bool:
+func _is_impact_velocity_sufficient(body: Node, velocity_threshold: float, action: String = "open") -> bool:
 	var impact_magnitude = _calculate_impact_magnitude(body)
 	var is_sufficient = impact_magnitude >= velocity_threshold
 	if HARD.mode():

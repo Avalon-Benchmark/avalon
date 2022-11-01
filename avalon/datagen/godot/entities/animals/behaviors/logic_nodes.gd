@@ -67,9 +67,7 @@ static func prefer_persisted(
 	return newly_configured_logic_node
 
 
-static func prefer_persisted_array(
-	container: Node, prefix: String, newly_configured_logic_nodes: Array
-) -> Array:
+static func prefer_persisted_array(container: Node, prefix: String, newly_configured_logic_nodes: Array) -> Array:
 	var node_prefix = "%s__" % prefix
 
 	if not is_container_already_persiting(container):

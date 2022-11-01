@@ -65,9 +65,7 @@ func on_scene_enter(teleporter: Teleporter) -> void:
 			)
 
 		teleporter.set_message(
-			"Up next: %s" % readable_next_world,
-			time_to_complete_in_minutes,
-			readable_last_world
+			"Up next: %s" % readable_next_world, time_to_complete_in_minutes, readable_last_world
 		)
 
 

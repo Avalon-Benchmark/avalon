@@ -20,9 +20,7 @@ const DEBUG_VIEWPORTS = [
 const DEBUG_CAMERAS_SCENE_PATH = "res://scenes/debug.tscn"
 
 
-func _init(
-	_root: Node, _resolution: Vector2, _tracked_node: String, _are_debug_views_enabled: bool
-):
+func _init(_root: Node, _resolution: Vector2, _tracked_node: String, _are_debug_views_enabled: bool):
 	root = _root
 	resolution = _resolution
 	tracked_node = _tracked_node
