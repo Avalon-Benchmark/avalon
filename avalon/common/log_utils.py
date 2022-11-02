@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict
 from typing import Optional
 
+from fire import helptext
 from loguru import logger
 from tqdm import tqdm
 
@@ -78,3 +79,20 @@ tqdm.monitor_interval = 0
 
 def enable_debug_logging():
     _configure_logger("DEBUG")
+
+
+def add_simple_stderr_log():
+    logger.add(sys.stderr, format="{message}", level="DEBUG", diagnose=False)
+
+
+def make_fire_more_friendly(line_length: int = 200, is_using_simple_logger: bool = False):
+    # make fire stop truncating so many things
+    helptext.LINE_LENGTH = line_length
+
+    # this makes fire do what I would expect if you pass --help into the base command
+    if len(sys.argv) == 2 and sys.argv[-1] in ("--help", "-h"):
+        sys.argv.pop()
+
+    if is_using_simple_logger:
+        logger.remove()
+        add_simple_stderr_log()

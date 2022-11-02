@@ -56,7 +56,7 @@ builds: Final[Dict[Tuple[Platform, BinaryType], str]] = {
     ("linux", RUNNER): "linux-egl-editor.zip",
     ("linux", EDITOR): "linux-x11-editor.zip",
     ("macos", EDITOR): "macos-editor.zip",
-    # ("windows", EDITOR): "windows-editor.zip",
+    ("windows", EDITOR): "windows-editor.zip",
 }
 
 
@@ -120,12 +120,13 @@ def install_binary(build: str, target_path: Path, is_overwriting: bool):
 
 
 def install_available_binaries_for_current_platform(is_overwriting: bool):
+    platform = get_platform()
     binary_path = get_godot_binary_path()
     editor_path = get_godot_editor_path()
 
-    editor_build = builds.get((get_platform(), EDITOR), None)
-    headless_build = builds.get((get_platform(), RUNNER), None)
-    assert editor_build is not None, f"{get_platform()} is currently unsupported"
+    editor_build = builds.get((platform, EDITOR), None)
+    headless_build = builds.get((platform, RUNNER), None)
+    assert editor_build is not None, f"{platform} is currently unsupported"
     logger.info(
         f"Installing editor {'build' if headless_build is None else 'and headless runner builds'} from {RELEASES}"
     )
@@ -134,9 +135,14 @@ def install_available_binaries_for_current_platform(is_overwriting: bool):
 
     if headless_build is not None:
         install_binary(headless_build, binary_path, is_overwriting)
+    elif platform == "windows":
+        logger.info(
+            f"Note: Installed godot editor for windows, but it cannot be used as a runner. "
+            f"Consider using WSL for actual training purposes: https://learn.microsoft.com/en-us/windows/wsl/install"
+        )
     else:
         logger.info(
-            f"Note: No headless runner currently available for {get_platform()}. Symlinking editor build in it's place."
+            f"Note: No headless runner currently available for {platform}. Symlinking editor build in it's place."
         )
         handle_overwrite(binary_path, is_overwriting)
         os.symlink(editor_path, binary_path, is_overwriting)
