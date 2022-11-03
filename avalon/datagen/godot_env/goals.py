@@ -152,7 +152,7 @@ class TrainingAvalonGoalEvaluator(AvalonGoalEvaluator):
     def get_level_frame_limit(self, world_params: GenerateAvalonWorldParams) -> int:
         super_frame_limit = super().get_level_frame_limit(world_params)
         dynamic_frame_limit = int(
-            TRAINING_FRAME_LIMITS_AT_ZERO_DIFFICULTY[world_params.task] * 10 ** world_params.difficulty
+            TRAINING_FRAME_LIMITS_AT_ZERO_DIFFICULTY[world_params.task] * 10**world_params.difficulty
         )
         return min(super_frame_limit, dynamic_frame_limit)
 

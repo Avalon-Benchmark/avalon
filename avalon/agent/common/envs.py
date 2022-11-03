@@ -307,8 +307,8 @@ class Atari(gym.Env):
         all_actions: bool = False,
     ):
         assert size[0] == size[1]
-        import gym.wrappers
         import gym.envs.atari
+        import gym.wrappers
 
         if name == "james_bond":
             name = "jamesbond"

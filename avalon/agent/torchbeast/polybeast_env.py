@@ -18,12 +18,12 @@ import logging
 import multiprocessing as mp
 import time
 
+import libtorchbeast
 import numpy as np
 
 # yapf: disable
 from loguru import logger
 
-import libtorchbeast
 from avalon.agent.torchbeast import atari_wrappers
 from avalon.agent.torchbeast import avalon_helpers
 from avalon.agent.torchbeast.avalon_helpers import create_godot_env

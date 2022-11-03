@@ -425,7 +425,7 @@ def _check_path(
         start_to_end_dist = np.linalg.norm(start_point - end_point)
         if start_to_end_dist < width:
             midpoint = (start_point + end_point) / 2.0
-            path_mask = map.get_dist_sq_to(midpoint) < width ** 2
+            path_mask = map.get_dist_sq_to(midpoint) < width**2
         else:
             start_to_end_vec = (end_point - start_point) / start_to_end_dist
             start_point = start_point + start_to_end_vec * (width / 2.0)
@@ -500,8 +500,8 @@ def _get_intersections(
     if d == 0 and r0 == r1:
         return None
     else:
-        a = (r0 ** 2 - r1 ** 2 + d ** 2) / (2 * d)
-        h = math.sqrt(r0 ** 2 - a ** 2)
+        a = (r0**2 - r1**2 + d**2) / (2 * d)
+        h = math.sqrt(r0**2 - a**2)
         x2 = x0 + a * (x1 - x0) / d
         y2 = y0 + a * (y1 - y0) / d
         x3 = x2 + h * (y1 - y0) / d

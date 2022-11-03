@@ -27,6 +27,8 @@ from typing import Any
 from typing import Dict
 from typing import Set
 
+import libtorchbeast
+import nest
 import numpy as np
 import sentry_sdk
 import torch
@@ -35,8 +37,6 @@ from gym import spaces
 from torch import nn
 from torch.nn import functional as F
 
-import libtorchbeast
-import nest
 from avalon.agent.godot.godot_gym import CURRICULUM_BASE_PATH
 from avalon.agent.ppo.observation_model import ImpalaConvNet
 from avalon.agent.torchbeast.avalon_helpers import IS_PROPRIOCEPTION_USED
@@ -155,7 +155,7 @@ def _set_seed(seed):
 
 
 def compute_baseline_loss(advantages):
-    return 0.5 * torch.sum(advantages ** 2)
+    return 0.5 * torch.sum(advantages**2)
 
 
 def compute_entropy_loss(logits):

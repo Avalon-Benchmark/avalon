@@ -327,7 +327,7 @@ class Building:
                     "transform": make_transform(position=light_centroid),
                     "light_energy": 0.5,
                     "omni_range": max(
-                        math.sqrt(first_story.width ** 2 + first_story.length ** 2) / 2, self.height.size / 2
+                        math.sqrt(first_story.width**2 + first_story.length**2) / 2, self.height.size / 2
                     ),
                 },
             )

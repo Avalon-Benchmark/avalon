@@ -19,7 +19,6 @@ import avalon.install_godot_binary as binary
 from avalon.common.utils import AVALON_PACKAGE_DIR
 from avalon.contrib.utils import run_local_command
 from avalon.datagen.generate_worlds import generate_worlds
-from avalon.datagen.godot_env.interactive_godot_process import GODOT_BINARY_PATH
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_EDITOR_PATH
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_PROJECT_FILE_PATH
 from avalon.datagen.world_creation.constants import AvalonTask

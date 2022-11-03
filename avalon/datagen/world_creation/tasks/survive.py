@@ -301,7 +301,7 @@ def add_fruit_tree_and_animals(
         difficulty, task_config.gathering_predator_dist_easy, task_config.gathering_predator_dist_hard
     )
     safe_mask = world.get_safe_mask(
-        sq_distances=sq_distances_from_tree, max_sq_dist=predator_dist ** 2, island_mask=None
+        sq_distances=sq_distances_from_tree, max_sq_dist=predator_dist**2, island_mask=None
     )
     for i in range(predator_count):
         position = world._get_safe_point(rand, safe_mask)
@@ -315,7 +315,7 @@ def add_fruit_tree_and_animals(
     prey_dist = scale_with_difficulty(
         difficulty, task_config.gathering_prey_dist_easy, task_config.gathering_prey_dist_hard
     )
-    safe_mask = world.get_safe_mask(sq_distances=sq_distances_from_tree, max_sq_dist=prey_dist ** 2, island_mask=None)
+    safe_mask = world.get_safe_mask(sq_distances=sq_distances_from_tree, max_sq_dist=prey_dist**2, island_mask=None)
     for i in range(prey_count):
         position = world._get_safe_point(rand, safe_mask)
         if position is None:
@@ -328,7 +328,7 @@ def add_fruit_tree_and_animals(
     tool_dist = scale_with_difficulty(
         difficulty, task_config.gathering_tool_dist_easy, task_config.gathering_tool_dist_hard
     )
-    safe_mask = world.get_safe_mask(sq_distances=sq_distances_from_tree, max_sq_dist=tool_dist ** 2, island_mask=None)
+    safe_mask = world.get_safe_mask(sq_distances=sq_distances_from_tree, max_sq_dist=tool_dist**2, island_mask=None)
     for i in range(tool_count):
         position = world._get_safe_point(rand, safe_mask)
         if position is None:
@@ -342,7 +342,7 @@ def add_fruit_tree_and_animals(
         difficulty, task_config.gathering_forage_food_dist_easy, task_config.gathering_forage_food_dist_hard
     )
     safe_mask = world.get_safe_mask(
-        sq_distances=sq_distances_from_tree, max_sq_dist=forage_food_dist ** 2, island_mask=None
+        sq_distances=sq_distances_from_tree, max_sq_dist=forage_food_dist**2, island_mask=None
     )
     for i in range(forage_food_count):
         position = world._get_safe_point(rand, safe_mask)

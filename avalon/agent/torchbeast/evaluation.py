@@ -11,10 +11,10 @@ from typing import Dict
 from typing import Optional
 from typing import Tuple
 
+import nest
 import sentry_sdk
 import torch
 
-import nest
 from avalon.agent.evaluation import EVAL_TEMP_PATH
 from avalon.agent.evaluation import EvaluationGodotEnv
 from avalon.agent.evaluation import get_wandb_result_key

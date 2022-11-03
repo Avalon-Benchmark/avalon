@@ -27,11 +27,11 @@ class EdgeConfig:
     circularity: float = 0.5
 
     def to_harmonics(self, radius: float) -> HarmonicsConfig:
-        noise = self.noise ** 0.5
+        noise = self.noise**0.5
         base_radius = 20.6
         base_harmonic_count = 20 * noise
         scale_factor = (radius / base_radius) * (1.0 / self.scale)
-        noise_harmonics = list(range(1, round(base_harmonic_count * scale_factor ** 0.5)))
+        noise_harmonics = list(range(1, round(base_harmonic_count * scale_factor**0.5)))
         scaled_harmonics = tuple([round(2 * scale_factor) + i for i in noise_harmonics])
         noise_weights = tuple([noise * 0.75 / x for x in scaled_harmonics])
 

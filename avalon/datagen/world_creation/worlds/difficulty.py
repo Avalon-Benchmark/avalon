@@ -31,7 +31,7 @@ def select_categorical_difficulty(
     num_choices = len(choices)
     prob_coeff = 1.0 / sum(difficulty ** float(x) for x in range(num_choices))
     choice_prob = [
-        difficulty / num_choices + (1 - difficulty) * (difficulty ** x) * prob_coeff for x in range(num_choices)
+        difficulty / num_choices + (1 - difficulty) * (difficulty**x) * prob_coeff for x in range(num_choices)
     ]
     choice_idx = rand.choice(range(num_choices), p=choice_prob)
     if _FORCED is not None:
@@ -39,7 +39,7 @@ def select_categorical_difficulty(
         choice_idx = choices.index(_FORCED)
 
     # TODO use other less arbitrary method to calculate?
-    new_difficulty = difficulty ** 2 + (1 - difficulty) * (difficulty ** (choice_idx + 1))
+    new_difficulty = difficulty**2 + (1 - difficulty) * (difficulty ** (choice_idx + 1))
     return choices[choice_idx], new_difficulty
 
 
@@ -67,7 +67,7 @@ def select_boolean_difficulty(
     if initial_prob == final_prob:
         return sampled_value < initial_prob, difficulty
     assert initial_prob > 0 and final_prob > 0, "Cannot have zero probability for True with log interpolation!"
-    prob = (initial_prob ** (1 - difficulty)) * (final_prob ** difficulty)
+    prob = (initial_prob ** (1 - difficulty)) * (final_prob**difficulty)
     value = sampled_value < prob
     # the updated difficulty is the integral of the probability to d over the integral to 1
     if value:

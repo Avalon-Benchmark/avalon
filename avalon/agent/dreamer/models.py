@@ -402,7 +402,7 @@ class ConvEncoder(nn.Module):
         in_channels = input_channels
         current_res = input_res
         for i, kernel in enumerate(kernels):
-            out_channels = 2 ** i * depth
+            out_channels = 2**i * depth
             conv = nn.Conv2d(
                 in_channels=in_channels, out_channels=out_channels, kernel_size=kernel, stride=2, padding=0
             )

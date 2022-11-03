@@ -59,7 +59,7 @@ def lerp(a, b, x):  # type: ignore
 
 def fade(t):  # type: ignore
     "6t^5 - 15t^4 + 10t^3"
-    return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3
+    return 6 * t**5 - 15 * t**4 + 10 * t**3
 
 
 def gradient(h, x, y):  # type: ignore

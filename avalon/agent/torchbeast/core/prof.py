@@ -60,7 +60,7 @@ class Timings:
         return self._vars
 
     def stds(self):
-        return {k: v ** 0.5 for k, v in self._vars.items()}
+        return {k: v**0.5 for k, v in self._vars.items()}
 
     def summary(self, prefix: str = "") -> str:
         means = self.means()

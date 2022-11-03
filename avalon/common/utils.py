@@ -190,7 +190,7 @@ def dir_checksum(dir_path: Path, glob: str = "*") -> str:
     hash_md5 = hashlib.md5()
     for path in sorted(dir_path.glob(glob)):
         with open(path, "rb") as f:
-            for chunk in iter(lambda: f.read(2 ** 20), b""):
+            for chunk in iter(lambda: f.read(2**20), b""):
                 hash_md5.update(chunk)
     return hash_md5.hexdigest()
 

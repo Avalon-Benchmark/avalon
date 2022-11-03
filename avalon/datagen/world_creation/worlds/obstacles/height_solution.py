@@ -272,7 +272,7 @@ class HeightSolution:
                     item = transformed_items[i]
                     item_pos_2d = to_2d_point(item.position)
                     item_dist_sq = map.get_dist_sq_to(item_pos_2d)
-                    item_jitter_mask = item_dist_sq < randomization_distance ** 2
+                    item_jitter_mask = item_dist_sq < randomization_distance**2
                     possible_spawn_mask = np.logical_and(item_jitter_mask, reduced_solution_mask)
                     if not np.any(possible_spawn_mask):
                         possible_spawn_mask = reduced_solution_mask

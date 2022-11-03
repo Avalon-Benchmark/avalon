@@ -682,7 +682,7 @@ def create_compositional_task(
 
             # actually boost the spawn
             spawn_radius = 2.0
-            spawn_point_region = world.map.get_dist_sq_to(to_2d_point(solution.locations.spawn)) < spawn_radius ** 2
+            spawn_point_region = world.map.get_dist_sq_to(to_2d_point(solution.locations.spawn)) < spawn_radius**2
             if visibility_height_offset > 0.0:
                 map_new = world.map.copy()
                 map_new.raise_island(spawn_point_region, visibility_height_offset)
@@ -764,7 +764,7 @@ def add_extra_predators(
         max_distance = scale_with_difficulty(
             difficulty, task_config.predator_path_dist_easy, task_config.predator_path_dist_hard
         )
-        max_sq_dist = max_distance ** 2
+        max_sq_dist = max_distance**2
         for i in range(random_predator_count):
             position = world.get_safe_point(
                 rand, sq_distances=sq_path_distances, max_sq_dist=max_sq_dist, island_mask=solution.locations.island
@@ -777,7 +777,7 @@ def add_extra_predators(
         max_distance = scale_with_difficulty(
             difficulty, task_config.weapon_path_dist_easy, task_config.weapon_path_dist_hard
         )
-        max_sq_dist = max_distance ** 2
+        max_sq_dist = max_distance**2
         weapon_classes: List[Type[Weapon]] = []
         for i in range(weapon_count):
             safe_mask = world.get_safe_mask(

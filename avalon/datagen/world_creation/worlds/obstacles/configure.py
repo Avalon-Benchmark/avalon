@@ -119,11 +119,11 @@ def make_ring(
     max_selectable_radius = max_traversal_radius - radius_diff * 0.3
     r_squared = world.map.get_dist_sq_to(center_point)
     acceptable_radius_mask = np.logical_and(
-        r_squared < max_selectable_radius ** 2, r_squared > min_selectable_radius ** 2
+        r_squared < max_selectable_radius**2, r_squared > min_selectable_radius**2
     )
     if is_debugging:
-        plot_value_grid(r_squared < max_selectable_radius ** 2, "Less than max radius")
-        plot_value_grid(r_squared > min_selectable_radius ** 2, "Greater than min radius")
+        plot_value_grid(r_squared < max_selectable_radius**2, "Less than max radius")
+        plot_value_grid(r_squared > min_selectable_radius**2, "Greater than min radius")
         plot_value_grid(acceptable_radius_mask, "Acceptable radius mask")
 
     max_dist = 2.0 + traversal_difficulty_meters * difficulty
@@ -141,7 +141,7 @@ def make_ring(
 
     if constraint is None:
         dist_sq_to_middle_point = world.map.get_dist_sq_to(actual_middle)
-        near_traversal_center_mask = dist_sq_to_middle_point < max_dist ** 2
+        near_traversal_center_mask = dist_sq_to_middle_point < max_dist**2
     else:
         near_traversal_center_mask = constraint.traversal_mask
     possible_points = np.logical_and(

@@ -93,7 +93,7 @@ class TruncatedStandardNormal(Distribution):
 
     @staticmethod
     def _little_phi(x: Tensor) -> Tensor:
-        return (-(x ** 2) * 0.5).exp() * CONST_INV_SQRT_2PI  # type:  ignore
+        return (-(x**2) * 0.5).exp() * CONST_INV_SQRT_2PI  # type:  ignore
 
     @staticmethod
     def _big_phi(x: Tensor) -> Tensor:
@@ -114,7 +114,7 @@ class TruncatedStandardNormal(Distribution):
     def log_prob(self, value: Tensor) -> Tensor:
         if self._validate_args:
             self._validate_sample(value)
-        return CONST_LOG_INV_SQRT_2PI - self._log_Z - (value ** 2) * 0.5  # type: ignore
+        return CONST_LOG_INV_SQRT_2PI - self._log_Z - (value**2) * 0.5  # type: ignore
 
     def rsample(self, sample_shape: torch.Size = torch.Size()) -> Tensor:
         shape = self._extended_shape(sample_shape)
@@ -151,7 +151,7 @@ class TruncatedNormal(TruncatedStandardNormal):
         super(TruncatedNormal, self).__init__(a, b, validate_args=validate_args)
         self._log_scale = self.scale.log()
         self._mean = self._mean * self.scale + self.loc
-        self._variance = self._variance * self.scale ** 2
+        self._variance = self._variance * self.scale**2
         self._entropy += self._log_scale
         self._mode = torch.clip(self.loc, self.low, self.high)
 

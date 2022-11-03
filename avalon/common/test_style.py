@@ -22,7 +22,7 @@ def test_code_contains_no_print_statement():
     ignore_test_files_and_notebooks = "grep -v -E '(tests?/|/test_|_test.py|.sync.py)'"
     ignore_lines_marked_with_script_comment = 'grep -v " # script"'
     result = subprocess.run(
-        fr'grep -E -r {exclusions} --include="*.py" "(^|\s)print\\(" | {ignore_test_files_and_notebooks} | {ignore_lines_marked_with_script_comment}',
+        rf'grep -E -r {exclusions} --include="*.py" "(^|\s)print\\(" | {ignore_test_files_and_notebooks} | {ignore_lines_marked_with_script_comment}',
         shell=True,
         capture_output=True,
         text=True,

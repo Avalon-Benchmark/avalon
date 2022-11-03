@@ -765,7 +765,7 @@ class World(Serializable):  # type: ignore[no-untyped-def]  # mypy bug?
             mid_point = (start_point + end_point) / 2.0
             water_mask = np.logical_not(island_mask)
             for mask_radius, blur_radius in ring.config.terrain_blurs:
-                nearby = map_new.get_dist_sq_to(mid_point) < mask_radius ** 2
+                nearby = map_new.get_dist_sq_to(mid_point) < mask_radius**2
                 blur_mask = np.logical_and(island_mask, nearby)
                 rest_mask = np.logical_not(blur_mask)
                 rest_mask = morphology.dilation(rest_mask, morphology.disk(3))
@@ -894,7 +894,7 @@ class World(Serializable):  # type: ignore[no-untyped-def]  # mypy bug?
         for i in range(10):
             harmonics = edge_config.to_harmonics(traversal_distance)
             variation = create_harmonics(rand, theta, config=harmonics, is_normalized=False)
-            z = np.sqrt(np.clip(normalized_r ** 2 + normalized_r * variation, 0.01, np.inf))
+            z = np.sqrt(np.clip(normalized_r**2 + normalized_r * variation, 0.01, np.inf))
 
             mid_z = z[traversal_indices]
             z = (z / mid_z) * traversal_distance

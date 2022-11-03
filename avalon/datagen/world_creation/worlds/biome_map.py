@@ -265,7 +265,7 @@ class BiomeMap:
         is_detail_important: MapBoolNP,
     ) -> Point2DListNP:
         meters_per_cell = 1.0 / self.map.cells_per_meter
-        square_meters_per_cell = meters_per_cell ** 2
+        square_meters_per_cell = meters_per_cell**2
         # points_per_cell = round(point_density_in_points_per_square_meter * square_meters_per_cell)
         # if points_per_cell == 0:
         #     points_per_cell = 1
@@ -328,7 +328,7 @@ def rotation_matrix_from_vectors(b: np.ndarray):
     c = np.dot(a, b)
     s = np.linalg.norm(v)
     kmat = np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
-    rotation_matrix = _IDENTITY_MATRIX + kmat + kmat.dot(kmat) * ((1 - c) / (s ** 2))
+    rotation_matrix = _IDENTITY_MATRIX + kmat + kmat.dot(kmat) * ((1 - c) / (s**2))
     return rotation_matrix
 
 

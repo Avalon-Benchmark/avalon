@@ -182,7 +182,7 @@ def create_descend_obstacle(
         cliff_edges = np.logical_and(cliff_edges, locations.island)
         cliff_movement_distance = scale_with_difficulty(difficulty, 1.0, 6.0)
         for i in range(2):
-            nearby = world.map.get_dist_sq_to(to_2d_point(new_locations.spawn)) < cliff_movement_distance ** 2
+            nearby = world.map.get_dist_sq_to(to_2d_point(new_locations.spawn)) < cliff_movement_distance**2
             cliff_edges = np.logical_and(cliff_edges, nearby)
             if np.any(cliff_edges):
                 cliff_indices = cast(Tuple[int, int], tuple(rand.choice(np.argwhere(cliff_edges))))

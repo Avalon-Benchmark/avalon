@@ -273,7 +273,7 @@ class Terrain:
 
 
 def normalize_v3(arr: np.ndarray) -> np.ndarray:
-    """ Normalize a numpy array of 3 component vectors shape=(n,3) """
+    """Normalize a numpy array of 3 component vectors shape=(n,3)"""
     lens = np.sqrt(arr[:, 0] ** 2 + arr[:, 1] ** 2 + arr[:, 2] ** 2)
     arr[:, 0] /= lens
     arr[:, 1] /= lens
@@ -376,7 +376,7 @@ class TerrainTriangulation:
     ):
         self.config = biome_map.config
         height_map = biome_map.map
-        points_per_meter = point_density_in_points_per_square_meter ** 0.5
+        points_per_meter = point_density_in_points_per_square_meter**0.5
         edge_region = height_map.create_edge_region(height_map.region, points_per_meter, rand)
         triangulation = _create_triangulation(
             rand,

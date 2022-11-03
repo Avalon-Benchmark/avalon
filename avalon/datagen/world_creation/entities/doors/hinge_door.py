@@ -134,7 +134,7 @@ class HingeDoor(Door):
 
         # We cap the handle width to ensure it doesn't prevent the door from opening inwards
         max_width = math.sqrt(
-            (door_width - leeway) ** 2 - handle_thickness ** 2
+            (door_width - leeway) ** 2 - handle_thickness**2
         )  # diagonal of handle can't exceed door width
         handle_width = min(max_width, handle_width)
         handle_size = np.array([handle_width, handle_height, handle_thickness])

@@ -309,7 +309,7 @@ class HouseLikeRoomBuilder(RoomBuilder):
 
     def build(self, story_footprint: np.ndarray, rand: np.random.Generator) -> List[Room]:
         world_length, world_width = story_footprint.shape
-        random_state = np.random.RandomState(seed=rand.integers(0, 2 ** 32 - 1))
+        random_state = np.random.RandomState(seed=rand.integers(0, 2**32 - 1))
 
         # Separate footprint into rectangles as "initial rooms"
         padded_footprint = story_footprint.copy()

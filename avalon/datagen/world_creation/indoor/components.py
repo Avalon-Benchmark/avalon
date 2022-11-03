@@ -171,7 +171,7 @@ class Ramp(StoryLink):
     def get_link_length(self, bottom_story: "Story", top_story: "Story") -> float:
         run = self.slope_run
         rise = bottom_story.outer_height + top_story.floor_negative_depth
-        return math.sqrt(run ** 2 + rise ** 2)
+        return math.sqrt(run**2 + rise**2)
 
     @property
     def slope_run(self) -> float:
@@ -206,7 +206,7 @@ class Ramp(StoryLink):
         slope_width = float(self.width)
         slope_run = float(self.slope_run)
         slope_rise = (bottom_story.outer_height - bottom_story_floor_positive_depth) + top_story_floor_depth
-        slope_length = math.sqrt(slope_run ** 2 + slope_rise ** 2)
+        slope_length = math.sqrt(slope_run**2 + slope_rise**2)
         slope_angle = math.atan(slope_rise / slope_run)
         slope_thickness = SLOPE_THICKNESS
 

@@ -121,7 +121,7 @@ Buffers = typing.Dict[str, typing.List[torch.Tensor]]
 
 
 def compute_baseline_loss(advantages):
-    return 0.5 * torch.sum(advantages ** 2)
+    return 0.5 * torch.sum(advantages**2)
 
 
 def compute_entropy_loss(logits):

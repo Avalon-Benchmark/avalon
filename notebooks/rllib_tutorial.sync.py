@@ -173,7 +173,7 @@ config = {
 
 # %%
 # Now let's run the training!
-ray.init(object_store_memory=4 * 10 ** 9)
+ray.init(object_store_memory=4 * 10**9)
 trainer = PPOTrainer(config)
 while True:
     result = trainer.train()

@@ -107,7 +107,7 @@ def create_avoid_obstacle(
         difficulty, task_config.safety_radius_easy, task_config.safety_radius_hard
     )
     spawn_dist_sq = world.map.get_dist_sq_to(to_2d_point(locations.spawn))
-    nearby = spawn_dist_sq < spawn_safety_radius ** 2
+    nearby = spawn_dist_sq < spawn_safety_radius**2
     is_detail_important_new = world.is_detail_important.copy()
     is_detail_important_new[nearby] = True
     world = attr.evolve(world, is_detail_important=is_detail_important_new)

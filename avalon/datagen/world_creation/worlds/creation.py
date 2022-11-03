@@ -269,7 +269,7 @@ def create_world_for_skill_scenario(
 
                 # also prevent things from being just way too close
                 if hard_min_distance > 0.0:
-                    sq_min_dist = hard_min_distance ** 2
+                    sq_min_dist = hard_min_distance**2
                     food_mask = np.logical_and(food_mask, world.map.get_dist_sq_to(spawn_point_2d) > sq_min_dist)
 
                 possible_food_points = np.stack([world.map.X, world.map.Y], axis=2)[food_mask]
