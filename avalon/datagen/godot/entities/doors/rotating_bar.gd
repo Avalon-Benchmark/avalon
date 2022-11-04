@@ -2,12 +2,13 @@ extends Entity
 
 class_name RotatingBar
 
-export var rotation_axis = "z"
-export var anchor_side = "left"
-export var proportion_open = 0.0
-export var unlatch_angle = 10.0
-const leeway_factor = 1
-var open: bool = false
+const LEEWAY_FACTOR := 1
+
+export var rotation_axis := "z"
+export var anchor_side := "left"
+export var proportion_open := 0.0
+export var unlatch_angle := 10.0
+export var open := false
 
 
 func _ready():
@@ -60,9 +61,9 @@ func _physics_process(_delta):
 
 	var unlatch_angle_exceeded
 	if anchor_side == "left":
-		unlatch_angle_exceeded = angle >= leeway_factor * unlatch_angle
+		unlatch_angle_exceeded = angle >= LEEWAY_FACTOR * unlatch_angle
 	else:
-		unlatch_angle_exceeded = angle <= 180 - (leeway_factor * unlatch_angle)
+		unlatch_angle_exceeded = angle <= 180 - (LEEWAY_FACTOR * unlatch_angle)
 
 	if not open and unlatch_angle_exceeded:
 		open = true

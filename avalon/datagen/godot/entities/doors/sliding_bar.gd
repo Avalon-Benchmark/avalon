@@ -2,11 +2,11 @@ extends Entity
 
 class_name SlidingBar
 
-export var sliding_axis = "x"
-export var proportion_open = 0.0
-export var proportion_to_unlock = 0.25
-var open: bool = false
-var size
+export var sliding_axis := "x"
+export var proportion_open := 0.0
+export var proportion_to_unlock := 0.25
+export var open := false
+export var size: int
 
 
 func _ready():

@@ -2,7 +2,7 @@ extends Door
 
 class_name SlidingDoor
 
-export var slide_axis = "x"
+export var slide_axis := "x"
 
 
 func _ready():

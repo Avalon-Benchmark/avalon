@@ -2,7 +2,7 @@ extends Door
 
 class_name HingeDoor
 
-export var swing_axis = "y"
+export var swing_axis := "y"
 
 
 func _ready():

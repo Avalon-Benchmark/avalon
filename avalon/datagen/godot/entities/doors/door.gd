@@ -3,7 +3,7 @@ extends Entity
 class_name Door
 
 export var is_latched: bool = true
-var locks: Dictionary = {}
+export var locks: Dictionary = {}
 
 
 func _ready():

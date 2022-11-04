@@ -3,7 +3,7 @@ extends DynamicEntity
 # Includes the body, the lever and latcing mechanism
 class_name DoorBody
 
-export var is_auto_latching: bool = false
+export var is_auto_latching := false
 
 
 func is_grabbable() -> bool:
