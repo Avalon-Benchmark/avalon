@@ -80,7 +80,7 @@ class DictObsActionWrapper(Wrapper[DictObservationType, DictActionType]):
 
     def observation(self, observation: Union[NDArray, DictObservationType]) -> DictObservationType:
         if self.wrapped_obs:
-            assert type(observation) == NDArray
+            assert isinstance(observation, NDArray)
             return {self.obs_key: observation}
         else:
             return observation
