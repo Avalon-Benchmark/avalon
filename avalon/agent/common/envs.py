@@ -101,6 +101,10 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         env = wrappers.OneHotActionWrapper(env)
         if env_params.elapsed_time_obs:
             env = wrappers.ElapsedTimeWrapper(env, max_steps)
+    elif env_params.suite == "builder":
+        env = env_params.task()
+        env = wrappers.DictObsActionWrapper(env, obs_key="obs")
+        env = wrappers.OneHotActionWrapper(env)
     elif env_params.suite == "atari":
         assert env_params.task is not None
         assert env_params.action_repeat == 4
