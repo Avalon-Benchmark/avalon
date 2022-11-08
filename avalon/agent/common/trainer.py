@@ -72,7 +72,6 @@ class Trainer(ABC, Generic[ParamsType]):
         self.env_step = 0
 
         self.get_spaces()
-        self.wandb_run = self.wandb_init()
         self.train_storage = self.create_train_storage()
         self.algorithm = self.create_model()
         self.train_rollout_manager = self.create_rollout_manager()
