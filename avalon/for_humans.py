@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Dict
 from typing import Final
 from typing import Iterable
-from typing import List
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -19,61 +18,35 @@ import avalon.install_godot_binary as binary
 from avalon.common.utils import AVALON_PACKAGE_DIR
 from avalon.contrib.utils import run_local_command
 from avalon.datagen.generate_worlds import generate_worlds
+from avalon.datagen.godot_env.interactive_godot_process import AVALON_GODOT_PROJECT_PATH
+from avalon.datagen.godot_env.interactive_godot_process import AVALON_HUMAN_WORLDS_PATH
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_EDITOR_PATH
-from avalon.datagen.godot_env.interactive_godot_process import GODOT_PROJECT_FILE_PATH
 from avalon.datagen.world_creation.constants import AvalonTask
+from avalon.datagen.world_creation.constants import AvalonTaskGroup
+from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
+from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
+from avalon.datagen.world_creation.world_generator import generate_world
+from avalon.datagen.world_creation.worlds.export import get_world_slug
 
 # Must be created with `adb shell mkdir -p /sdcard/Android/data/com.godotengine.datagen`
 MOCK_OCULUS_EXTERNAL_STORAGE: Final = "/sdcard/Android/data/com.godotengine.datagen/files"
 
-GODOT_SOURCE_PATH: Final = Path(AVALON_PACKAGE_DIR) / "datagen/godot"
-ANDROID_CONFIG_PATH: Final = GODOT_SOURCE_PATH / "config.json"
-GENERATED_WORLD_PATH: Final = GODOT_SOURCE_PATH / "worlds"
+GODOT_SOURCE_PATH: Final = Path(AVALON_GODOT_PROJECT_PATH)
+GODOT_PROJECT_FILE_PATH: Final = f"{AVALON_GODOT_PROJECT_PATH}/project.godot"
 OPENXR_PLUGIN_RELEASE: Final = "https://github.com/GodotVR/godot_openxr/releases/download/1.3.0/godot-openxr.zip"
 OPENXR_PLUGIN_PATH: Final = GODOT_SOURCE_PATH / "addons/godot-openxr"
 
 
-def _regenerate_avalon_words(
-    target_path: Path,
-    tasks: List[AvalonTask],
-    is_generated_as_practice: bool = True,
-    is_generating_for_human: bool = True,
-    start_seed: int = 10_000,
-    number_of_worlds_per_task: int = 10,
-    is_verbose: bool = False,
-):
-    # canonical release num_worlds and seed (50, 0)
-    # canonical practice num_worlds and seed (10, 10000)
-    return generate_worlds(
-        min_difficulty=0.0,
-        is_recreating=True,
-        num_workers=64,
-        base_output_path=target_path,
-        tasks=tasks,
-        num_worlds_per_task=number_of_worlds_per_task,
-        start_seed=start_seed,
-        is_practice=is_generated_as_practice,
-        is_generating_for_human=is_generating_for_human,
-        is_verbose=is_verbose,
-    )
-
-
-def _parse_tasks(task_list: Union[str, Sequence[str]]) -> Iterable[AvalonTask]:
-    mapping = {str(task.value).lower(): task for task in AvalonTask}
-    if isinstance(task_list, str):
-        task_list = task_list.split(",")
-    tasks = [t.strip().lower() for t in task_list]
-
-    if "all" in tasks:
-        print("Generating all tasks. This might take a bit!")
-        yield from [t for t in AvalonTask]
-        return
-
-    for task in tasks:
-        assert task in mapping, (
-            f"Invalid Avalon Task {task}. " f"Allowed options (case insensitive): {', '.join(mapping.keys())}"
+def _parse_task_groups(task_group_list: Union[str, Sequence[str]]) -> Iterable[AvalonTaskGroup]:
+    mapping = {str(task.value).lower(): task for task in AvalonTaskGroup}
+    if isinstance(task_group_list, str):
+        task_group_list = task_group_list.split(",")
+    for task_group in [t.strip().lower() for t in task_group_list]:
+        assert task_group in mapping, (
+            f"Invalid Avalon Task or Task Group {task_group}. "
+            f"Allowed options (case insensitive): {', '.join(mapping.keys())}"
         )
-        yield mapping[task.lower()]
+        yield mapping[task_group]
 
 
 def _rerun_this_command_with_env(env: Dict[str, str]) -> None:
@@ -96,55 +69,132 @@ def _edit_project_settings(replacements: Dict[str, str]):
 class VRHelperCLI:
     """CLI for human-centric usage of avalon (world generation, editor config, launching the editor)"""
 
-    def available_tasks(self):
-        """print available tasks for generation"""
-        print("Available Tasks:")
-        for task in AvalonTask:
-            print(f" * {task.name} ({task})")
+    def available_tasks(self, exclude_groups: bool = False):
+        """print available tasks and task groups for generation
 
-    def generate_worlds(
-        self,
-        tasks: Union[str, Sequence[str]],
-        start_seed: int = 10_000,
-        worlds_per_task: int = 10,
-        delete_existing_worlds: bool = False,
-        verbose: bool = False,
-    ) -> None:
-        """Regenerate canonical avalon worlds and save them to the internal `worlds` directory for inspection & playing by a human.
-
-        Examples:
-            generate_worlds all  --delete_existing_worlds
-            generate_worlds --tasks="eat,move,navigate"
-            generate_worlds EAT,SURVIVE --worlds_per_task=3
-
-        For a complete list of tasks see run `available_tasks`
-
-        :param tasks: List of avalon tasks to generate (case insensitive, comma delimited).
-        :param start_seed: Change the world generator random seed.
-        :param worlds_per_task: Number of worlds to generate for each task.
-        :param delete_existing_worlds: Delete all existing generated worlds before generating new ones.
-        :param verbose: Enable verbose logging in world generator.
+        :param no_groups: Suppress task group output
         """
+        task_group_lines = []
+        single_tasks = []
+        for task_group in AvalonTaskGroup:
+            tasks = get_all_tasks_for_task_groups([task_group])
+            if len(tasks) == 1 and tasks[0].name == task_group.name:
+                single_tasks.append(tasks[0].name)
+            else:
+                task_group_lines.append(f"  {task_group.name}: f{', '.join(task.name for task in tasks)}")
+        output_lines = [
+            "Available Tasks:",
+            f"  {', '.join(single_tasks)}\n",
+        ]
+        if not exclude_groups:
+            output_lines.extend(["Available Task Groups:", *task_group_lines])
+        print("\n".join(output_lines))
+
+    def _ensure_hashseed_is_set(self):
         hashseed_env = "PYTHONHASHSEED"
         if os.environ.get(hashseed_env, None) is None:
             print(f"Rerunning command with {hashseed_env}=0 so level generation is deterministic\n")
             return _rerun_this_command_with_env({hashseed_env: "0"})
 
-        avalon_tasks = list(_parse_tasks(tasks))
+    def generate_evaluation_worlds(
+        self,
+        tasks: Union[str, Sequence[str]],
+        for_practice: bool = False,
+        start_seed: int = 10_000,
+        worlds_per_task: int = 10,
+        min_difficulty: float = 0.0,
+        delete_existing_worlds: bool = False,
+        verbose: bool = False,
+    ) -> None:
+        """Generate evaluation or practice worlds and save them to the internal `worlds` directory for inspection & playing by a human.
+
+        Evaluation worlds will always ensure a special set of configurations are applied to guarantee a completeness of variety in certain tasks,
+        where as `--for_practice` will use more randomness in it's configuration more akin to that seen in training.
+
+        Note: to generate a single specific world identical to one seen in training, use `generate_single_world`.
+
+        Examples:
+            generate_evaluation_worlds easy,compositional --for_practice --delete_existing_worlds
+            generate_evaluation_worlds --tasks="eat,move,navigate"
+            generate_evaluation_worlds EAT,SURVIVE --worlds_per_task=3
+
+        For a complete list of tasks see run `available_tasks`
+
+        :param tasks: List of avalon tasks or task groups to generate (case insensitive, comma delimited).
+        "param for_practice: Disable special evaluation configuration and output levels accessible by the left-hand "Practice World" teleporter.
+        :param start_seed: Change the initial world generator random seed.
+        :param worlds_per_task: Number of worlds to generate for each task.
+        :param min_difficulty: Minimum difficulty with which to generate tasks.
+        :param delete_existing_worlds: Delete all existing generated worlds before generating new ones.
+        :param verbose: Enable verbose logging in world generator.
+        """
+        self._ensure_hashseed_is_set()
+
+        avalon_tasks = get_all_tasks_for_task_groups(list(_parse_task_groups(tasks)))
+        avalon_tasks = list(sorted(avalon_tasks, key=lambda g: g.name))
 
         if delete_existing_worlds:
-            shutil.rmtree(GENERATED_WORLD_PATH, ignore_errors=True)
+            shutil.rmtree(AVALON_HUMAN_WORLDS_PATH, ignore_errors=True)
 
-        _regenerate_avalon_words(
-            GENERATED_WORLD_PATH,
-            avalon_tasks,
+        generate_worlds(
+            is_recreating=True,
+            is_practice=for_practice,
+            is_generating_for_human=True,
+            num_workers=4,
+            base_output_path=Path(AVALON_HUMAN_WORLDS_PATH),
+            min_difficulty=min_difficulty,
+            tasks=avalon_tasks,
+            num_worlds_per_task=worlds_per_task,
             start_seed=start_seed,
-            number_of_worlds_per_task=worlds_per_task,
             is_verbose=verbose,
         )
 
+    def generate_single_world(
+        self,
+        task: str,
+        seed: int,
+        index: int,
+        difficulty: float,
+        delete_existing_worlds: bool = False,
+    ) -> None:
+        """Generate a single world and save it to the internal `worlds` directory as a practice world for inspection & playing by a human.
+
+        The output world will be identical to what would be seen in training, given the same configuration
+        (Note that index effects the world generator).
+
+        Examples:
+            generate_single_worlds EAT --seed=2 --index=100 --difficulty=0.5
+
+        For a complete list of tasks see run `available_tasks --exclude_groups`
+
+        :param task: Task to generate (groups are invalid here)
+        :param seed: World generator base random seed.
+        :param index: Index of world generated during training (effects world generation).
+        :param delete_existing_worlds: Delete all existing generated worlds before generating new ones.
+        """
+        self._ensure_hashseed_is_set()
+
+        avalon_tasks = [t for t in AvalonTask if t.name.lower() == task.lower()]
+        assert len(avalon_tasks) == 1, f"No such task {task}"
+        avalon_task = avalon_tasks[0]
+
+        if delete_existing_worlds:
+            shutil.rmtree(AVALON_HUMAN_WORLDS_PATH, ignore_errors=True)
+
+        slug = get_world_slug(avalon_task.name, seed=seed, index=index, difficulty=difficulty, is_practice=True)
+
+        generate_world(
+            GenerateAvalonWorldParams(
+                output=f"{AVALON_HUMAN_WORLDS_PATH}/{slug}",
+                task=avalon_task,
+                difficulty=difficulty,
+                seed=seed,
+                index=index,
+            )
+        )
+
     def print_godot_project_path(self):
-        print(Path(GODOT_PROJECT_FILE_PATH).parent)
+        print(GODOT_SOURCE_PATH)
 
     def setup_android_export_presets(
         self,
@@ -186,8 +236,7 @@ class VRHelperCLI:
             urlretrieve("https://mmap.monster/godot/templates/android_release.apk", release_template_apk_path)
 
         print("Configuring export_presets.cfg")
-        project_dir = Path(GODOT_PROJECT_FILE_PATH).parent
-        with open(project_dir / "export_presets.template.cfg", "r") as template_file:
+        with open(GODOT_SOURCE_PATH / "export_presets.template.cfg", "r") as template_file:
             template = template_file.read()
         replacements = {
             "/your/path/avalon.apk": export_apk_path,
@@ -201,7 +250,7 @@ class VRHelperCLI:
         for placeholder, value in replacements.items():
             template = template.replace(placeholder, value)
 
-        with open(project_dir / "export_presets.cfg", "w") as preset_file:
+        with open(GODOT_SOURCE_PATH / "export_presets.cfg", "w") as preset_file:
             preset_file.write(template)
         print("Android export configured. You will need to restart the editor to see changes.")
 

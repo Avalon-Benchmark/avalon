@@ -47,8 +47,11 @@ from avalon.datagen.world_creation.worlds.world import World
 from avalon.datagen.world_creation.worlds.world import get_spawn
 
 
-def get_world_slug(task_name: str, seed: float, difficulty: float, is_practice: bool = False) -> str:
-    slug = f"{task_name}__{seed}__{float_to_str(difficulty)}"
+def get_world_slug(
+    task_name: str, seed: float, difficulty: float, is_practice: bool = False, index: Optional[int] = None
+) -> str:
+    index_part = f"_{index}" if index is not None else ""
+    slug = f"{task_name}__{seed}{index_part}__{float_to_str(difficulty)}"
     if is_practice:
         return f"practice__{slug}"
     return slug

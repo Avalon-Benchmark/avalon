@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import List
 from typing import NamedTuple
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Union
 
@@ -27,6 +28,7 @@ from avalon.datagen.world_creation.tasks.hunt import ForceHunt
 from avalon.datagen.world_creation.tasks.hunt import ForceWeapons
 from avalon.datagen.world_creation.types import DebugVisualizationConfig
 from avalon.datagen.world_creation.world_generator import GENERATION_FUNCTION_BY_TASK
+from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 from avalon.datagen.world_creation.worlds.compositional import ForcedComposition
 from avalon.datagen.world_creation.worlds.export import get_world_slug
 
@@ -155,7 +157,7 @@ def generate_world(
 
 def generate_worlds(
     base_output_path: Path,
-    tasks: List[AvalonTask],
+    tasks: Sequence[AvalonTask],
     num_worlds_per_task: int,
     is_generating_for_human: bool,
     start_seed: int = 0,
@@ -193,54 +195,55 @@ def generate_worlds(
     start_time = time.time()
     results = []
 
+    params_to_generate: List[GenerateAvalonWorldParams] = []
+    current_seed = start_seed
+    for task in tasks:
+        difficulties = get_difficulties_for_task(task, is_practice, min_difficulty, num_worlds_per_task)
+        task_name = task.value.lower()
+        for i in range(num_worlds_per_task):
+            difficulty = difficulties[i]
+            world_id = get_world_slug(task_name, current_seed, difficulty, is_practice)
+            params_to_generate.append(
+                GenerateAvalonWorldParams(
+                    seed=current_seed,
+                    index=i,
+                    difficulty=difficulty,
+                    output=str(base_output_path / world_id),
+                    task=task,
+                )
+            )
+            current_seed += 1
+
     with Pool(processes=num_workers) as worker_pool:
         requests = []
-        curr_seed = start_seed
-        for task in tasks:
-            difficulties = get_difficulties_for_task(task, is_practice, min_difficulty, num_worlds_per_task)
-            for i in range(num_worlds_per_task):
-                difficulty = difficulties[i]
-                curr_seed += 1
-                seed = curr_seed
+        for params in params_to_generate:
+            world_id = params.output_path.name
+            if not is_recreating and params.output_path.exists():
+                continue
 
-                task_name = task.value.lower()
-                world_id = get_world_slug(task_name, seed, difficulty, is_practice)
+            args = (
+                base_output_path,
+                params.task,
+                params.difficulty,
+                params.seed,
+                world_id,
+                params.index,
+                is_practice,
+                debug_visualization_config,
+                is_generating_for_human,
+            )
 
-                output_path = base_output_path / world_id
+            if is_async:
+                request = worker_pool.apply_async(
+                    generate_world,
+                    args=args,
+                    callback=on_done,
+                    error_callback=on_error,
+                )
+                requests.append(request)
+            else:
+                results.append(generate_world(*args))
 
-                if not is_recreating and output_path.exists():
-                    continue
-
-                if is_async:
-                    request = worker_pool.apply_async(
-                        generate_world,
-                        args=(
-                            base_output_path,
-                            task,
-                            difficulty,
-                            seed,
-                            world_id,
-                            i,
-                            is_practice,
-                            debug_visualization_config,
-                            is_generating_for_human,
-                        ),
-                        callback=on_done,
-                        error_callback=on_error,
-                    )
-                    requests.append(request)
-                else:
-                    generate_world(
-                        base_output_path,
-                        task,
-                        difficulty,
-                        seed,
-                        world_id,
-                        i,
-                        is_practice,
-                        debug_visualization_config,
-                        is_generating_for_human,
-                    )
         for request in requests:
             request.wait()
             if request._success:  # type: ignore[attr-defined]

@@ -264,6 +264,7 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
             resolution=params.resolution,
         )
         with base_config.mutable_clone() as config:
+            config.recording_options.is_debugging_output_requested = params.is_debugging_godot
             if params.mode == "test" and params.is_video_logged:
                 config.player.is_displaying_debug_meshes = True
                 config.recording_options.is_adding_debugging_views = True
@@ -371,7 +372,6 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
 
     def _create_world_generator(self) -> Union[FixedWorldGenerator, LocalProcessWorldGenerator]:
         base_path = Path(self.params.level_output_base_path)
-        world_generator: Union[FixedWorldGenerator, LocalProcessWorldGenerator]
         if self.params.is_fixed_generator:
             difficulties = tuple(
                 np.linspace(
@@ -380,7 +380,7 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
                     self.params.num_fixed_worlds_per_task,
                 )
             )
-            world_generator = FixedWorldGenerator(
+            return FixedWorldGenerator(
                 base_path=base_path,
                 seed=self.params.seed,
                 difficulties=difficulties,
@@ -389,17 +389,14 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
                 num_generators=self.params.env_count,
                 load_levels_from_path=self.params.fixed_worlds_load_from_path,
             )
-        else:
-            world_generator = LocalProcessWorldGenerator(
-                base_path=base_path,
-                seed=self.params.seed,
-                min_difficulty=0,
-                start_difficulty=self.params.initial_difficulty,
-                task_groups=self.params.task_groups,
-                is_task_curriculum_used=self.params.is_task_curriculum_used,
-            )
-
-        return world_generator
+        return LocalProcessWorldGenerator(
+            base_path=base_path,
+            seed=self.params.seed,
+            min_difficulty=0,
+            start_difficulty=self.params.initial_difficulty,
+            task_groups=self.params.task_groups,
+            is_task_curriculum_used=self.params.is_task_curriculum_used,
+        )
 
     @property
     def curriculum_base_path(self) -> Path:

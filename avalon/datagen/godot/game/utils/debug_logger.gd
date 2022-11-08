@@ -38,12 +38,13 @@ func _get_file_path(dir_root: String, episode: int, file_name: String) -> String
 	)
 
 
-func open_debug_file(dir_root: String, episode: int) -> void:
+func open_debug_file(dir_root: String, episode: int, is_truncated_on_open: bool = true) -> void:
 	if current_debug_file and current_debug_file.is_open() == true:
 		current_debug_file.close()
 	var path = Tools.file_create(_get_file_path(dir_root, episode, "debug.json"))
 	current_debug_file = File.new()
-	var error = current_debug_file.open(path, File.READ_WRITE)
+	var mode = File.WRITE_READ if is_truncated_on_open else File.READ_WRITE
+	var error = current_debug_file.open(path, mode)
 	HARD.assert(error == OK, "IO error: %s for file at path %s" % [error, path])
 	if HARD.mode():
 		print("Logging debug output to %s" % path)

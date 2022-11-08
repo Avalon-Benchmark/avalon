@@ -46,9 +46,9 @@ You'll need:
 
 Avalon comes with a CLI tool for generating worlds for interactive use:
 ```sh
-# python -m avalon.for_humans generate_worlds --help # for all options
+# python -m avalon.for_humans generate_evaluation_worlds --help # for all options
 # python -m avalon.for_humans # to view all available commands
-python -m avalon.for_humans generate_worlds eat,hunt --worlds_per_task=10
+python -m avalon.for_humans generate_evaluation_worlds eat,hunt --worlds_per_task=10
 ```
 
 This will generate 20 worlds into the internal worlds directory so that they're visible in the editor.

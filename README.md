@@ -119,14 +119,17 @@ docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabili
 ## Tutorials
 
 Using Avalon in your own RL code:
-- [**Using Avalon via the OpenAI Gym interface**](./notebooks/gym_interface_example.sync.ipynb): an example of how to create random worlds, 
-take actions as an agent, and display the resulting observations.
-
-- [**Training a PPO Agent on Avalon using RLlib**](./notebooks/rllib_tutorial.sync.ipynb): an example of how to use Avalon with an external RL library/codebase.
+- [**Using Avalon via the OpenAI Gym interface**](./notebooks/gym_interface_example.sync.ipynb):
+  an example of how to create random worlds, take actions as an agent, and display the resulting observations.
+- [**Training a PPO Agent on Avalon using RLlib**](./notebooks/rllib_tutorial.sync.ipynb):
+  an example of how to use Avalon with an external RL library/codebase.
+- [**Inspecting Test Worlds**](./noebooks/inspecting_test_worlds.sync.ipynb):
+  Generate and view Avalon worlds using `env.debug_act` and the godot editor.
 
 
 Using our RL library:
-- [**Training PPO and Dreamer Agents using the Avalon RL library**](./docs/avalon_baselines.md): train RL agents using our own fast, tuned implementations!
+- [**Training PPO and Dreamer Agents using the Avalon RL library**](./docs/avalon_baselines.md):
+  train RL agents using our own fast, tuned implementations!
 - [**Reproducing the RL results from our paper**](./docs/avalon_baselines.md#reproducing-our-paper-results)
 
 

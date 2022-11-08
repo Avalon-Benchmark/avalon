@@ -36,12 +36,14 @@ GODOT_BINARY_PATH: Final = os.environ.get(GODOT_BINARY_PATH_ENV_FLAG, f"{AVALON_
 GODOT_EDITOR_PATH_ENV_FLAG: Final = "GODOT_EDITOR_PATH"
 GODOT_EDITOR_PATH: Final = os.environ.get("GODOT_EDITOR_PATH", f"{GODOT_BINARY_PATH}_editor")
 
-GODOT_ERROR_LOG_PATH = f"{FILESYSTEM_ROOT}/godot"
+GODOT_ERROR_LOG_PATH: Final = f"{FILESYSTEM_ROOT}/godot"
 
-DATAGEN_SCRIPT_PATH = f"{AVALON_PACKAGE_DIR}/datagen/godot/datagen.sh"
-GODOT_PROJECT_FILE_PATH = f"{AVALON_PACKAGE_DIR}/datagen/godot/project.godot"
+AVALON_GODOT_PROJECT_PATH: Final = f"{AVALON_PACKAGE_DIR}/datagen/godot"
+AVALON_HUMAN_WORLDS_PATH: Final = f"{AVALON_GODOT_PROJECT_PATH}/worlds"
 
-_ACTION_REPLAY_FILENAME = "actions_replay.out"
+DATAGEN_SCRIPT_PATH: Final = f"{AVALON_GODOT_PROJECT_PATH}/datagen.sh"
+
+_ACTION_REPLAY_FILENAME: Final = "actions_replay.out"
 
 
 def _create_json_from_config(config: AbstractDataConfig) -> str:

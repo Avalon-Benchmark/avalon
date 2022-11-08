@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Dict
 from typing import Final
 from typing import List
+from typing import Sequence
 from typing import Set
 from typing import Tuple
 
@@ -242,7 +243,7 @@ METERS_OF_TREE_CLEARANCE_AROUND_LINE_OF_SIGHT = 5.0
 FLORA_REMOVAL_METERS = 1.0
 
 
-def get_all_tasks_for_task_groups(task_groups: Tuple[AvalonTaskGroup, ...]) -> List[AvalonTask]:
+def get_all_tasks_for_task_groups(task_groups: Sequence[AvalonTaskGroup]) -> List[AvalonTask]:
     result: Set[AvalonTask] = set()
     for task_group in task_groups:
         result.update(TASKS_BY_TASK_GROUP[task_group])

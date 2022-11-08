@@ -373,19 +373,19 @@ class FixedWorldGenerator(AvalonWorldGenerator):
             shutil.copytree(world_path, new_world_path)
             world_name_parts = new_world_path.name.split("__")
             task = AvalonTask(world_name_parts[0].upper())
-            world_index = int(world_name_parts[1])
-            if world_index in self.worlds:
+            world_index_and_seed = int(world_name_parts[1])
+            if world_index_and_seed in self.worlds:
                 raise Exception("Cannot have two worlds with the same index!")
             difficulty = float(world_name_parts[2].replace("_", "."))
 
             world = GeneratedAvalonWorldParams(
                 task=task,
                 difficulty=difficulty,
-                seed=world_index,
-                index=world_index,
+                seed=world_index_and_seed,
+                index=world_index_and_seed,
                 output=str(new_world_path),
             )
-            self.worlds[world_index] = world
+            self.worlds[world.index] = world
 
     def _init_by_generating(
         self,
