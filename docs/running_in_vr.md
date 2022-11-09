@@ -65,7 +65,14 @@ python -m  avalon.for_humans launch_editor
 ```
 
 In the bottom right file navigator, scroll to the bottom and select
-`worlds/practice__eat__10001__0/main.tscn`:
+`worlds/practice__eat__10000__0_5/main.tscn`:
+
+![select_in_editor](https://user-images.githubusercontent.com/8343799/200675015-be7ba518-f694-484e-b59f-26b34861b156.png)
+
+> **A word of caution:** The included editor is primarily intended for inspection and debugging.
+> Changing settings or editing files in the editor will effect avalon's runtime, and may degrade performance or otherwise break training.
+>
+> If you want to experiment with the code itself, prefer forking https://github.com/Avalon-Benchmark/avalon instead.
 
 ## Configuring the Editor
 

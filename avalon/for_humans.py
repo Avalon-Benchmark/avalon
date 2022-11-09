@@ -3,6 +3,8 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from textwrap import dedent
+from textwrap import indent
 from typing import Dict
 from typing import Final
 from typing import Iterable
@@ -325,7 +327,12 @@ class VRHelperCLI:
         print("OpenXR plugin successfully installed")
 
     def launch_editor(self, verbose: bool = False):
-        """Launch the godot editor installed with `python -m avalon.install_godot_binary`
+        """Launch the godot editor installed with `python -m avalon.install_godot_binary` pointing at the internal godot project
+
+        .. caution::
+           The included editor is primarily intended for inspection and debugging.
+           Changing settings or editing files in the editor will effect avalon's runtime, and may degrade performance or otherwise break training.
+           If you want to experiment with the code itself, prefer forking https://github.com/Avalon-Benchmark/avalon instead.
 
         :param verbose: Enable godot's verbose mode
         """
@@ -334,6 +341,9 @@ class VRHelperCLI:
             install = "python -m avalon.install_godot_binary"
             print(f"Warning: no file found in GODOT_EDITOR_PATH. Attempting to run `{install}`")
             run_local_command(install)
+
+        note = str(self.launch_editor.__doc__).split(".. caution::", 1)[1].split("\n\n")[0]
+        print(f"\nCAUTION:{indent(dedent(note), '  ')}\n")
 
         run_local_command(f"{GODOT_EDITOR_PATH} --editor{' --verbose' if verbose else ''} {GODOT_PROJECT_FILE_PATH}")
 
