@@ -19,7 +19,7 @@ from scipy.interpolate import RegularGridInterpolator
 from scipy.ndimage import convolve
 from scipy.ndimage import gaussian_filter
 from scipy.ndimage import generate_binary_structure
-from scipy.ndimage import measurements
+from scipy import ndimage
 from scipy.spatial import KDTree
 from skimage import morphology
 from skimage.morphology import flood_fill
@@ -156,7 +156,7 @@ class HeightMap:
         noise = rand.normal(scale, scale / 3.0, self.Z.shape)
         max_dist = mountain_radius * self.region.x.size
         dist_sq_to_mountain = self.get_dist_sq_to(np.array(mountain_center))
-        weight = 1.0 - (dist_sq_to_mountain / (max_dist**2))
+        weight = 1.0 - (dist_sq_to_mountain / (max_dist ** 2))
         self.Z = self.Z + np.clip(weight, 0.0, 1.0) * noise
 
     def get_land_mask(self) -> MapBoolNP:
@@ -633,9 +633,9 @@ class HeightMap:
             plot_value_grid(contracted_shore_mask, "contracted shore mask")
 
         # create connected beach components
-        lw, num = measurements.label(contracted_shore_mask, structure=generate_binary_structure(2, 2))
+        lw, num = ndimage.label(contracted_shore_mask, structure=generate_binary_structure(2, 2))
         # remove beach components that are too small
-        all_areas = measurements.sum(contracted_shore_mask, lw, index=np.arange(np.max(lw) + 1))
+        all_areas = ndimage.sum(contracted_shore_mask, lw, index=np.arange(np.max(lw) + 1))
         selected_area_ids = []
         min_cells_for_beach = biome_config.min_beach_length * self.cells_per_meter
         for area_id, area in enumerate(all_areas):
@@ -964,12 +964,12 @@ def get_border_points(data: np.ndarray, rand: np.random.Generator, reduction: fl
     kernel = np.array(
         [
             [0, 1, 0],
-            [16, 0, 16**2],
-            [0, 16**3, 0],
+            [16, 0, 16 ** 2],
+            [0, 16 ** 3, 0],
         ]
     )
     sums = convolve(data, kernel)
-    expected_sums = data + data * 16 + data * 16**2 + data * 16**3
+    expected_sums = data + data * 16 + data * 16 ** 2 + data * 16 ** 3
     border = sums != expected_sums
     # plot_value_grid(border, "BORDER")
     # make it go 3x faster and add a little noise...  we are bad people
