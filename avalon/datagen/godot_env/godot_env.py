@@ -330,7 +330,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
             if self.is_running:
                 self.close()
         except AttributeError:
-            # ignore errors from incomplete init
+            # Ignore errors from incomplete init
             pass
         except BrokenPipeError:
             # ignore errors from race conditions if the pipe was broken by a different close

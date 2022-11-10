@@ -1,6 +1,7 @@
 import json
 import os
 import subprocess
+import sys
 import tarfile
 import tempfile
 import uuid
@@ -57,11 +58,22 @@ ERROR_ALLOWLIST = (
     "No library set for this platform",
 )
 
+SYSTEM_FINALIZING_NO_GODOT_RERAISE = "Could not check Godot log during Python finalization"
+
 
 def _read_log(log_path: str) -> Tuple[List[str], bool]:
     """Read the godot log and check for errors"""
-    with open(log_path, "r") as infile:
-        log_lines = infile.readlines()
+    try:
+        with open(log_path, "r") as infile:
+            log_lines = infile.readlines()
+    except NameError:
+        # We check Godot logs during GodotEnv.__del__ and depending on the exact script + Python internals, it may get
+        # called during Python finalization, when open() and other builtins are not available. Can't use a custom
+        # error class since they can't be caught during finalization.
+        # This tweak can possibly be removed when we're running Python 3.10; ref: https://bugs.python.org/issue26789
+        # also see: https://pythondev.readthedocs.io/finalization.html
+        if sys.is_finalizing():
+            raise RuntimeError(SYSTEM_FINALIZING_NO_GODOT_RERAISE)
 
     is_disallowed_error_logged = False
     for l in log_lines:

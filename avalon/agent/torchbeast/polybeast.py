@@ -23,8 +23,8 @@ from uuid import uuid4
 import numpy as np
 import wandb
 
-from avalon.agent.evaluation import EVAL_TEMP_PATH
 from avalon.agent.godot.godot_gym import CURRICULUM_BASE_PATH
+from avalon.agent.random.evaluation import EVAL_TEMP_PATH
 from avalon.agent.torchbeast import polybeast_env
 from avalon.agent.torchbeast import polybeast_learner
 from avalon.agent.torchbeast.avalon_helpers import TORCHBEAST_ENV_LOGS_PATH

@@ -12,6 +12,7 @@ from torch import Tensor
 from torch.distributions import Independent
 from torch.distributions import Normal
 from torch.distributions import OneHotCategorical
+from torch.distributions import constraints
 from torch.distributions.transformed_distribution import TransformedDistribution
 from torch.nn import functional as F
 
@@ -247,6 +248,11 @@ class DictActionDist(torch.distributions.Distribution):
 
     def __getitem__(self, item: str):
         return self.dists[item]
+
+    @property
+    def arg_constraints(self) -> Dict[str, constraints.Constraint]:
+        """needed for repr() to work"""
+        return {}
 
 
 def visualize_action_dists(

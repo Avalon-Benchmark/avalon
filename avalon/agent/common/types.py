@@ -18,6 +18,7 @@ from torch import Tensor
 from avalon.agent.common.params import Params
 from avalon.agent.common.util import pack_1d_list
 from avalon.agent.common.util import pack_2d_list
+from avalon.agent.common.util import seed_and_run_deterministically_if_enabled
 
 Info = Dict[str, Any]
 Observation = Dict[str, Tensor]  # represents a single timestep. atoms can have any shape
@@ -103,6 +104,8 @@ class Algorithm(torch.nn.Module, ABC, Generic[ParamsType]):
     step_data_type: Type = StepData
 
     def __init__(self, params: ParamsType, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+        seed_and_run_deterministically_if_enabled()
+
         super().__init__()
         self.params = params
         self.obs_space = obs_space

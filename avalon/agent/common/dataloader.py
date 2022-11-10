@@ -62,7 +62,7 @@ class ReplayDataset(IterableDataset):
     def load_into_cache(self) -> None:
         """Update the cache to match the state of the disk folder."""
         global WORKER_ID
-        disk_filenames = [f.name for f in pathlib.Path(self.storage_dir).iterdir() if f.is_file()]
+        disk_filenames = [f.name for f in sorted(pathlib.Path(self.storage_dir).iterdir()) if f.is_file()]
         # Shuffle so we're not loading a biased part of the dataset first
         random.shuffle(disk_filenames)
         loaded = 0

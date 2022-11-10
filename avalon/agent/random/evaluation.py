@@ -33,7 +33,10 @@ class RandomActionDistribution:
         self.discrete_dist = torch.distributions.Bernoulli(logits=torch.tensor(discrete_logits))
 
     def sample(self):
-        return {"real": self.real_dist.sample(), "discrete": self.discrete_dist.sample()}
+        return {
+            "real": self.real_dist.sample().cpu().detach().numpy(),
+            "discrete": self.discrete_dist.sample().cpu().detach().numpy(),
+        }
 
 
 @torch.no_grad()

@@ -1,6 +1,8 @@
+import os
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 from typing import Type
 from typing import Union
 
@@ -11,6 +13,7 @@ from numpy.typing import NDArray
 from torch import Tensor
 
 from avalon.agent.common import wandb_lib
+from avalon.contrib.utils import make_deterministic
 
 
 def get_checkpoint_file(protocol_path: str) -> str:
@@ -82,7 +85,7 @@ def pack_2d_list(batch: List[List], out_cls: Type):
     return out_cls(**out)
 
 
-def postprocess_uint8_to_float(data: Dict[str, torch.Tensor], observation_prefix: str = ""):
+def postprocess_uint8_to_float(data: Dict[str, torch.Tensor], observation_prefix: str = "") -> Dict[str, torch.Tensor]:
     """Convert uint8 (0,255) to float (-.5, .5) in a dictionary of rollout data.
 
     We use this to keep images as uint8 in storage + transfer.
@@ -137,3 +140,21 @@ def explained_variance(y_pred: ArrayType, y_true: ArrayType) -> float:
             return np.nan if var_y == 0 else 1 - tf.math.reduce_variance(y_true - y_pred).numpy() / var_y
         else:
             raise ValueError
+
+
+def hash_tensor(tensor: torch.Tensor) -> int:
+    return hash(tuple(tensor.cpu().contiguous().view(-1).tolist()))
+
+
+def hash_model(model: torch.nn.Module) -> int:
+    return hash(tuple(hash_tensor(p.data) for p in model.state_dict().values()))
+
+
+def get_avalon_model_seed() -> Optional[int]:
+    seed = os.getenv("AVALON_MODEL_SEED")
+    return int(seed) if seed is not None else None
+
+
+def seed_and_run_deterministically_if_enabled() -> None:
+    if (seed := get_avalon_model_seed()) is not None:
+        make_deterministic(seed)

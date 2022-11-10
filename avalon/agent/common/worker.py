@@ -36,6 +36,7 @@ from avalon.agent.common.types import Observation
 from avalon.agent.common.types import StepData
 from avalon.agent.common.util import get_checkpoint_file
 from avalon.agent.common.util import postprocess_uint8_to_float
+from avalon.agent.common.util import seed_and_run_deterministically_if_enabled
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.common.error_utils import capture_exception
 
@@ -63,6 +64,8 @@ class AsyncRolloutManager:
         multiprocessing_context: BaseContext,
         train_rollout_dir: str,
     ):
+        seed_and_run_deterministically_if_enabled()
+
         self.params = params
         self.obs_space = obs_space
         self.action_space = action_space
@@ -98,9 +101,10 @@ class AsyncRolloutManager:
 
     def entrypoint(self, shutdown_event: multiprocessing.synchronize.Event, wandb_queue) -> None:  # type: ignore[no-untyped-def]
         warnings.filterwarnings("ignore", category=DeprecationWarning)
-
         torch.set_num_threads(1)
         signal.signal(signal.SIGINT, signal.default_int_handler)
+        seed_and_run_deterministically_if_enabled()
+
         params = attr.evolve(
             self.params,
             env_params=attr.evolve(

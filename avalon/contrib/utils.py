@@ -85,19 +85,23 @@ def is_notebook() -> bool:
 
 
 def set_all_seeds(seed: int):
-    # make determinisitc. was getting weird behavior
+    # make deterministic. was getting weird behavior
     torch.manual_seed(seed + 1)
     np.random.seed(seed + 2)
     random.seed(seed + 3)
 
 
 # if training multiple networks, may want to call this before training each!
-def make_deterministic(seed: int):
+def make_deterministic(seed: int, num_intraop_threads: int = 1):
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     set_all_seeds(seed)
-    # noinspection PyUnresolvedReferences
+    # ref: https://github.com/pytorch/pytorch/issues/88718
+    torch.set_num_threads(num_intraop_threads)
     torch.use_deterministic_algorithms(True)
     # noinspection PyUnresolvedReferences
     torch.backends.cudnn.benchmark = False
+    # noinspection PyUnresolvedReferences
+    torch.backends.cudnn.deterministic = True
 
 
 def run_local_command(

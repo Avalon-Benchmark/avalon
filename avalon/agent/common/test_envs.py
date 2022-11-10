@@ -26,7 +26,7 @@ class TestEnvironmentParams(EnvironmentParams):
 
 def get_env(task, params: TestEnvironmentParams):
     if task == "dummy":
-        return DummyEnv
+        return DummyEnv()
     elif task == "case1":
         # One long episode, returning reward 1 each step.
         # Use with discount = .75.

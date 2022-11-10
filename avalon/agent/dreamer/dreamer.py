@@ -35,6 +35,7 @@ from avalon.agent.common.types import LatentBatch
 from avalon.agent.common.types import ObservationBatch
 from avalon.agent.common.types import StateActionBatch
 from avalon.agent.common.util import explained_variance
+from avalon.agent.common.util import get_avalon_model_seed
 from avalon.agent.dreamer.models import RSSM
 from avalon.agent.dreamer.models import DenseDecoder
 from avalon.agent.dreamer.models import HybridDecoder
@@ -133,6 +134,8 @@ class Dreamer(Algorithm[DreamerParams]):
             prev_latent = self._dynamics.initial(batch_size, device)
             # Using random actions as an initial action probably isn't ideal, but zero isn't a valid 1-hot action..
             # so that seemed worse.
+            if (seed := get_avalon_model_seed()) is not None:
+                self.action_space.seed(seed)
             prev_action = self.action_space.sample()
             prev_action = map_structure(lambda x: torch.tensor(x, device=device), prev_action)
             prev_action = map_structure(lambda x: repeat(x, "... -> b ...", b=batch_size), prev_action)
