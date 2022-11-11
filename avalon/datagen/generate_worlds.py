@@ -3,12 +3,15 @@ import time
 import traceback
 from multiprocessing import Pool
 from pathlib import Path
+from typing import Dict
+from typing import Final
+from typing import Generic
 from typing import List
 from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
-from typing import Union
+from typing import TypeVar
 
 import attr
 import numpy as np
@@ -25,45 +28,87 @@ from avalon.datagen.world_creation.entities.food import FOODS
 from avalon.datagen.world_creation.tasks.eat import ForcedFood
 from avalon.datagen.world_creation.tasks.fight import ForceFight
 from avalon.datagen.world_creation.tasks.hunt import ForceHunt
-from avalon.datagen.world_creation.tasks.hunt import ForceWeapons
 from avalon.datagen.world_creation.types import DebugVisualizationConfig
 from avalon.datagen.world_creation.world_generator import GENERATION_FUNCTION_BY_TASK
 from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
-from avalon.datagen.world_creation.worlds.compositional import ForcedComposition
 from avalon.datagen.world_creation.worlds.export import get_world_slug
 
-_BASE_FIGHT_DATA = ForceFight(
-    weapon_value=2,
-    large_weapon_probability=0,
-    rock_probability=1.0,
-)
-_SPECIAL_FIGHT_PARAMS = [attr.evolve(_BASE_FIGHT_DATA, predators=(x, x, x)) for x in ALL_PREDATOR_CLASSES]
-_BASE_HUNT_DATA = ForceHunt(
-    weapon_value=2,
-    large_weapon_probability=0,
-    rock_probability=1.0,
-)
-_SPECIAL_HUNT_PARAMS = [attr.evolve(_BASE_HUNT_DATA, prey=x) for x in ALL_PREY_CLASSES]
-_SPECIAL_FOOD_PARAMS = [ForcedFood(food=x.__class__) for x in FOODS]
+ForcedParams = TypeVar("ForcedParams")
+
+
+@attr.s(auto_attribs=True, collect_by_mro=True)
+class _ForceGeneratedWorldCompleteness(Generic[ForcedParams]):
+    """Ensures generated worlds include certain forced configurations to guarantee completeness."""
+
+    forced_params: List[ForcedParams]
+    difficulty: float
+
+    @property
+    def difficulties(self) -> List[float]:
+        return [self.difficulty] * len(self.forced_params)
+
+
 _DIFFICULT_WORLD_FRACTION = 0.2
 
 
+_SPECIAL_COMPLETENESS_CONFIGS: Final[Dict[AvalonTask, _ForceGeneratedWorldCompleteness]] = {
+    AvalonTask.FIGHT: _ForceGeneratedWorldCompleteness(
+        difficulty=1.0,
+        forced_params=[
+            ForceFight(
+                weapon_value=2,
+                large_weapon_probability=0,
+                rock_probability=1.0,
+                predators=(predator, predator, predator),
+            )
+            for predator in ALL_PREDATOR_CLASSES
+        ],
+    ),
+    AvalonTask.HUNT: _ForceGeneratedWorldCompleteness(
+        difficulty=1.0,
+        forced_params=[
+            ForceHunt(
+                weapon_value=2,
+                large_weapon_probability=0,
+                rock_probability=1.0,
+                prey=prey,
+            )
+            for prey in ALL_PREY_CLASSES
+        ],
+    ),
+    AvalonTask.EAT: _ForceGeneratedWorldCompleteness(
+        difficulty=0.5,
+        forced_params=[ForcedFood(food=x.__class__) for x in FOODS],
+    ),
+}
+
+
+def _resolve_forced_difficulties_for_completeness(task: AvalonTask, is_practice: bool) -> List[float]:
+    if is_practice or task not in _SPECIAL_COMPLETENESS_CONFIGS:
+        return []
+    return _SPECIAL_COMPLETENESS_CONFIGS[task].difficulties
+
+
+def _resolve_forced_kwargs_for_completeness(task: AvalonTask, is_practice: bool, task_index: int) -> dict:
+    if is_practice or task not in _SPECIAL_COMPLETENESS_CONFIGS:
+        return {}
+
+    forced_params_for_task = _SPECIAL_COMPLETENESS_CONFIGS[task].forced_params
+    if task_index < len(forced_params_for_task):
+        return {"_FORCED": forced_params_for_task[task_index]}
+
+    return {}
+
+
 def get_difficulties_for_task(task: AvalonTask, is_practice: bool, min_difficulty: float, num_worlds_per_task: int):
-    forced_worlds = []
-    if not is_practice:
-        if task == AvalonTask.FIGHT:
-            forced_worlds = [1.0 for x in range(len(_SPECIAL_FIGHT_PARAMS))]
-        if task == AvalonTask.HUNT:
-            forced_worlds = [1.0 for x in range(len(_SPECIAL_HUNT_PARAMS))]
-        if task == AvalonTask.EAT:
-            forced_worlds = [0.5 for x in range(len(_SPECIAL_FOOD_PARAMS))]
-    remaining_world_count = num_worlds_per_task - len(forced_worlds)
+    forced_difficulties_for_completeness = _resolve_forced_difficulties_for_completeness(task, is_practice)
+    remaining_world_count = num_worlds_per_task - len(forced_difficulties_for_completeness)
     if remaining_world_count <= 0:
-        return forced_worlds[:num_worlds_per_task]
+        return forced_difficulties_for_completeness[:num_worlds_per_task]
     difficult_world_count = round(remaining_world_count * _DIFFICULT_WORLD_FRACTION)
     remaining_world_count -= difficult_world_count
     return (
-        forced_worlds
+        forced_difficulties_for_completeness
         + [round(x.item(), 2) for x in np.linspace(min_difficulty, 1.0, remaining_world_count)]
         + difficult_world_count * [1.0]
     )
@@ -79,7 +124,7 @@ class GeneratedWorld(NamedTuple):
     was_successful: bool
 
 
-def generate_world(
+def _generate_world(
     base_output_path: Path,
     task: AvalonTask,
     difficulty: float,
@@ -111,20 +156,7 @@ def generate_world(
 
     was_successful = True
 
-    force: Optional[Union[ForceWeapons, ForcedFood, ForcedComposition]] = None
-    if not is_practice:
-        if task == AvalonTask.FIGHT:
-            if task_idx < len(_SPECIAL_FIGHT_PARAMS):
-                force = _SPECIAL_FIGHT_PARAMS[task_idx]
-        if task == AvalonTask.HUNT:
-            if task_idx < len(_SPECIAL_HUNT_PARAMS):
-                force = _SPECIAL_HUNT_PARAMS[task_idx]
-        if task == AvalonTask.EAT:
-            if task_idx < len(_SPECIAL_FOOD_PARAMS):
-                force = _SPECIAL_FOOD_PARAMS[task_idx]
-        if task in (AvalonTask.GATHER, AvalonTask.FIND, AvalonTask.NAVIGATE):
-            force = ForcedComposition(is_enabled=True)
-    kwargs = dict(_FORCED=force) if force else {}
+    kwargs = _resolve_forced_kwargs_for_completeness(task, is_practice, task_idx)
 
     i = 0
     while i < max_retries:
@@ -155,7 +187,7 @@ def generate_world(
     )
 
 
-def generate_worlds(
+def generate_evaluation_worlds(
     base_output_path: Path,
     tasks: Sequence[AvalonTask],
     num_worlds_per_task: int,
@@ -165,11 +197,15 @@ def generate_worlds(
     min_difficulty: float = 0.0,
     is_recreating: bool = True,
     num_workers: int = 10,
-    is_using_constraints: bool = False,
     debug_visualization_config: Optional[DebugVisualizationConfig] = None,
     is_async: bool = True,
     is_verbose: bool = True,
 ) -> List[GeneratedWorld]:
+    """Generates worlds for evaluation and testing, either by models or humans.
+
+    Ensures a special set of configurations are applied to guarantee a completeness of variety in certain tasks (disabled by is_practice).
+    For instance, the generated set will include one of each food in EAT, a difficult FIGHT with each predator, etc.
+    """
     assert (
         os.getenv("PYTHONHASHSEED", None) is not None
     ), f"PYTHONHASHSEED must be set for worlds to be generated deterministically."
@@ -235,14 +271,14 @@ def generate_worlds(
 
             if is_async:
                 request = worker_pool.apply_async(
-                    generate_world,
+                    _generate_world,
                     args=args,
                     callback=on_done,
                     error_callback=on_error,
                 )
                 requests.append(request)
             else:
-                results.append(generate_world(*args))
+                results.append(_generate_world(*args))
 
         for request in requests:
             request.wait()

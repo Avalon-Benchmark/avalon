@@ -23,12 +23,12 @@ from avalon.datagen.env_helper import DebugLogLine
 from avalon.datagen.env_helper import display_video
 from avalon.datagen.env_helper import get_debug_json_logs
 from avalon.datagen.env_helper import get_null_vr_action
-from avalon.datagen.generate_worlds import generate_worlds
+from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.godot_env.actions import DebugCameraAction
 from avalon.datagen.godot_env.observations import AvalonObservation
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
-from avalon.datagen.world_creation.world_generator import FixedWorldGenerator
+from avalon.datagen.world_creation.world_generator import FixedWorldLoader
 from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
 
 TEST_WORLD_OUTPUT_PATH = Path("/tmp/test_worlds")
@@ -51,7 +51,7 @@ def tasks_from_protocol(protocol: TrainingProtocolChoice) -> List[AvalonTask]:
     return list(sorted(get_all_tasks_for_task_groups(groups), key=lambda g: g.name))
 
 
-generated_world_params = generate_worlds(
+generated_world_params = generate_evaluation_worlds(
     base_output_path=TEST_WORLD_OUTPUT_PATH,
     tasks=tasks_from_protocol(TRAINING_PROTOCOL),
     min_difficulty=min_difficulty,
@@ -81,7 +81,7 @@ hd_test_env = AvalonEnv(
         fixed_worlds_load_from_path=TEST_WORLD_OUTPUT_PATH,
     )
 )
-assert isinstance(hd_test_env.world_generator, FixedWorldGenerator)
+assert isinstance(hd_test_env.world_generator, FixedWorldLoader)
 
 # %% [markdown]
 # ### Inspecting worlds during training

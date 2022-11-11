@@ -20,11 +20,13 @@ from typing import Optional
 from typing import Protocol
 from typing import Tuple
 from typing import TypeVar
+from typing import Union
 from typing import cast
 
 import attr
 import numpy as np
 from godot_parser import Node as GDNode
+from typing_extensions import TypeGuard
 
 from avalon.common.errors import SwitchError
 from avalon.common.log_utils import logger
@@ -185,6 +187,12 @@ class AvalonWorldGenerator(WorldGenerator[GeneratedAvalonWorldParams]):
         return GeneratedAvalonWorldParams.from_world_path(world_path)
 
 
+def is_fixed_world_generator(
+    generator: AvalonWorldGenerator,
+) -> TypeGuard[Union["FixedWorldGenerator", "FixedWorldLoader"]]:
+    return isinstance(generator, (FixedWorldGenerator, FixedWorldLoader))
+
+
 class SingleTaskWorldGenerator(AvalonWorldGenerator):
     def __init__(self, base_path: Path, seed: int, difficulty: float, task: AvalonTask):
         super().__init__(base_path, seed)
@@ -337,30 +345,28 @@ def generate_fixed_worlds(
     return worlds
 
 
-class FixedWorldGenerator(AvalonWorldGenerator):
-    """
-    Generates num_unique_worlds and copies them to a working dir each time they are requested.
-    If `load_levels_from_path` is set, load worlds from this path instead of generating them.
-    """
+def _copy_world(world: GeneratedAvalonWorldParams, filename_suffix: str = "working") -> GeneratedAvalonWorldParams:
+    original_path = world.output_path
+    dest_path = original_path.with_stem(f"{original_path.stem}_{filename_suffix}")
+    shutil.copytree(str(original_path), str(dest_path), dirs_exist_ok=True)
+    return attr.evolve(world, output=str(dest_path))
+
+
+class FixedWorldLoader(AvalonWorldGenerator):
+    """Load worlds from the given path instead of generating them."""
 
     def __init__(
         self,
         base_path: Path,
-        seed: int,
-        difficulties: Tuple[float, ...],
-        task_groups: Tuple[AvalonTaskGroup, ...],
+        generated_worlds_path: Path,
         num_generators: int = 1,
         generator_index: int = 0,
-        load_levels_from_path: Optional[Path] = None,
     ):
-        super().__init__(base_path, seed)
-        self.base_path = base_path
-        if load_levels_from_path is None:
-            self._init_by_generating(difficulties, task_groups, num_generators, generator_index)
-        else:
-            self._init_by_loading(load_levels_from_path, num_generators, generator_index)
+        unused_placeholder_seed = -1
+        super().__init__(base_path, seed=unused_placeholder_seed)
+        self._init_by_loading(generated_worlds_path, num_generators, generator_index)
 
-    def _init_by_loading(self, load_path: Path, num_generators: int = 1, generator_index: int = 0):
+    def _init_by_loading(self, load_path: Path, num_generators: int, generator_index: int):
         world_paths = sorted(path for path in load_path.iterdir() if not str(path).startswith("practice"))
         selected_list_indices_and_paths = [
             (i, path) for i, path in enumerate(world_paths) if i % num_generators == generator_index
@@ -378,6 +384,8 @@ class FixedWorldGenerator(AvalonWorldGenerator):
                 raise Exception("Cannot have two worlds with the same index!")
             difficulty = float(world_name_parts[2].replace("_", "."))
 
+            # TODO should we use GeneratedAvalonWorldParams.from_world_path?
+            # Don't liket hat the seed is a lie
             world = GeneratedAvalonWorldParams(
                 task=task,
                 difficulty=difficulty,
@@ -387,12 +395,34 @@ class FixedWorldGenerator(AvalonWorldGenerator):
             )
             self.worlds[world.index] = world
 
-    def _init_by_generating(
+    def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedAvalonWorldParams]:
+        assert batch_size == 1, "Not supported for FixedWorldLoader"
+        if start_world_id is None:
+            start_world_id = DEFAULT_WORLD_ID
+        return [_copy_world(self.worlds[start_world_id])]
+
+
+class FixedWorldGenerator(AvalonWorldGenerator):
+    """Generates num_unique_worlds and copies them to a working dir each time they are requested."""
+
+    def __init__(
         self,
+        base_path: Path,
+        seed: int,
         difficulties: Tuple[float, ...],
         task_groups: Tuple[AvalonTaskGroup, ...],
         num_generators: int = 1,
         generator_index: int = 0,
+    ):
+        super().__init__(base_path, seed)
+        self._init_by_generating(difficulties, task_groups, num_generators, generator_index)
+
+    def _init_by_generating(
+        self,
+        difficulties: Tuple[float, ...],
+        task_groups: Tuple[AvalonTaskGroup, ...],
+        num_generators: int,
+        generator_index: int,
     ):
         world_params = get_world_params_for_task_groups(
             task_groups,
@@ -410,12 +440,7 @@ class FixedWorldGenerator(AvalonWorldGenerator):
         assert batch_size == 1, "Not supported for fixed world gen"
         if start_world_id is None:
             start_world_id = DEFAULT_WORLD_ID
-        world = self.worlds[start_world_id]
-        original_path = world.output_path
-        dest_path = original_path.with_stem(original_path.stem + "_working")
-        shutil.copytree(str(original_path), str(dest_path), dirs_exist_ok=True)
-        copied_world = attr.evolve(world, output=str(dest_path))
-        return [copied_world]
+        return [_copy_world(self.worlds[start_world_id])]
 
 
 def disable_sigint():

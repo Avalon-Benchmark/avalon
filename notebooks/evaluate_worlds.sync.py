@@ -10,7 +10,7 @@ from pathlib import Path
 from avalon.common.log_utils import enable_debug_logging
 from avalon.datagen.env_helper import display_video
 from avalon.datagen.env_helper import visualize_worlds_in_folder
-from avalon.datagen.generate_worlds import generate_worlds
+from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.types import DebugVisualizationConfig
 
@@ -51,7 +51,7 @@ if base_output_path.exists():
 base_output_path.mkdir(parents=True, exist_ok=True)
 
 # %%
-actual_worlds = generate_worlds(
+actual_worlds = generate_evaluation_worlds(
     base_output_path=base_output_path,
     tasks=tasks,
     num_worlds_per_task=NUM_WORLDS,

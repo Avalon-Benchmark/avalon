@@ -19,7 +19,7 @@ import fire
 import avalon.install_godot_binary as binary
 from avalon.common.utils import AVALON_PACKAGE_DIR
 from avalon.contrib.utils import run_local_command
-from avalon.datagen.generate_worlds import generate_worlds
+from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.godot_env.interactive_godot_process import AVALON_GODOT_PROJECT_PATH
 from avalon.datagen.godot_env.interactive_godot_process import AVALON_HUMAN_WORLDS_PATH
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_EDITOR_PATH
@@ -138,7 +138,7 @@ class VRHelperCLI:
         if delete_existing_worlds:
             shutil.rmtree(AVALON_HUMAN_WORLDS_PATH, ignore_errors=True)
 
-        generate_worlds(
+        generate_evaluation_worlds(
             is_recreating=True,
             is_practice=for_practice,
             is_generating_for_human=True,

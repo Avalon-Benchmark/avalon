@@ -13,7 +13,7 @@ from avalon.datagen.generate_apks import add_worlds_to_server
 from avalon.datagen.generate_apks import generate_apk
 from avalon.datagen.generate_apks import generate_apks
 from avalon.datagen.generate_apks import upload_apk_to_server
-from avalon.datagen.generate_worlds import generate_worlds
+from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.world_creation.constants import AvalonTask
 
 enable_debug_logging()
@@ -62,7 +62,7 @@ tasks = [
 ]
 
 # %%
-practice_worlds = generate_worlds(
+practice_worlds = generate_evaluation_worlds(
     base_output_path=worlds_path,
     tasks=tasks,
     num_worlds_per_task=10,
@@ -78,7 +78,7 @@ practice_worlds = generate_worlds(
 # %%
 
 if RELEASE_BUILD:
-    actual_worlds = generate_worlds(
+    actual_worlds = generate_evaluation_worlds(
         base_output_path=worlds_path,
         tasks=tasks,
         num_worlds_per_task=50,

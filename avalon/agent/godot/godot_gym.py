@@ -14,7 +14,6 @@ from typing import List
 from typing import Literal
 from typing import Optional
 from typing import Tuple
-from typing import Union
 
 import attr
 import gym
@@ -48,8 +47,10 @@ from avalon.datagen.world_creation.constants import get_all_tasks_for_task_group
 from avalon.datagen.world_creation.world_generator import AvalonWorldGenerator
 from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
 from avalon.datagen.world_creation.world_generator import FixedWorldGenerator
+from avalon.datagen.world_creation.world_generator import FixedWorldLoader
 from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
 from avalon.datagen.world_creation.world_generator import LocalProcessWorldGenerator
+from avalon.datagen.world_creation.world_generator import is_fixed_world_generator
 
 
 def create_base_benchmark_config(
@@ -358,6 +359,7 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
         world_id = None
         if self.params.is_fixed_generator:
             if len(self.eval_world_ids) == 0:
+                assert is_fixed_world_generator(self.world_generator)
                 self.eval_world_ids = sorted(self.world_generator.worlds.keys())
 
             world_id = self.eval_world_ids[self.current_world_id]
@@ -370,9 +372,16 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
         self.update_lame_observation(lame_observation)
         return lame_observation
 
-    def _create_world_generator(self) -> Union[FixedWorldGenerator, LocalProcessWorldGenerator]:
+    def _create_world_generator(self) -> AvalonWorldGenerator:
         base_path = Path(self.params.level_output_base_path)
         if self.params.is_fixed_generator:
+            if self.params.fixed_worlds_load_from_path:
+                return FixedWorldLoader(
+                    base_path=base_path,
+                    generator_index=self.params.env_index,
+                    num_generators=self.params.env_count,
+                    generated_worlds_path=self.params.fixed_worlds_load_from_path,
+                )
             difficulties = tuple(
                 np.linspace(
                     self.params.fixed_world_min_difficulty,
@@ -387,7 +396,6 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
                 task_groups=self.params.task_groups,
                 generator_index=self.params.env_index,
                 num_generators=self.params.env_count,
-                load_levels_from_path=self.params.fixed_worlds_load_from_path,
             )
         return LocalProcessWorldGenerator(
             base_path=base_path,
