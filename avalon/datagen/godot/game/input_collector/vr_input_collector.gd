@@ -1,9 +1,9 @@
-extends InputCollector
+extends PlayerInputCollector
 
 class_name VRInputCollector
 
 
-func scaled_relative_action_from_normalized_relative_action(normalized_action, player):
+func scaled_relative_action_from_normalized_relative_action(normalized_action: VRAction, player):
 	var scaled_action = VRAction.new()
 
 	scaled_action.is_left_hand_grasping = normalized_action.is_left_hand_grasping

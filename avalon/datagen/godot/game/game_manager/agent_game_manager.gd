@@ -26,10 +26,10 @@ func _init(_root: Node, _avalon_spec, _input_pipe_path: String, _output_pipe_pat
 	world_node.add_child(load(default_scene_path).instance())
 
 
-func should_try_to_spawn_player() -> bool:
+func is_safe_to_spawn_on_new_world() -> bool:
 	# need to apply one action before spawning so that nodes are in a reasonable place
 	return (
-		.should_try_to_spawn_player()
+		.is_safe_to_spawn_on_new_world()
 		and (
 			not player.is_human_playback_enabled
 			or player.is_human_playback_enabled and frame == 1
@@ -37,7 +37,7 @@ func should_try_to_spawn_player() -> bool:
 	)
 
 
-func spawn() -> void:
+func spawn_controlled_nodes() -> void:
 	if player.is_human_playback_enabled:
 		player.configure_nodes_for_playback(
 			input_collector.arvr_camera_transform,
@@ -50,7 +50,7 @@ func spawn() -> void:
 		# reset frame counter
 		frame = 0
 
-	.spawn()
+	.spawn_controlled_nodes()
 
 
 func _reply_with_observation():
@@ -116,11 +116,7 @@ func read_input_from_pipe() -> bool:
 				if is_debugging_output_requested():
 					debug_logger.current_debug_file.flush()
 				if camera_controller.debug_view == null:
-					var size = Vector2(
-						avalon_spec.recording_options.resolution_x,
-						avalon_spec.recording_options.resolution_y
-					)
-					camera_controller.add_debug_camera(size)
+					camera_controller.add_debug_camera()
 
 				var is_frame_advanced = camera_controller.debug_view.read_and_apply_action(data)
 				if not is_frame_advanced:

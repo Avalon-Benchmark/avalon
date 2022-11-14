@@ -418,7 +418,7 @@ class Scenario:
 
 
 def get_vr_action(
-    head_x: float = 0.0, head_z: float = 0.0, head_yaw: float = 0.0, head_pitch: float = 0.0
+    head_x: float = 0.0, head_z: float = 0.0, head_yaw: float = 0.0, head_pitch: float = 0.0, is_jumping: bool = False
 ) -> VRAction:
     return VRAction(
         head_x=head_x,
@@ -441,7 +441,7 @@ def get_vr_action(
         right_hand_yaw=0.0,
         right_hand_roll=0.0,
         is_right_hand_grasping=0.0,
-        is_jumping=0.0,
+        is_jumping=1.0 if is_jumping else 0.0,
     )
 
 

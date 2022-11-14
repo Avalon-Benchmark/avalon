@@ -1,4 +1,4 @@
-extends SpecBase
+extends ControlledNodeSpec
 
 class_name PlayerSpec
 
@@ -42,9 +42,10 @@ func get_scene_instance() -> Object:
 	return HARD.assert(false, "Must be overridden")
 
 
-func get_node() -> Object:
+func get_node() -> ControlledNode:
 	var player = get_scene_instance()
 	player.spec = self
+	player.spawn_point_name = spawn_point_name
 	# TODO: sigh ... this is very error prone how these get set
 	player.max_head_linear_speed = max_head_linear_speed
 	player.max_head_angular_speed = max_head_angular_speed

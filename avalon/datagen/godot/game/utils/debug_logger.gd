@@ -21,7 +21,7 @@ func _get_items_recursively(node: Node) -> Array:
 
 
 func _get_dynamic_item_snapshot() -> Array:
-	var dynamic_item_group = root.find_node("dynamic_tracker", true, false)
+	var dynamic_item_group = root.get_node_or_null(CONST.DYNAMIC_TRACKER_NODE_PATH)
 	var results = []
 	if dynamic_item_group:
 		results += _get_items_recursively(dynamic_item_group)

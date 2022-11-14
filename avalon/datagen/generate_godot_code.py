@@ -20,10 +20,15 @@ import itertools
 import re
 from pathlib import Path
 from typing import Dict
+from typing import Final
 from typing import Iterable
 from typing import List
 from typing import Set
 from typing import TypeVar
+
+COMMENTS: Final = {
+    "SimSpec": "TODO: should SimSpec still inherit from DataConfigImplementation?",
+}
 
 T = TypeVar("T")
 _BUILTIN_TYPE_NAMES = ("String", "bool", "int", "float", "Vector2", "Vector3")
@@ -110,13 +115,17 @@ class ParsedClass:
         attribute_lines = [x.get_line() for x in self.attributes]
         if len(attribute_lines) == 0:
             attribute_lines.append("    pass")
-        return [
+        lines = [
             f"@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)",
             f"class {self.name}({self.python_base}):",
             *attribute_lines,
             "",
             "",
         ]
+        comment = COMMENTS.get(self.name, None)
+        if comment is not None:
+            return [f"# {comment}", *lines]
+        return lines
 
     @property
     def python_base(self) -> str:
@@ -205,9 +214,10 @@ def get_header_lines() -> List[str]:
         "# GENERATED FILE",
         "# See generate_godot_code.py for details",
         "",
-        "import attr",
         "from typing import Final",
         "from typing import Optional",
+        "",
+        "import attr",
         "",
         "from avalon.datagen.godot_base_types import *",
         "",

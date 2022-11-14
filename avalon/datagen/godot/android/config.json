@@ -18,6 +18,7 @@
   },
   "player": {
     "$type": "VRHumanPlayerSpec",
+    "spawn_point_name": "SpawnPoint",
     "max_head_linear_speed": 0.3,
     "max_head_angular_speed": {
       "$type": "Vector3",

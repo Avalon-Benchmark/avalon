@@ -1,12 +1,15 @@
 import struct
 from typing import Any
+from typing import ClassVar
 from typing import Dict
+from typing import Generic
 from typing import Protocol
 from typing import Tuple
 from typing import Type
 from typing import TypeVar
 from typing import Union
 from typing import cast
+from typing import runtime_checkable
 
 import attr
 import gym
@@ -18,21 +21,27 @@ from avalon.common.errors import SwitchError
 from avalon.datagen.godot_base_types import Vector3
 
 
+@runtime_checkable
 class ActionProtocol(Protocol):
     @classmethod
     def to_gym_space(cls) -> spaces.Space:
         ...
 
     @classmethod
-    def from_input(cls: Type["ActionType"], input_vec: Dict[str, np.ndarray]) -> "ActionType":
+    def from_input(cls: Type["ActionType"], input_dict: Dict[str, np.ndarray]) -> "ActionType":
         ...
 
     def to_bytes(self) -> bytes:
         """Convert this action to bytes to be sent to godot"""
 
     @classmethod
+    def _from_bytes_with_remainder(cls: Type["ActionType"], action_bytes: bytes) -> Tuple["ActionType", bytes]:
+        """Parse this action from bytes from an action log, including unused bytes in the return"""
+
+    @classmethod
     def from_bytes(cls: Type["ActionType"], action_bytes: bytes) -> "ActionType":
         """Parse this action from bytes from an action log"""
+        return cls._from_bytes_with_remainder(action_bytes)[0]
 
     @classmethod
     def get_null_action(cls: Type["ActionType"]) -> "ActionType":
@@ -40,12 +49,14 @@ class ActionProtocol(Protocol):
 
 
 ActionType = TypeVar("ActionType", bound=ActionProtocol)
+ActionType2 = TypeVar("ActionType2", bound=ActionProtocol)
 
 
 class AttrsAction(ActionProtocol):
     @classmethod
     def to_gym_space(cls) -> spaces.Space:
         """Basic float space the same dimensions as this action.
+
 
         Override if any customization is necessary (i.e. discrete spaces)
         """
@@ -58,11 +69,11 @@ class AttrsAction(ActionProtocol):
         )
 
     @classmethod
-    def from_input(cls: Type["ActionType"], input_vec: Dict[str, np.ndarray]) -> "ActionType":
+    def from_input(cls: Type[ActionType], input_dict: Dict[str, np.ndarray]) -> ActionType:
         raise NotImplementedError
 
     @classmethod
-    def get_null_action(cls: Type["ActionType"]) -> "ActionType":
+    def get_null_action(cls: Type[ActionType]) -> ActionType:
         action_fields = [x for x in attr.fields(cls)]
         null_action_kwargs = {}
         for field in action_fields:
@@ -87,12 +98,12 @@ class AttrsAction(ActionProtocol):
         return _to_bytes(int, len(action_bytes)) + action_bytes
 
     @classmethod
-    def from_bytes(cls: Type["ActionType"], action_bytes: bytes) -> "ActionType":
+    def _from_bytes_with_remainder(cls: Type[ActionType], action_bytes: bytes) -> Tuple[ActionType, bytes]:
         fields: Dict[str, Any] = {}
         _size, remaining_bytes = _from_bytes(int, action_bytes)
         for field in attr.fields(cls):
             fields[field.name], remaining_bytes = _from_bytes(cast(Type, field.type), remaining_bytes)
-        return cls(**fields)
+        return cls(**fields), remaining_bytes
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
@@ -172,6 +183,91 @@ class MouseKeyboardAction(AttrsAction):
         input_vec = np.concatenate([clipped_real, input_dict["discrete"]], axis=-1)
 
         return cls(*tuple(x.item() for x in input_vec))
+
+
+@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
+class CombinedAction(ActionProtocol, Generic[ActionType, ActionType2]):
+
+    actions: Tuple[ActionType, ActionType2]
+
+    SPACE_DICT_PREFIX: ClassVar = "combined_action"
+
+    @classmethod
+    def get_action_types(
+        cls: "Type[CombinedAction[ActionType, ActionType2]]",
+    ) -> Tuple[Type[ActionType], Type[ActionType2]]:
+        "Get the action types, in order, to combine"
+        raise ValueError(f"Inheritors must implement get_action_types themselves")
+
+    @classmethod
+    def _get_action_types_downcast_to_satisfy_mypy(
+        cls: "Type[CombinedAction[ActionType, ActionType2]]",
+    ) -> Tuple[Type[ActionProtocol], Type[ActionProtocol]]:
+        # mypy can't tell tuple iterations should be unions :(
+        a, b = cls.get_action_types()
+        assert issubclass(a, ActionProtocol)
+        assert issubclass(b, ActionProtocol)
+        return (a, b)
+
+    @classmethod
+    def _prefixed_space_key(cls, key: str, index: int):
+        return f"{cls.SPACE_DICT_PREFIX}_{index}_{str}"
+
+    @classmethod
+    def to_gym_space(cls: "Type[CombinedAction[ActionType, ActionType2]]") -> spaces.Space:
+        action_types = cls._get_action_types_downcast_to_satisfy_mypy()
+        space = {}
+        for i, action_type in enumerate(action_types):
+            action_space = action_type.to_gym_space()
+            assert isinstance(
+                action_space, spaces.Dict
+            ), "to_gym_space support for CombinedActions not represented as dicts is not yet supported"
+            space.update({cls._prefixed_space_key(key, i): value for key, value in action_space.items()})
+
+        return spaces.Dict(space)
+
+    @classmethod
+    def from_input(
+        cls: "Type[CombinedAction[ActionType, ActionType2]]", input_dict: Dict[str, np.ndarray]
+    ) -> "CombinedAction[ActionType, ActionType2]":
+        action_types = cls._get_action_types_downcast_to_satisfy_mypy()
+        actions = []
+        for i, a_type in enumerate(action_types):
+            prefix = f"{cls.SPACE_DICT_PREFIX}_{i}_"
+            i_input_dict = {k[2:]: v for k, v in input_dict.items() if k.startswith(prefix)}
+            actions.append(a_type.from_input(i_input_dict))
+        return cls(cast(Tuple[ActionType, ActionType2], tuple(actions)))
+
+    @classmethod
+    def get_null_action(
+        cls: "Type[CombinedAction[ActionType, ActionType2]]",
+    ) -> "CombinedAction[ActionType, ActionType2]":
+        action_types = cls._get_action_types_downcast_to_satisfy_mypy()
+        null_actions = tuple(a_type.get_null_action() for a_type in action_types)
+        return cls(cast(Tuple[ActionType, ActionType2], null_actions))
+
+    def _just_field_bytes(self, action: ActionProtocol) -> bytes:
+        size, field_bytes = _from_bytes(int, action.to_bytes())
+        return field_bytes
+
+    def to_bytes(self) -> bytes:
+        # mypy can't tell tuple iterations should be unions
+        actions = (cast(ActionProtocol, a) for a in self.actions)
+        all_action_bytes = b"".join((self._just_field_bytes(a) for a in actions))
+        return _to_bytes(int, len(all_action_bytes)) + all_action_bytes
+
+    @classmethod
+    def _from_bytes_with_remainder(
+        cls: "Type[CombinedAction[ActionType, ActionType2]]", action_bytes: bytes
+    ) -> Tuple["CombinedAction[ActionType, ActionType2]", bytes]:
+        action_types = cls._get_action_types_downcast_to_satisfy_mypy()
+        remaining_bytes = action_bytes
+        actions = []
+        for a_type in action_types:
+            action, remaining_bytes = a_type._from_bytes_with_remainder(remaining_bytes)
+            actions.append(action)
+        final_actions = cast(Tuple[ActionType, ActionType2], tuple(actions))
+        return cls(final_actions), remaining_bytes
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True, slots=True)

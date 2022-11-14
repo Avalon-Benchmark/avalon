@@ -86,9 +86,9 @@ func get_primary_camera() -> TrackingCamera:
 	return cameras[0]
 
 
-func add_debug_camera(size: Vector2) -> void:
+func add_debug_camera() -> void:
 	debug_view = DebugCameraView.new()
-	debug_view.insert_as_overlay(self, root, size)
+	debug_view.insert_as_overlay(self, root, resolution)
 
 
 func remove_debug_camera() -> void:

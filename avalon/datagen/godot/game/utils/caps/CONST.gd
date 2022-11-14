@@ -38,3 +38,9 @@ const FAKE_TYPE_IMAGE = -1
 
 const SNAPSHOT_JSON := "snapshot_context.json"
 const SNAPSHOT_SUBPATH := "snapshots"
+
+const SCENE_ROOT_NODE_PATH := "/root/scene_root"
+const WORLD_NODE_PATH := SCENE_ROOT_NODE_PATH + "/world"
+
+const DYNAMIC_TRACKER_NODE_NAME := "dynamic_tracker"
+const DYNAMIC_TRACKER_NODE_PATH := WORLD_NODE_PATH + "/Avalon/dynamic_tracker"

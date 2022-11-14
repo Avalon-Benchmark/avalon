@@ -6,6 +6,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Protocol
+from typing import Set
 from typing import Tuple
 
 import attr
@@ -28,6 +29,7 @@ from avalon.datagen.world_creation.entities.animals import Prey
 from avalon.datagen.world_creation.entities.entity import Entity
 from avalon.datagen.world_creation.entities.food import Food
 from avalon.datagen.world_creation.entities.scenery import Scenery
+from avalon.datagen.world_creation.entities.spawn_point import PLAYER_SPAWN_POINT
 from avalon.datagen.world_creation.entities.spawn_point import SpawnPoint
 from avalon.datagen.world_creation.entities.tools.boulder import Boulder
 from avalon.datagen.world_creation.entities.tools.colored_sphere import ColoredSphere
@@ -161,6 +163,7 @@ def export_world_terrain(
 
     terrain_export_results = []
     spawn_point = None
+    spawn_point_names: Set[str] = set()
     for x_idx in range(0, x_tile_count):
         for z_idx in range(0, z_tile_count):
             region = Region(
@@ -207,10 +210,13 @@ def export_world_terrain(
                 )
             )
             spawn_items = [x for x in region_items if isinstance(x, SpawnPoint)]
-            if len(spawn_items) > 0:
-                assert spawn_point is None, "Should only be one spawn point"
-                spawn_point = only(spawn_items)
-                start_tile = fine_output_file
+            for spawn in spawn_items:
+                assert spawn.name not in spawn_point_names, f"SpawnPoints name {spawn.name} is duplicated"
+                spawn_point_names.add(spawn.name)
+                if spawn.name == PLAYER_SPAWN_POINT:
+                    assert spawn_point is None, "Should only be one player spawn point"
+                    spawn_point = spawn
+                    start_tile = fine_output_file
     assert start_tile is not None, "No tiles contained a spawn point--that's not good!"
 
     starting_terrain_tile_path = (

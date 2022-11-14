@@ -1,4 +1,3 @@
-"""Pulled in from the old ballworld/models folder."""
 from enum import Enum
 from typing import Callable
 from typing import Dict

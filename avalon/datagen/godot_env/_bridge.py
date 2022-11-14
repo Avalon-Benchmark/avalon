@@ -95,6 +95,9 @@ class _BridgeKillSwitch:
             return
         raise self._kill_error
 
+    def raise_any_logged_errors(self) -> None:
+        self._godot_process.raise_any_logged_godot_errors()
+
     def _kill_if_blocked(self):
         while True:
             time.sleep(self._check_period_seconds)
@@ -296,8 +299,10 @@ class GodotEnvBridge(Generic[ActionType]):
         try:
             return np.ndarray(shape=shape, dtype=dtype, buffer=byte_buffer)
         except TypeError as te:
+            self._kill_switch.raise_any_logged_errors()
             raise GodotError(
-                f"Invalid number of bytes for feature {feature_name}: got {len(byte_buffer)}, expected {read_size} of {dtype}"
+                f"Invalid number of bytes for feature {feature_name}: "
+                f"got {len(byte_buffer)}, expected {read_size} of {dtype}"
             ) from te
 
     def _read_features(self, selected_features: FeatureSpecDict) -> FeatureDataDict:

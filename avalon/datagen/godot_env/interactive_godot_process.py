@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import subprocess
 import sys
 import tarfile
@@ -94,12 +95,17 @@ def _raise_godot_error(
                 log_content = infile.read()
         except FileNotFoundError as e:
             log_content = str(e)
+
     if details != "":
         details = details + " "
+    else:
+        match = re.search(r"^ERROR: (.*)$", log_content, re.MULTILINE)
+        if match is not None:
+            details = match.group(1) + " "
 
-    error_message = f"Godot error: {details}\nLog: {log_path}\nArtifacts: {artifact_path}"
+    error_message = f"{details}\nLog: {log_path}\nArtifacts: {artifact_path}"
 
-    logger.error(error_message)
+    logger.error(f"Godot error: {error_message}")
     logger.error("Attempting to dump log file here...")
     logger.error(log_content)
 
@@ -326,7 +332,7 @@ class InteractiveGodotProcess:
             _kill_process_group(self.process)
 
         if raise_logged_errors:
-            self._raise_any_logged_godot_errors()
+            self.raise_any_logged_godot_errors()
 
         try:
             wait_until_true(self._poll_for_exit)
@@ -352,7 +358,7 @@ class InteractiveGodotProcess:
             details=self._error_code_repr(),
         )
 
-    def _raise_any_logged_godot_errors(self):
+    def raise_any_logged_godot_errors(self):
         lines, is_error_logged = _read_log(self.log_path)
         if is_error_logged:
             self._raise_error("\n".join(lines))
@@ -386,7 +392,7 @@ class InteractiveGodotProcess:
 
     def _poll_for_exit(self):
         assert self.process is not None, "Cannot call _poll_for_exit() before start()"
-        self._raise_any_logged_godot_errors()
+        self.raise_any_logged_godot_errors()
         self.process.poll()
         if self.process.returncode is None:
             return False

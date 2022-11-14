@@ -322,8 +322,7 @@ func _put_transform_in_stream(stream: StreamPeerBuffer, transform: Transform):
 	stream.put_double(transform.basis.z.z)
 
 
-func to_byte_array(player) -> PoolByteArray:
-	var stream = StreamPeerBuffer.new()
+func write_into_stream(stream: StreamPeerBuffer, player) -> void:
 	stream.put_double(player.human_height)
 	# save off the current ARVR tracked nodes
 	_put_transform_in_stream(stream, player.arvr_origin.transform)
@@ -338,4 +337,3 @@ func to_byte_array(player) -> PoolByteArray:
 	stream.put_double(is_left_hand_grab_pressed)
 	stream.put_double(is_right_hand_grab_pressed)
 	stream.put_double(is_jump_pressed)
-	return stream.data_array

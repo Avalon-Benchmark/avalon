@@ -39,6 +39,7 @@ from avalon.datagen.world_creation.constants import TASKS_BY_TASK_GROUP
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
+from avalon.datagen.world_creation.entities.spawn_point import PLAYER_SPAWN_POINT
 from avalon.datagen.world_creation.tasks.avoid import generate_avoid_task
 from avalon.datagen.world_creation.tasks.bridge import generate_bridge_task
 from avalon.datagen.world_creation.tasks.carry import generate_carry_task
@@ -142,9 +143,16 @@ class EmptyLevelGenerator(WorldGenerator[GeneratedWorldParams]):
     def __init__(self, base_path: Path, seed: int):
         super().__init__(base_path, seed)
         scene = GodotScene()
-        env = scene.add_sub_resource("Environment")
         with scene.use_tree() as tree:
-            tree.root = GDNode("WorldEnvironment", type="WorldEnvironment", properties=dict(environment=env.reference))
+            tree.root = GDNode("Avalon", type="Spatial")
+            tree.root.add_child(GDNode(PLAYER_SPAWN_POINT, type="Spatial"))
+            env = scene.add_sub_resource("Environment")
+            env_node = GDNode(
+                "WorldEnvironment",
+                type="WorldEnvironment",
+                properties=dict(environment=env.reference),
+            )
+            tree.root.add_child(env_node)
         scene.write(str(self.output_path.absolute() / "main.tscn"))
 
     def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedWorldParams]:

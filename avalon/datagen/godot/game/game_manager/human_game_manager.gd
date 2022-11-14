@@ -54,8 +54,7 @@ func _init(_root, _avalon_spec).(_root, _avalon_spec):
 			child.queue_free()
 		var scene: PackedScene = ResourceLoader.load(initial_scene_path)
 		world_node.add_child(scene.instance())
-		spawn_point = scene_root.find_node("SpawnPoint", true, false)
-		is_spawning_player = is_instance_valid(spawn_point)
+		is_spawn_on_new_world_pending = _is_current_world_playable()
 		_teleporter_on_scene_enter()
 	else:
 		_load_default_scene()
@@ -86,6 +85,14 @@ func _init(_root, _avalon_spec).(_root, _avalon_spec):
 		root.get_viewport().add_child(MouseKeyboardHelpPanel.new())
 
 
+func _is_current_world_playable() -> bool:
+	for _node in controlled_nodes:
+		var node: ControlledNode = _node
+		if node.get_spawn_point(root) == null:
+			return false
+	return true
+
+
 func is_teleporter_enabled() -> bool:
 	return avalon_spec.recording_options.is_teleporter_enabled
 
@@ -110,8 +117,8 @@ func apk_version() -> String:
 	return avalon_spec.recording_options.apk_version
 
 
-func spawn() -> void:
-	.spawn()
+func spawn_controlled_nodes() -> void:
+	.spawn_controlled_nodes()
 	frame = 0
 	set_time_and_seed()
 
@@ -256,14 +263,14 @@ func read_input_before_physics() -> void:
 	input_collector.read_input_before_physics()
 
 	if is_recording_enabled_for_world():
-		recorder.record_human_input(frame, input_collector.to_byte_array(player))
+		recorder.record_human_input(frame, input_collector.to_byte_array(controlled_nodes))
 
 
-func get_action() -> Dictionary:
-	var actions = .get_action()
-
+func apply_collected_action(delta: float) -> Array:
+	var actions = .apply_collected_actions(delta)
+	var action: PlayerAction = actions[0]
 	if is_recording_enabled_for_world():
-		recorder.record_action(frame, actions.normalized_action.to_byte_array())
+		recorder.record_action(frame, action.normalized.to_byte_array())
 
 	return actions
 

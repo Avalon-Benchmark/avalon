@@ -8,6 +8,7 @@ import attr
 
 from avalon.datagen.godot_base_types import *
 
+
 BRIDGE_LOG_SIGNAL: Final = "Establishing Bridge"
 READY_LOG_SIGNAL: Final = "GODATA!"
 FIXED_FPS: Final = 10
@@ -36,6 +37,10 @@ RIGHT_HAND: Final = "Right"
 FAKE_TYPE_IMAGE: Final = -1
 SNAPSHOT_JSON: Final = "snapshot_context.json"
 SNAPSHOT_SUBPATH: Final = "snapshots"
+SCENE_ROOT_NODE_PATH: Final = "/root/scene_root"
+WORLD_NODE_PATH: Final = SCENE_ROOT_NODE_PATH + "/world"
+DYNAMIC_TRACKER_NODE_NAME: Final = "dynamic_tracker"
+DYNAMIC_TRACKER_NODE_PATH: Final = WORLD_NODE_PATH + "/Avalon/dynamic_tracker"
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
@@ -44,7 +49,27 @@ class SpecBase(Serializable):
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class PlayerSpec(SpecBase):
+class ControlledNodeSpec(SpecBase):
+    spawn_point_name: str
+
+
+@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
+class RecordingOptionsSpec(SpecBase):
+    user_id: Optional[str]
+    apk_version: Optional[str]
+    recorder_host: Optional[str]
+    recorder_port: Optional[int]
+    is_teleporter_enabled: bool
+    resolution_x: int
+    resolution_y: int
+    is_recording_human_actions: bool
+    is_remote_recording_enabled: bool
+    is_adding_debugging_views: bool
+    is_debugging_output_requested: bool
+
+
+@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
+class PlayerSpec(ControlledNodeSpec):
     # m/s
     max_head_linear_speed: float
     # deg/s
@@ -79,21 +104,6 @@ class PlayerSpec(SpecBase):
     is_displaying_debug_meshes: bool
     is_human_playback_enabled: bool
     is_slowed_from_crouching: bool
-
-
-@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
-class RecordingOptionsSpec(SpecBase):
-    user_id: Optional[str]
-    apk_version: Optional[str]
-    recorder_host: Optional[str]
-    recorder_port: Optional[int]
-    is_teleporter_enabled: bool
-    resolution_x: int
-    resolution_y: int
-    is_recording_human_actions: bool
-    is_remote_recording_enabled: bool
-    is_adding_debugging_views: bool
-    is_debugging_output_requested: bool
 
 
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
@@ -138,3 +148,8 @@ class VRAgentPlayerSpec(AgentPlayerSpec):
 @attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
 class VRHumanPlayerSpec(HumanPlayerSpec):
     pass
+
+
+@attr.s(auto_attribs=True, hash=True, collect_by_mro=True)
+class CaregiverSimSpec(AvalonSimSpec):
+    caregiver: ControlledNodeSpec

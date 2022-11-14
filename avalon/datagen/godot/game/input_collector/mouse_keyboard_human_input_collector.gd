@@ -188,8 +188,7 @@ func read_input_before_physics() -> void:
 	is_wheel_down_just_released = Input.is_action_just_released("wheel_down")
 
 
-func to_byte_array(_player) -> PoolByteArray:
-	var stream = StreamPeerBuffer.new()
+func write_into_stream(stream: StreamPeerBuffer, _player) -> void:
 	stream.put_float(is_move_forward_pressed)
 	stream.put_float(is_move_backward_pressed)
 	stream.put_float(is_move_left_pressed)
@@ -203,4 +202,3 @@ func to_byte_array(_player) -> PoolByteArray:
 	stream.put_float(is_wheel_down_just_released)
 	stream.put_float(is_mouse_mode_toggled)
 	stream.put_float(is_active_hand_toggled)
-	return stream.data_array

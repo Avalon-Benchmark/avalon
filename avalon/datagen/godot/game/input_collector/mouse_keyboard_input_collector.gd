@@ -1,4 +1,4 @@
-extends InputCollector
+extends PlayerInputCollector
 
 class_name MouseKeyboardInputCollector
 

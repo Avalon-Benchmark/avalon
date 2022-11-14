@@ -28,25 +28,38 @@ static func _get_current_frame_snapshot_path(game_manager: GameManager) -> Strin
 	return "%s/ep_%s_frame_%s" % [world_snapshots_path, game_manager.episode, game_manager.frame]
 
 
-static func save_snapshot(game_manager: GameManager) -> String:
+static func _write_context_json(snapshot_path: String, game_manager: GameManager) -> void:
 	var current_world_path = game_manager.current_world_path
 	var episode = game_manager.episode
 	var frame = game_manager.frame
-	var snapshot_path = _get_current_frame_snapshot_path(game_manager)
+	var controlled_node_names = []
+	for node in game_manager.controlled_nodes:
+		controlled_node_names.append(node.name)
 	HARD.assert(OK == Directory.new().make_dir_recursive(snapshot_path))
 	Tools.write_json_to_path(
 		"%s/%s" % [snapshot_path, CONST.SNAPSHOT_JSON],
-		{"world_path": current_world_path, "episode_seed": episode, "frame": frame}
+		{
+			"world_path": current_world_path,
+			"episode_seed": episode,
+			"frame": frame,
+			"controlled_node_names": controlled_node_names
+		}
 	)
 	# TODO copy and reload debug_logger.current_debug_file
 
 	var path_details = "world_path=%s, snapshot_path=%s" % [current_world_path, snapshot_path]
 	print("Saving snapshot of episode %s frame %s (%s)" % [episode, frame, path_details])
 
-	var player = game_manager.player
-	snapshot_node(player, snapshot_path)
 
-	var dynamic_tracker = game_manager.root.find_node("dynamic_tracker", true, false)
+static func save_snapshot(game_manager: GameManager) -> String:
+	var snapshot_path = _get_current_frame_snapshot_path(game_manager)
+	_write_context_json(snapshot_path, game_manager)
+	# TODO copy and reload debug_logger.current_debug_file
+
+	for controlled_node in game_manager.controlled_nodes:
+		snapshot_node(controlled_node, snapshot_path)
+
+	var dynamic_tracker = game_manager.root.get_node(CONST.DYNAMIC_TRACKER_NODE_PATH)
 	for item in dynamic_tracker.get_children():
 		if item is Animal:
 			item.persist_behaviors()
@@ -60,17 +73,18 @@ static func get_snapshot_node_instance(snapshot_path: String, node_name: String)
 	return snapshot.instance()
 
 
-static func swap_node_with_snapshot(node: Node, snapshot_path: String) -> void:
+static func swap_node_with_snapshot(node: Node, snapshot_path: String) -> Node:
 	var instance = get_snapshot_node_instance(snapshot_path, node.name)
 	var parent = node.get_parent()
 	parent.remove_child(node)
 	node.queue_free()
 	parent.add_child(instance)
 	Tools.set_owner_of_subtree(instance, instance.get_children())
+	return instance
 
 
 static func load_snapshot(game_manager: GameManager, snapshot_path: String):
-	var snapshot_context = Tools.read_json_from_path("%s/snapshot_context.json" % snapshot_path)
+	var snapshot_context = Tools.read_json_from_path("%s/%s" % [snapshot_path, CONST.SNAPSHOT_JSON])
 	var is_snapshot_of_current_world = (
 		game_manager.current_world_path
 		== snapshot_context["world_path"]
@@ -95,12 +109,25 @@ static func load_snapshot(game_manager: GameManager, snapshot_path: String):
 	if not is_snapshot_of_current_world:
 		game_manager.swap_in_scene(load(current_world_path).instance())
 
-	swap_node_with_snapshot(game_manager.player, snapshot_path)
+	var controlled_names: Array = snapshot_context.get("controlled_node_names", ["player"])
+	HARD.assert(
+		len(game_manager.controlled_nodes) == len(controlled_names),
+		"Different number of configured and snapshotted controlled nodes"
+	)
+	game_manager.player = null
+	for i in len(game_manager.controlled_nodes):
+		var current: ControlledNode = game_manager.controlled_nodes[i]
+		HARD.assert(
+			controlled_names.has(current.name), "missing expected controlled node %s" % current.name
+		)
+		var new_node = swap_node_with_snapshot(current, snapshot_path)
+		game_manager.controlled_nodes[i] = new_node
+
 	game_manager.player = game_manager.scene_root.find_node("player", true, false)
+	HARD.assert(game_manager.player != null, "Failed to load player from snapshot")
 
-	var dynamic_tracker = game_manager.root.find_node("dynamic_tracker", true, false)
-	swap_node_with_snapshot(dynamic_tracker, snapshot_path)
+	var dynamic_tracker = game_manager.root.get_node(CONST.DYNAMIC_TRACKER_NODE_PATH)
+	var _new_node = swap_node_with_snapshot(dynamic_tracker, snapshot_path)
 
-	game_manager.spawn_point = game_manager.world_node.find_node("SpawnPoint", true, false)
 	game_manager.camera_controller.setup()
 	game_manager.observation_handler.reset()

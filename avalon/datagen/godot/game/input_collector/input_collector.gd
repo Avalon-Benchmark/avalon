@@ -7,12 +7,8 @@ func reset():
 	HARD.assert(false, "Not implemented")
 
 
-func to_normalized_relative_action(_player):
-	return HARD.assert(false, "Not implemented")
-
-
-func scaled_relative_action_from_normalized_relative_action(_normalized_action, _player):
-	return HARD.assert(false, "Not implemented")
+func get_action(_controlled_node):
+	HARD.assert(false, "Not implemented")
 
 
 func read_input_from_event(_event: InputEvent) -> void:
@@ -31,5 +27,11 @@ func read_input_from_data(_action: PoolRealArray) -> void:
 	HARD.assert(false, "Not implemented")
 
 
-func to_byte_array(_player) -> PoolByteArray:
-	return HARD.assert(false, "Not implemented")
+func write_into_stream(_stream: StreamPeerBuffer, _player) -> void:
+	HARD.assert(false, "Not implemented")
+
+
+func to_byte_array(player) -> PoolByteArray:
+	var stream = StreamPeerBuffer.new()
+	write_into_stream(stream, player)
+	return stream.data_array

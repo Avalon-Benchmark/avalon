@@ -1,4 +1,4 @@
-extends Node
+extends ControlledNode
 
 class_name Player
 
@@ -29,9 +29,9 @@ export var is_jumping := false
 export var _hit_points_gained_from_eating: float = 0.0
 export var _hit_points_lost_from_enemies: float = 0.0
 export var is_dead := false
-export var floor_y_vel_history := []
-export var falling_y_vel_history := []
-export var wall_grab_history := []
+export var floor_y_vel_history: Array
+export var falling_y_vel_history: Array
+export var wall_grab_history: Array
 # see `_get_fall_damage` for more explanation on what these constants are used for
 export var frames_after_taking_fall_damage := 0
 export var frames_after_reaching_fall_damage_speeds := 0
@@ -107,6 +107,7 @@ var PERF_ACTION_APPLY: bool = ProjectSettings.get_setting("avalon/action_apply")
 
 func _ready() -> void:
 	if not _is_state_initialized:
+		_reset_histories()
 		hit_points = starting_hit_points
 
 	validate_configuration()
@@ -231,8 +232,15 @@ func _get_eyes() -> Node:
 	return get_node("camera")
 
 
+func _reset_histories() -> void:
+	floor_y_vel_history = []
+	falling_y_vel_history = []
+	wall_grab_history = []
+
+
 func reset_on_new_world() -> void:
 	# reset any internal state when moving to a new world
+	_reset_histories()
 	hit_points = starting_hit_points
 	gravity_velocity = Vector3.ZERO
 	surface_normal = Vector3.UP
@@ -241,9 +249,6 @@ func reset_on_new_world() -> void:
 	_hit_points_gained_from_eating = 0.0
 	_hit_points_lost_from_enemies = 0.0
 	is_dead = false
-	floor_y_vel_history = []
-	falling_y_vel_history = []
-	wall_grab_history = []
 	frames_after_taking_fall_damage = 0
 	frames_after_reaching_fall_damage_speeds = 0
 
@@ -312,7 +317,12 @@ func set_spawn(spawn_transform: Transform):
 	set_current_observation()
 
 
-func apply_action(action: AvalonAction, delta: float):
+func apply_action(player_action: PlayerAction, delta: float):
+	if not player_action is PlayerAction:
+		HARD.stop("Player.apply_action expected PlayerAction but received %s" % player_action)
+
+	var action = player_action.scaled
+
 	if not PERF_ACTION_APPLY:
 		return
 	# head collision shape is actually part of your body -- make sure it get's moved so climbing will work

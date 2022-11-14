@@ -44,6 +44,7 @@ from avalon.datagen.world_creation.constants import TRAIN_TASK_GROUPS
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
+from avalon.datagen.world_creation.entities.spawn_point import PLAYER_SPAWN_POINT
 from avalon.datagen.world_creation.world_generator import AvalonWorldGenerator
 from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
 from avalon.datagen.world_creation.world_generator import FixedWorldGenerator
@@ -76,6 +77,7 @@ def create_base_benchmark_config(
             is_debugging_output_requested=False,
         ),
         player=VRAgentPlayerSpec(
+            spawn_point_name=PLAYER_SPAWN_POINT,
             max_head_linear_speed=0.3,
             max_head_angular_speed=Vector3(5.0, 10.0, 1.0),
             max_hand_linear_speed=1.0,
