@@ -484,8 +484,8 @@ class EnvironmentContainerProcess:
 
     def lazy_init_env(self) -> None:
         if self.env is None:
+            # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
             sentry_sdk.init(  # type: ignore[abstract]
-                dsn="https://198a62315b2c4c2a99cb8a5493224e2f@o568344.ingest.sentry.io/6453090",
                 # Set traces_sample_rate to 1.0 to capture 100%
                 # of transactions for performance monitoring.
                 # We recommend adjusting this value in production.

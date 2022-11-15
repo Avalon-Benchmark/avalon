@@ -83,8 +83,8 @@ def run_evaluation(worlds_path: Path, data_key: str, seed: int) -> None:
 
     s3_client = SimpleS3Client()
 
+    # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
     sentry_sdk.init(  # type: ignore
-        dsn="https://198a62315b2c4c2a99cb8a5493224e2f@o568344.ingest.sentry.io/6453090",
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
         # We recommend adjusting this value in production.

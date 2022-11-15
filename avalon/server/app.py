@@ -37,8 +37,8 @@ APK_DIR = Path(ENV_ROOT_PATH) / "apks" / API_VERSION
 APK_DIR.mkdir(parents=True, exist_ok=True)
 
 if IS_SENTRY_ENABLED:
+    # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
     sentry_sdk.init(
-        dsn="https://198a62315b2c4c2a99cb8a5493224e2f@o568344.ingest.sentry.io/6453090",
         integrations=[FlaskIntegration()],
         # Set traces_sample_rate to 1.0 to capture 100%
         # of transactions for performance monitoring.
