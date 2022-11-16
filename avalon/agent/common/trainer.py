@@ -203,9 +203,6 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
     def __init__(self, params: OffPolicyParams):
         self.train_rollout_dir = str(Path(params.data_dir) / "train" / str(uuid.uuid4()))
 
-        # Necessary to fix some bug: https://github.com/wandb/client/issues/1994
-        # Also necessary to get wandb to shut down properly?
-        wandb.require(experiment="service")
         wandb.setup()
 
         self.train_rollout_managers: list[AsyncRolloutManager] = []
