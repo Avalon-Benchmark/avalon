@@ -74,22 +74,22 @@ class AsyncRolloutManager:
         self.env_step_counter = env_step_counter
         self.shutdown_event = multiprocessing_context.Event()
         self.train_rollout_dir = train_rollout_dir
-        self.wandb_queue = multiprocessing_context.Queue()
+        self.tracking_queue = multiprocessing_context.Queue()
 
     def start(self) -> None:
         ps = self.multiprocessing_context.Process(
-            target=self.safe_entrypoint, args=(self.shutdown_event, self.wandb_queue), daemon=False
+            target=self.safe_entrypoint, args=(self.shutdown_event, self.tracking_queue), daemon=False
         )
         ps.start()
 
     def shutdown(self) -> None:
         self.shutdown_event.set()
 
-    def safe_entrypoint(self, shutdown_event: multiprocessing.synchronize.Event, wandb_queue) -> None:  # type: ignore[no-untyped-def]
+    def safe_entrypoint(self, shutdown_event: multiprocessing.synchronize.Event, tracking_queue) -> None:  # type: ignore[no-untyped-def]
         # We don't wrap this in a loop because it really shouldn't fail flakily.
         # This is just for debugging a fatal crash.
         try:
-            self.entrypoint(shutdown_event, wandb_queue)
+            self.entrypoint(shutdown_event, tracking_queue)
         except KeyboardInterrupt:
             pass
         except Exception as e:
@@ -99,7 +99,7 @@ class AsyncRolloutManager:
             # This basically just gets eaten
             raise
 
-    def entrypoint(self, shutdown_event: multiprocessing.synchronize.Event, wandb_queue) -> None:  # type: ignore[no-untyped-def]
+    def entrypoint(self, shutdown_event: multiprocessing.synchronize.Event, tracking_queue) -> None:  # type: ignore[no-untyped-def]
         warnings.filterwarnings("ignore", category=DeprecationWarning)
         torch.set_num_threads(1)
         signal.signal(signal.SIGINT, signal.default_int_handler)
@@ -116,7 +116,7 @@ class AsyncRolloutManager:
         rollout_device = torch.device(
             f"cuda:{self.params.inference_gpus[self.rollout_manager_id % len(self.params.inference_gpus)]}"
         )
-        storage = DiskStorage(self.params, rollout_dir=self.train_rollout_dir, wandb_queue=wandb_queue)
+        storage = DiskStorage(self.params, rollout_dir=self.train_rollout_dir, tracking_queue=tracking_queue)
         algorithm_cls = get_algorithm_cls(self.params)
         model = algorithm_cls(params, self.obs_space, self.action_space)
 
@@ -159,7 +159,7 @@ class AsyncRolloutManager:
                         f"player {self.rollout_manager_id}: env steps: {self.env_step_counter.value}, fps:{rollout_fps}"
                     )
                     self.env_step_counter.value += self.params.num_workers * self.params.rollout_steps
-                    wandb_queue.put(("scalar", "env_step", self.env_step_counter.value))
+                    tracking_queue.put(("scalar", "env_step", self.env_step_counter.value))
                 except KeyboardInterrupt:
                     player.shutdown()
                     storage.shutdown()

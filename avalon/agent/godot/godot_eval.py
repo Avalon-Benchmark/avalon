@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 from matplotlib.pyplot import bar
 from numpy import typing as npt
 
-from avalon.agent.common import wandb_lib
+from avalon.agent.common.experiment_tracking import ExperimentTracker
 from avalon.agent.common.params import Params
 from avalon.agent.common.storage import LambdaStorage
 from avalon.agent.common.storage import StorageMode
@@ -38,7 +38,10 @@ RESULT_TAG = "DATALOADER:0 TEST RESULTS"
 
 
 def log_rollout_stats_packed(
-    packed_rollouts: Dict[str, npt.NDArray], infos: Dict[int, List[Dict[str, npt.NDArray]]], i: int
+    packed_rollouts: Dict[str, npt.NDArray],
+    infos: Dict[int, List[Dict[str, npt.NDArray]]],
+    i: int,
+    tracker: ExperimentTracker,
 ) -> None:
     successes: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
     keys = ["success", "difficulty"]
@@ -50,11 +53,11 @@ def log_rollout_stats_packed(
     # Data is a dict (task) of dicts (keys) of lists
     for task, x in successes.items():
         for field, y in x.items():
-            wandb_lib.log_histogram(f"train/{task}/{field}", y, i, hist_freq=10)
-        wandb_lib.log_scalar(f"train/{task}/num_episodes", len(y), i)
+            tracker.log_histogram(f"train/{task}/{field}", y, i, hist_freq=10)
+        tracker.log_scalar(f"train/{task}/num_episodes", len(y), i)
 
 
-def log_rollout_stats(rollouts: List[List[StepData]], i: int) -> None:
+def log_rollout_stats(rollouts: List[List[StepData]], i: int, tracker: ExperimentTracker) -> None:
     """Log stats, when rollouts is a collection of episode fragments."""
     successes: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
     keys = ["success", "difficulty"]
@@ -67,8 +70,8 @@ def log_rollout_stats(rollouts: List[List[StepData]], i: int) -> None:
     # Data is a dict (task) of dicts (keys) of lists
     for task, x in successes.items():
         for field, y in x.items():
-            wandb_lib.log_histogram(f"train/{task}/{field}", y, i, hist_freq=10)
-        wandb_lib.log_scalar(f"train/{task}/num_episodes", len(y), i)
+            tracker.log_histogram(f"train/{task}/{field}", y, i, hist_freq=10)
+        tracker.log_scalar(f"train/{task}/num_episodes", len(y), i)
 
 
 Episode = List[StepData]
@@ -92,13 +95,17 @@ def get_episode_difficulty_bin(episode: Episode, difficulty_bin_size: float) -> 
 
 
 def log_video_by_difficulty(
-    episode: Episode, difficulty_bin: DifficultyBin, prefix: str = "test", infix: str = ""
+    episode: Episode,
+    difficulty_bin: DifficultyBin,
+    tracker: ExperimentTracker,
+    prefix: str = "test",
+    infix: str = "",
 ) -> None:
     if infix != "":
         infix += "/"
     difficulty_bin_name = get_difficulty_bin_name(difficulty_bin)
     video = torch.stack([step.observation["rgbd"] for step in episode])
-    wandb_lib.log_video(f"{prefix}/videos/{infix}{difficulty_bin_name}", video, step=None, normalize=True, freq=1)
+    tracker.log_video(f"{prefix}/videos/{infix}{difficulty_bin_name}", video, step=None, normalize=True, freq=1)
 
 
 def log_success_by_difficulty(
@@ -191,10 +198,13 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
         if log and is_first_episode_in_group:
             # Note: wandb.log is not thread safe, this might cause issues. But it's fast :)
             thread = Thread(
-                target=log_video_by_difficulty, args=(episode, difficulty_bin), kwargs={"infix": task}, daemon=True
+                target=log_video_by_difficulty,
+                args=(episode, difficulty_bin, tracker),
+                kwargs={"infix": task},
+                daemon=True,
             )
             thread.start()
-            # log_video_by_difficulty(episode, difficulty_bin, infix=task)
+            # log_video_by_difficulty(episode, difficulty_bin, tracker, infix=task)
 
         # Stuff for collecting scores
         world_scores[world_index] = episode[-1].info["score"]

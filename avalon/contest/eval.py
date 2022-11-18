@@ -20,8 +20,14 @@ from avalon.contest.contest_params import ContestAlgorithmParams
 class ContestAlgorithmWrapper(Algorithm):
     """Wraps a user-provided algorithm into our internal Algorithm class."""
 
-    def __init__(self, params: Params, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
-        super().__init__(params, observation_space, action_space)
+    def __init__(
+        self,
+        params: Params,
+        observation_space: gym.spaces.Dict,
+        action_space: gym.spaces.Dict,
+        tracker: ExperimentTracker,
+    ):
+        super().__init__(params, observation_space, action_space, tracker)
         self.contest_algorithm = load_algorithm()
 
     def rollout_step(

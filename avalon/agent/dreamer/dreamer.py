@@ -22,11 +22,11 @@ from torch.distributions import Normal
 from tree import flatten
 from tree import map_structure
 
-from avalon.agent.common import wandb_lib
 from avalon.agent.common.action_model import DictActionDist
 from avalon.agent.common.action_model import DictActionHead
 from avalon.agent.common.action_model import StraightThroughOneHotCategorical
 from avalon.agent.common.action_model import visualize_action_dists
+from avalon.agent.common.experiment_tracking import ExperimentTracker
 from avalon.agent.common.types import ActionBatch
 from avalon.agent.common.types import Algorithm
 from avalon.agent.common.types import AlgorithmInferenceExtraInfoBatch
@@ -46,8 +46,14 @@ from avalon.agent.dreamer.tools import pack_list_of_dicts
 
 
 class Dreamer(Algorithm[DreamerParams]):
-    def __init__(self, params: DreamerParams, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
-        super().__init__(params, obs_space, action_space)
+    def __init__(
+        self,
+        params: DreamerParams,
+        obs_space: gym.spaces.Dict,
+        action_space: gym.spaces.Dict,
+        tracker: ExperimentTracker,
+    ):
+        super().__init__(params, obs_space, action_space, tracker)
 
         self._encode = HybridEncoder(obs_space, mlp_hidden_dim=self.params.encoder_mlp_hidden_size)
         feature_size = self.params.deter_size + self.params.stoch_size
@@ -271,13 +277,13 @@ class Dreamer(Algorithm[DreamerParams]):
         # No great way to log those, i guess we would reshape and slice them out if we were being proper.
         for k, pred in obs_pred.items():
             target = next_obs[k]
-            wandb_lib.log_histogram(f"train/observations/{k}_pred", pred, step)
-            wandb_lib.log_histogram(f"train/observations/{k}_target", target, step)
+            self.tracker.log_histogram(f"train/observations/{k}_pred", pred, step)
+            self.tracker.log_histogram(f"train/observations/{k}_target", target, step)
             if step % self.params.log_freq_hist == 0:
                 # Log EVs of scalar observations
                 if len(target.shape) == 3 and target.shape[-1] == 1:
                     ev = explained_variance(pred, target)
-                    wandb_lib.log_scalar(f"train/observations/{k}_EV", ev, step, freq=1)
+                    self.tracker.log_scalar(f"train/observations/{k}_EV", ev, step, freq=1)
 
         reward_pred = self._reward(feat)
         # Note we mask out autoencoding of the terminal timestep.
@@ -301,25 +307,25 @@ class Dreamer(Algorithm[DreamerParams]):
             likelihoods["pcont"] = loss.mean()
             likelihoods["pcont"] *= self.params.pcont_loss_scale
 
-            wandb_lib.log_histogram("train/model/pcont/pred", pcont_pred.probs, step)
-            wandb_lib.log_histogram("train/model/pcont/target", pcont_target, step)
-            wandb_lib.log_scalar("train/model/pcont/loss_mean", -1 * likelihoods["pcont"], step)
+            self.tracker.log_histogram("train/model/pcont/pred", pcont_pred.probs, step)
+            self.tracker.log_histogram("train/model/pcont/target", pcont_target, step)
+            self.tracker.log_scalar("train/model/pcont/loss_mean", -1 * likelihoods["pcont"], step)
 
         reward_ev = explained_variance(reward_pred.mean, rewards.float())
-        wandb_lib.log_scalar("train/reward/ev", reward_ev, step)
-        wandb_lib.log_histogram("train/reward/target", rewards.float(), step)
-        wandb_lib.log_histogram("train/reward/pred", reward_pred.mean, step)
+        self.tracker.log_scalar("train/reward/ev", reward_ev, step)
+        self.tracker.log_histogram("train/reward/target", rewards.float(), step)
+        self.tracker.log_histogram("train/reward/pred", reward_pred.mean, step)
 
         prior_dist = self._dynamics.get_dist(prior)
         post_dist = self._dynamics.get_dist(post)
 
-        wandb_lib.log_histogram("train/kl/prior_mean", prior_dist.mean, step)
-        wandb_lib.log_histogram("train/kl/prior_std", prior_dist.stddev, step)
-        wandb_lib.log_histogram("train/kl/post_mean", prior_dist.mean, step)
-        wandb_lib.log_histogram("train/kl/post_std", prior_dist.stddev, step)
-        wandb_lib.log_histogram("train/kl/stoch", post["stoch"], step)
-        wandb_lib.log_histogram("train/kl/deter", post["deter"], step)
-        wandb_lib.log_histogram("train/kl/embed", embed, step)
+        self.tracker.log_histogram("train/kl/prior_mean", prior_dist.mean, step)
+        self.tracker.log_histogram("train/kl/prior_std", prior_dist.stddev, step)
+        self.tracker.log_histogram("train/kl/post_mean", prior_dist.mean, step)
+        self.tracker.log_histogram("train/kl/post_std", prior_dist.stddev, step)
+        self.tracker.log_histogram("train/kl/stoch", post["stoch"], step)
+        self.tracker.log_histogram("train/kl/deter", post["deter"], step)
+        self.tracker.log_histogram("train/kl/embed", embed, step)
 
         # Dreamerv1 approach
         # FWIW, the dreamerv1 approach works differently than the dreamerv2 approach with balance=.5,
@@ -328,29 +334,29 @@ class Dreamer(Algorithm[DreamerParams]):
         # div = torch.distributions.kl_divergence(post_dist, prior_dist).mean()
         # div_clipped = torch.maximum(div, torch.tensor(self._c.free_nats))
         # kl_loss = div_clipped
-        # wandb_lib.log_scalar("train/model/div", div, step)
+        # self.tracker.log_scalar("train/model/div", div, step)
 
         # Dreamerv2 approach.
         kl_loss, kl_value = self._dynamics.kl_loss(
             post, prior, balance=self.params.kl_balance, free=self.params.free_nats
         )
         assert len(kl_loss.shape) == 0
-        wandb_lib.log_scalar("train/model/div", kl_value.mean(), step)
+        self.tracker.log_scalar("train/model/div", kl_value.mean(), step)
 
         model_loss = self.params.kl_loss_scale * kl_loss - sum(likelihoods.values())
-        wandb_lib.log_scalar("train/model/kl_loss_mean", self.params.kl_loss_scale * kl_loss, step)
+        self.tracker.log_scalar("train/model/kl_loss_mean", self.params.kl_loss_scale * kl_loss, step)
 
         self._model_opt.zero_grad(set_to_none=True)
         model_loss.backward()
         model_norm = nn.utils.clip_grad_norm_(self._model_params, self.params.clip_grad_norm)
         self._model_opt.step()
 
-        wandb_lib.log_histogram("train/model/prior_ent", prior_dist.entropy(), step)
-        wandb_lib.log_histogram("train/model/post_ent", post_dist.entropy(), step)
+        self.tracker.log_histogram("train/model/prior_ent", prior_dist.entropy(), step)
+        self.tracker.log_histogram("train/model/post_ent", post_dist.entropy(), step)
         for name, logprob in likelihoods.items():
-            wandb_lib.log_scalar(f"train/model/{name}_loss_mean", -logprob.mean(), step)
-        wandb_lib.log_scalar("train/model/loss_mean", model_loss.mean(), step)
-        wandb_lib.log_scalar("train/model/grad_norm", model_norm.mean(), step)
+            self.tracker.log_scalar(f"train/model/{name}_loss_mean", -logprob.mean(), step)
+        self.tracker.log_scalar("train/model/loss_mean", model_loss.mean(), step)
+        self.tracker.log_scalar("train/model/grad_norm", model_norm.mean(), step)
 
         ## IMAGINE #############################
 
@@ -460,15 +466,15 @@ class Dreamer(Algorithm[DreamerParams]):
             actor_norm = nn.utils.clip_grad_norm_(self._actor.parameters(), self.params.clip_grad_norm)
             self._actor_opt.step()
 
-            wandb_lib.log_histogram("train/actor/loss", actor_loss, step)  # note this includes the entropy penalty
-            wandb_lib.log_scalar("train/actor/grad_norm", actor_norm.mean(), step)
-            wandb_lib.log_scalar("train/actor/entropy_loss_mean", -1 * actor_entropy_loss.mean(), step)
-            wandb_lib.log_histogram("train/actor/entropy", actor_entropy, step)
-            wandb_lib.log_histogram("train/actor/steps_imagined", seq["weight"].sum(dim=0), step)
-            wandb_lib.log_histogram("train/reward/imagined", reward[:-1], step)
+            self.tracker.log_histogram("train/actor/loss", actor_loss, step)  # note this includes the entropy penalty
+            self.tracker.log_scalar("train/actor/grad_norm", actor_norm.mean(), step)
+            self.tracker.log_scalar("train/actor/entropy_loss_mean", -1 * actor_entropy_loss.mean(), step)
+            self.tracker.log_histogram("train/actor/entropy", actor_entropy, step)
+            self.tracker.log_histogram("train/actor/steps_imagined", seq["weight"].sum(dim=0), step)
+            self.tracker.log_histogram("train/reward/imagined", reward[:-1], step)
 
             # Visualize actions
-            visualize_action_dists(self.action_space, policy, prefix="imagination_policy")
+            visualize_action_dists(self.action_space, policy, self.tracker, prefix="imagination_policy")
 
         ## VALUE #############################
         if self.params.value_lr > 0 and step > self.params.freeze_actor_steps:
@@ -492,22 +498,22 @@ class Dreamer(Algorithm[DreamerParams]):
                 self._value_lagged.load_state_dict(self._value_current.state_dict())
 
             value_ev = explained_variance(value_pred.mean * weight[:-1], value_target.float() * weight[:-1])
-            wandb_lib.log_scalar("train/value/ev", value_ev, step)
+            self.tracker.log_scalar("train/value/ev", value_ev, step)
             # TODO: these histograms of things that are soft-masked don't really making sense.
             # Without the mask, we're showing hists containing junk. But if we apply the mask,
             # the hist ends up with wrong values. Ideally we'd make a "weighted hist".
             # In the meantime, just consider they'll be containing junk unless the imag rollouts rarely contain ep ends.
-            wandb_lib.log_histogram("train/value/pred_slow", slow_value, step)
-            wandb_lib.log_histogram("train/value/pred", value_pred.mean, step)
-            wandb_lib.log_histogram("train/value/target", value_target, step)
+            self.tracker.log_histogram("train/value/pred_slow", slow_value, step)
+            self.tracker.log_histogram("train/value/pred", value_pred.mean, step)
+            self.tracker.log_histogram("train/value/target", value_target, step)
 
-            wandb_lib.log_scalar("train/value/grad_norm", value_norm.mean(), step)
-            wandb_lib.log_scalar("train/value/loss_mean", value_loss.mean(), step)
-            wandb_lib.log_histogram("train/value/weight", weight, step)
+            self.tracker.log_scalar("train/value/grad_norm", value_norm.mean(), step)
+            self.tracker.log_scalar("train/value/loss_mean", value_loss.mean(), step)
+            self.tracker.log_histogram("train/value/weight", weight, step)
 
         # if "rgbd" in next_obs and step % self.params.log_freq_media == 0:
         for k, v in next_obs.items():
-            if len(v.shape) == 5 and step % wandb_lib.MEDIA_FREQ == 0:  # b, t, c, h, w
+            if len(v.shape) == 5 and step % self.tracker.media_freq == 0:  # b, t, c, h, w
                 batch_size = 6
                 # Do an imagination rollout. Can we use the imagine_ahead logic instead of replicating here?
                 truth = next_obs[k][:batch_size, :, :3] + 0.5
@@ -524,7 +530,7 @@ class Dreamer(Algorithm[DreamerParams]):
                 model = torch.cat([recon[:, :5] + 0.5, openl + 0.5], 1)
                 error = (model - truth + 1) / 2
                 comparison = torch.cat([truth, model, error], 3)
-                wandb_lib.log_video("video/openl", comparison, step, freq=1, num_images_per_row=batch_size)
+                self.tracker.log_video("video/openl", comparison, step, freq=1, num_images_per_row=batch_size)
 
                 # similarity metrics
                 truth_np = truth.detach().cpu().numpy()
@@ -534,8 +540,8 @@ class Dreamer(Algorithm[DreamerParams]):
                 openl_ssim = calculate_framewise_ssim(truth_np[:, 5:] + 0.5, openl_np + 0.5)
                 recon_ssim_plot = make_ssim_plot(recon_ssim, "Reconstructed observation SSIM by frame across batches")
                 openl_ssim_plot = make_ssim_plot(openl_ssim, "Imagination rollout SSIM by frame across batches")
-                wandb.log({f"images/recon_ssim": wandb.Image(recon_ssim_plot)})
-                wandb.log({f"images/openl_ssim": wandb.Image(openl_ssim_plot)})
+                self.tracker.log_image("images/recon_ssim", recon_ssim_plot, step)
+                self.tracker.log_image("images/openl_ssim", openl_ssim_plot, step)
         return step + 1
 
 

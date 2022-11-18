@@ -21,8 +21,8 @@ def encode_video(
     video_format: str = "webm",
 ) -> str:
     """
-    This is a stripped down version of wandb_lib.log_video. Can pull in more options from there as needed,
-    like batching or normalization.
+    This is a stripped down version of experiment_tracking.ExperimentTracker.log_video.
+    Can pull in more options from there as needed, like batching or normalization.
     Keeping them separate so we don't need Torch here.
     Expects an array of shape (t c h w), in uint range (0, 255) or float range (0, 1).
     I think wandb.Video works with a batch of videos natively, too.

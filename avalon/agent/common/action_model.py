@@ -16,7 +16,7 @@ from torch.distributions import constraints
 from torch.distributions.transformed_distribution import TransformedDistribution
 from torch.nn import functional as F
 
-from avalon.agent.common import wandb_lib
+from avalon.agent.common import experiment_tracking
 from avalon.agent.common.params import ClippedNormalMode
 from avalon.agent.common.params import Params
 from avalon.agent.common.types import ActionBatch
@@ -258,6 +258,7 @@ class DictActionDist(torch.distributions.Distribution):
 def visualize_action_dists(
     action_space: gym.spaces.Dict,
     action_dist_dict: DictActionDist,
+    tracker: experiment_tracking.ExperimentTracker,
     prefix: str = "action_dists",
     freq: Optional[int] = None,
 ):
@@ -275,7 +276,7 @@ def visualize_action_dists(
             probs = probs.reshape(-1, probs.shape[-2], probs.shape[-1])
             for act_i in range(len(space.nvec)):
                 for cat_i in range(space.nvec[act_i]):
-                    wandb_lib.log_histogram(
+                    tracker.log_histogram(
                         f"{prefix}/{k}_{act_i}_{cat_i}", probs[:, act_i, cat_i], mean_freq=freq, hist_freq=freq
                     )
                     if space.nvec[act_i] == 2:
@@ -290,16 +291,20 @@ def visualize_action_dists(
                 assert isinstance(action_dist, (ClippedTruncatedNormal, NormalWithMode))
                 means = action_dist.mean
                 for dim in range(means.shape[-1]):
-                    wandb_lib.log_histogram(
+                    tracker.log_histogram(
                         f"{prefix}/{k}_{dim}_mean", means[..., dim], mean_freq=freq, hist_freq=freq
                     )
                 stds = action_dist.stddev
                 for dim in range(means.shape[-1]):
-                    wandb_lib.log_histogram(f"{prefix}/{k}_{dim}_std", stds[..., dim], mean_freq=freq, hist_freq=freq)
+                    tracker.log_histogram(f"{prefix}/{k}_{dim}_std", stds[..., dim], mean_freq=freq, hist_freq=freq)
 
 
 def visualize_actions(
-    action_space: gym.spaces.Dict, action_dict: dict[str, Tensor], prefix: str = "actions", freq: Optional[int] = None
+    action_space: gym.spaces.Dict,
+    action_dict: dict[str, Tensor],
+    tracker: experiment_tracking.ExperimentTracker,
+    prefix: str = "actions",
+    freq: Optional[int] = None,
 ):
     """Log a batch of actions to wandb (any batch shape is fine)."""
     for k, space in action_space.spaces.items():
@@ -311,7 +316,7 @@ def visualize_actions(
             for act_i in range(len(space.nvec)):
                 for cat_i in range(space.nvec[act_i]):
                     # Histograms don't make sense, we'll just log the % of actions where this category is selected
-                    wandb_lib.log_scalar(f"{prefix}/{k}_{act_i}_{cat_i}", action[:, act_i, cat_i].mean(), freq=freq)
+                    tracker.log_scalar(f"{prefix}/{k}_{act_i}_{cat_i}", action[:, act_i, cat_i].mean(), freq=freq)
                     if space.nvec[act_i] == 2:
                         # a binary space only needs one of the categories logged
                         break
@@ -319,6 +324,6 @@ def visualize_actions(
             assert len(space.shape) == 1
             # expect shape (batch_dims, num_actions)
             for act_i in range(space.shape[0]):
-                wandb_lib.log_histogram(
+                tracker.log_histogram(
                     f"{prefix}/{k}_{act_i}", action[:, act_i].float(), mean_freq=freq, hist_freq=freq
                 )

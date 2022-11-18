@@ -12,7 +12,6 @@ from einops import rearrange
 from torch import Tensor
 from tree import map_structure
 
-from avalon.agent.common import wandb_lib
 from avalon.agent.common.action_model import DictActionDist
 from avalon.agent.common.action_model import visualize_action_dists
 from avalon.agent.common.types import ActionBatch
@@ -22,6 +21,7 @@ from avalon.agent.common.types import AlgorithmInferenceExtraInfoBatch
 from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.types import ObservationBatch
 from avalon.agent.common.util import explained_variance
+from avalon.agent.common.experiment_tracking import ExperimentTracker
 from avalon.agent.common.worker import StepData
 from avalon.agent.ppo.gae import gae
 from avalon.agent.ppo.model import CNNBase
@@ -73,9 +73,9 @@ class PPOInferenceExtraInfoBatch(AlgorithmInferenceExtraInfoBatch):
 class PPO(Algorithm["PPOParams"]):
     step_data_type: Type = PPOStepData
 
-    def __init__(self, params: PPOParams, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+    def __init__(self, params: PPOParams, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict, tracker: ExperimentTracker):
         self.params = params
-        super().__init__(params, observation_space, action_space)
+        super().__init__(params, observation_space, action_space, tracker)
 
         self.model: PPOModel
         if params.model == "cnn":
@@ -126,8 +126,8 @@ class PPO(Algorithm["PPOParams"]):
 
         if self.params.entropy_mode == "max" and self.params.entropy_coef != 0:
             entropy_reward: Tensor = rollouts.policy_entropy * self.params.entropy_coef
-            wandb_lib.log_histogram("training/entropy_reward", entropy_reward, i)
-            wandb_lib.log_histogram("training/env_reward", rollouts.reward, i)
+            self.tracker.log_histogram("training/entropy_reward", entropy_reward, i)
+            self.tracker.log_histogram("training/env_reward", rollouts.reward, i)
             rollouts = attr.evolve(rollouts, reward=rollouts.reward + entropy_reward)
 
         with torch.no_grad():
@@ -161,9 +161,9 @@ class PPO(Algorithm["PPOParams"]):
 
         # Lots of logging!
         ev = explained_variance(rollouts.value.detach().flatten().cpu(), rewards_to_go.detach().flatten().cpu())
-        wandb_lib.log_scalar("training/rollout_value_ev", ev, i)
-        wandb_lib.log_histogram("training/raw_advantage", advantages, i)
-        wandb_lib.log_histogram("training/rewards", rollouts.reward, i)
+        self.tracker.log_scalar("training/rollout_value_ev", ev, i)
+        self.tracker.log_histogram("training/raw_advantage", advantages, i)
+        self.tracker.log_histogram("training/rewards", rollouts.reward, i)
 
         return i
 
@@ -210,22 +210,22 @@ class PPO(Algorithm["PPOParams"]):
         if self.params.entropy_mode == "regularized" and self.params.entropy_coef != 0:
             entropy_loss = -1 * self.params.entropy_coef * policy_entropy
             loss += entropy_loss
-            wandb_lib.log_scalar("loss/entropy_loss", entropy_loss, i)
+            self.tracker.log_scalar("loss/entropy_loss", entropy_loss, i)
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.params.clip_grad_norm)
         self.optim.step()
 
         # Lots of logging
         clip_fraction = torch.mean((torch.abs(prob_ratio - 1) > self.params.clip_range).float()).item()
-        wandb_lib.log_scalar("loss/clip_fraction", clip_fraction, i)
-        wandb_lib.log_histogram("loss/ppo_loss", -1 * torch.min(a, b), i)
-        wandb_lib.log_scalar("loss/value_loss", value_loss, i)
-        wandb_lib.log_scalar("loss/loss", loss, i)
-        wandb_lib.log_histogram("training/value_pred", values_new, i)
-        wandb_lib.log_histogram("training/advantage", advantages, i)
-        wandb_lib.log_histogram("training/value_target", batch.reward_to_go, i)
-        wandb_lib.log_histogram("training/prob_ratio", prob_ratio, i)
-        wandb_lib.log_scalar("policy/policy entropy", policy_entropy, i)
+        self.tracker.log_scalar("loss/clip_fraction", clip_fraction, i)
+        self.tracker.log_histogram("loss/ppo_loss", -1 * torch.min(a, b), i)
+        self.tracker.log_scalar("loss/value_loss", value_loss, i)
+        self.tracker.log_scalar("loss/loss", loss, i)
+        self.tracker.log_histogram("training/value_pred", values_new, i)
+        self.tracker.log_histogram("training/advantage", advantages, i)
+        self.tracker.log_histogram("training/value_target", batch.reward_to_go, i)
+        self.tracker.log_histogram("training/prob_ratio", prob_ratio, i)
+        self.tracker.log_scalar("policy/policy entropy", policy_entropy, i)
 
         # Log actions
-        visualize_action_dists(self.action_space, dist_new, prefix="train_policy")
+        visualize_action_dists(self.action_space, dist_new, self.tracker, prefix="train_policy")

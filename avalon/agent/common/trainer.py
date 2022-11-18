@@ -19,7 +19,6 @@ from loguru import logger
 from torch.utils.data import DataLoader
 from tree import map_structure
 
-from avalon.agent.common import wandb_lib
 from avalon.agent.common.action_model import visualize_actions
 from avalon.agent.common.dataloader import ReplayDataset
 from avalon.agent.common.dataloader import worker_init_fn
@@ -35,6 +34,7 @@ from avalon.agent.common.types import ParamsType
 from avalon.agent.common.util import get_checkpoint_file
 from avalon.agent.common.util import pack_1d_list
 from avalon.agent.common.util import postprocess_uint8_to_float
+from avalon.agent.common.experiment_tracking import ExperimentTracker
 from avalon.agent.common.worker import AsyncRolloutManager
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import OffPolicyParams
@@ -50,7 +50,7 @@ class Cleanable(Protocol):
 
 
 class Trainer(ABC, Generic[ParamsType]):
-    def __init__(self, params: ParamsType):
+    def __init__(self, params: ParamsType, tracker: Optional[ExperimentTracker]):
         # TODO: fix this properly
         import openturns
 
@@ -65,6 +65,9 @@ class Trainer(ABC, Generic[ParamsType]):
         # https://github.com/pytorch/pytorch/issues/80777
         torch.set_num_threads(1)
         self.params = params
+        self.tracker = tracker
+        if self.tracker is None:
+            self.tracker = self.construct_tracker()
         self.to_cleanup: List[Cleanable] = []
 
         self.start: Optional[float] = None
@@ -76,7 +79,6 @@ class Trainer(ABC, Generic[ParamsType]):
         self.algorithm = self.create_model()
         self.train_rollout_manager = self.create_rollout_manager()
         self.train_dataloader = self.create_dataloader()
-        self.wandb_run = self.wandb_init()
         self.algorithm = self.algorithm.to(self.params.train_device)
 
     def get_spaces(self):
@@ -89,20 +91,24 @@ class Trainer(ABC, Generic[ParamsType]):
     def create_train_storage(self) -> Optional[TrajectoryStorage]:
         return None
 
-    def wandb_init(self):
-        # This needs to happen after all other processes launch
-        run_name = self.params.env_params.suite if not self.params.name else self.params.name
-        run = wandb.init(
+    def construct_tracker(self):
+        run_name = (
+            self.params.env_params.suite if not self.params.name else self.params.name
+        )
+        wandb_run = wandb.init(
             name=run_name,
             project=self.params.project,
             config=attr.asdict(self.params),
             tags=self.params.tags,
             group=self.params.group,
         )
-        wandb_lib.SCALAR_FREQ = self.params.log_freq_scalar
-        wandb_lib.HIST_FREQ = self.params.log_freq_hist
-        wandb_lib.MEDIA_FREQ = self.params.log_freq_media
-        return run
+        tracker = ExperimentTracker(
+            Wandb(wandb_run),
+            scalar_freq=self.params.log_freq_scalar,
+            hist_freq=self.params.log_freq_hist,
+            media_freq=self.params.log_freq_media,
+        )
+        return tracker
 
     @abstractmethod
     def create_rollout_manager(self):
@@ -112,7 +118,12 @@ class Trainer(ABC, Generic[ParamsType]):
         algorithm_cls = get_algorithm_cls(self.params)
         assert self.params.observation_space is not None
         assert self.params.action_space is not None
-        algorithm = algorithm_cls(self.params, self.params.observation_space, self.params.action_space)
+        algorithm = algorithm_cls(
+            self.params,
+            self.params.observation_space,
+            self.params.action_space,
+            self.tracker,
+        )
 
         if self.params.resume_from:
             checkpoint_path = get_checkpoint_file(self.params.resume_from)
@@ -132,7 +143,7 @@ class Trainer(ABC, Generic[ParamsType]):
         while True:
             self.train_step()
 
-            wandb_lib.log_scalar("env_step", self.env_step, self.i)
+            self.tracker.log_scalar("env_step", self.env_step, self.i)
             if self.env_step >= self.params.total_env_steps:
                 break
 
@@ -150,31 +161,31 @@ class Trainer(ABC, Generic[ParamsType]):
         rollouts = attr.evolve(rollouts, observation=postprocess_uint8_to_float(rollouts.observation))
         self.i = self.algorithm.train_step(rollouts, self.i)
 
-        wandb_lib.log_scalar(
+        self.tracker.log_scalar(
             "timings/train_fps", self.frames_per_batch * (self.i - start_i) / (time.time() - start), self.i
         )
-        wandb_lib.log_scalar("true_env_step", self.env_step * self.params.env_params.action_repeat, self.i)
+        self.tracker.log_scalar("true_env_step", self.env_step * self.params.env_params.action_repeat, self.i)
 
         if self.i % self.params.checkpoint_every == 0:
             self.checkpoint()
 
-        wandb_lib.log_iteration_time(self.frames_per_batch, self.i)
-        wandb_lib.log_scalar("timings/cumulative_env_fps", self.env_step / (time.time() - self.start), self.i)
-        wandb_lib.log_scalar(
+        self.tracker.log_iteration_time(self.frames_per_batch, self.i)
+        self.tracker.log_scalar("timings/cumulative_env_fps", self.env_step / (time.time() - self.start), self.i)
+        self.tracker.log_scalar(
             "timings/cumulative_train_fps", self.i * self.frames_per_batch / (time.time() - self.start), self.i
         )
 
         # Visualize the observations
-        if self.i % wandb_lib.MEDIA_FREQ == 0:
+        if self.i % self.tracker.media_freq == 0:
             # the post-transforms have already been applied.
             for k, v in self.params.observation_space.spaces.items():
                 if len(v.shape) == 3:
                     obs_video = rollouts.observation[k][:8]
-                    wandb_lib.log_video(f"videos/obs/{k}", obs_video + 0.5, self.i, freq=1)
+                    self.tracker.log_video(f"videos/obs/{k}", obs_video + 0.5, self.i, freq=1)
 
         # Visualize the actions
-        if self.i % wandb_lib.MEDIA_FREQ == 0:
-            visualize_actions(self.params.action_space, rollouts.action, prefix="rollout_actions", freq=1)
+        if self.i % self.tracker.media_freq == 0:
+            visualize_actions(self.params.action_space, rollouts.action, self.tracker, prefix="rollout_actions", freq=1)
 
         # Evaluation
         # val.update(algorithm, i, env_step)
@@ -183,10 +194,10 @@ class Trainer(ABC, Generic[ParamsType]):
     def checkpoint(self, filename: Optional[str] = None):
         if not filename:
             filename = f"model_{self.i}.pt"
-        model_filename = Path(wandb.run.dir) / filename  # type: ignore
+        model_filename = self.tracker.get_run_dir() / filename
         torch.save(self.algorithm.state_dict(), model_filename)
-        wandb.save(str(model_filename), policy="now")  # type: ignore
-        wandb_lib.log_scalar("last_checkpoint", self.i, self.i, freq=1)
+        self.tracker.upload_file(model_filename)
+        self.tracker.log_scalar("last_checkpoint", self.i, self.i, freq=1)
 
     def test(self):
         if not self.params.is_train_only:
@@ -200,15 +211,15 @@ class Trainer(ABC, Generic[ParamsType]):
 
 
 class OffPolicyTrainer(Trainer[OffPolicyParams]):
-    def __init__(self, params: OffPolicyParams):
+    def __init__(self, params: OffPolicyParams, tracker: Optional[ExperimentTracker]):
         self.train_rollout_dir = str(Path(params.data_dir) / "train" / str(uuid.uuid4()))
         self.train_rollout_managers: list[AsyncRolloutManager] = []
-        super().__init__(params)
+        super().__init__(params, tracker)
         ModelStorage.clean()
 
     def log_rollout_stats(self):
         for manager in self.train_rollout_managers:
-            wandb_lib.log_from_queue(manager.wandb_queue, prefix=f"rollout_manager_{manager.rollout_manager_id}/")
+            self.tracker.log_from_queue(manager.tracking_queue, prefix=f"rollout_manager_{manager.rollout_manager_id}/")
 
     def start_train_rollouts(self):
         [manager.start() for manager in self.train_rollout_managers]
@@ -268,8 +279,8 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
 
 
 class OnPolicyTrainer(Trainer[OnPolicyParams]):
-    def __init__(self, params: OnPolicyParams):
-        super().__init__(params)
+    def __init__(self, params: OnPolicyParams, tracker: Optional[ExperimentTracker]):
+        super().__init__(params, tracker)
 
     def create_rollout_manager(self):
         rollout_manager = RolloutManager(
@@ -297,13 +308,13 @@ class OnPolicyTrainer(Trainer[OnPolicyParams]):
             exploration_mode="explore",
         )
         rollout_fps = (self.params.num_workers * self.params.num_steps) / (time.time() - start)
-        wandb_lib.log_scalar("timings/rollout_fps", rollout_fps, self.i)
+        self.tracker.log_scalar("timings/rollout_fps", rollout_fps, self.i)
         self.env_step += self.params.num_workers * self.params.num_steps
 
         if self.params.env_params.suite == "godot":
             from avalon.agent.godot.godot_eval import log_rollout_stats
 
-            log_rollout_stats(self.train_storage.storage.values(), self.i)
+            log_rollout_stats(self.train_storage.storage.values(), self.i, self.tracker)
         else:
             # TODO: we don't keep good statistics for on-policy rollouts. no way to compute ep len or reward.
             # Should make a wrapper that keeps track of these and returns them at the end of the ep in the info.

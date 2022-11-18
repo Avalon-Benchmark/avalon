@@ -112,13 +112,13 @@ class DiskStorage(TrajectoryStorage):
         params: OffPolicyParams,
         rollout_dir: str,
         # wandb: Optional[Run],
-        wandb_queue=None,  # not typeable, but a Optional[Queue] :(
+        tracking_queue=None,  # not typeable, but a Optional[Queue] :(
         discard_short_eps: bool = True,  # should be true in training, false in eval
     ):
         self.ongoing: Dict[str, List[StepData]] = defaultdict(list)
         self.params = params
         # self.wandb = wandb
-        self.wandb_queue = wandb_queue
+        self.tracking_queue = tracking_queue
 
         self.data_dir = Path(rollout_dir)
         self.data_dir.mkdir(parents=True, exist_ok=True)
@@ -133,7 +133,7 @@ class DiskStorage(TrajectoryStorage):
 
     def log_stats(self) -> None:
         # Compute training rollout statistics
-        if not self.wandb_queue:
+        if not self.tracking_queue:
             return
         if not self.log_freq:
             return
@@ -154,8 +154,8 @@ class DiskStorage(TrajectoryStorage):
             # Data is a dict (task) of dicts (keys) of lists
             for task, x in successes.items():
                 for field, y in x.items():
-                    self.wandb_queue.put(("scalar", f"{task}/{field}", np.mean(y)))
-                self.wandb_queue.put(("scalar", f"{task}/num_episodes", len(y)))
+                    self.tracking_queue.put(("scalar", f"{task}/{field}", np.mean(y)))
+                self.tracking_queue.put(("scalar", f"{task}/num_episodes", len(y)))
         else:
             rewards = []
             lengths = []
@@ -166,13 +166,13 @@ class DiskStorage(TrajectoryStorage):
                 lengths.append(length)
             # TODO: add histograms here
             # Note: action repeats have not been factored in here
-            self.wandb_queue.put(("scalar", f"return_mean", np.mean(rewards)))
-            self.wandb_queue.put(("scalar", f"length_mean", np.mean(lengths)))
+            self.tracking_queue.put(("scalar", f"return_mean", np.mean(rewards)))
+            self.tracking_queue.put(("scalar", f"length_mean", np.mean(lengths)))
 
-        self.wandb_queue.put(("scalar", f"buffer_size_timesteps", self.timesteps_in_buffer))
-        self.wandb_queue.put(("scalar", f"total_timesteps", self.total_timesteps))
-        self.wandb_queue.put(("scalar", f"true_buffer_size", measure_buffer_size(str(self.data_dir))))
-        self.wandb_queue.put(("scalar", f"total_episodes", self.episode_counter))
+        self.tracking_queue.put(("scalar", f"buffer_size_timesteps", self.timesteps_in_buffer))
+        self.tracking_queue.put(("scalar", f"total_timesteps", self.total_timesteps))
+        self.tracking_queue.put(("scalar", f"true_buffer_size", measure_buffer_size(str(self.data_dir))))
+        self.tracking_queue.put(("scalar", f"total_episodes", self.episode_counter))
 
     def add_timestep_samples(self, samples: Dict[str, StepData]) -> None:
         """Add a set of samples representing a single timestep, keyed by a batch/episode identifer."""

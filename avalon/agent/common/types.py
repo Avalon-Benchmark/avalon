@@ -18,6 +18,7 @@ from torch import Tensor
 from avalon.agent.common.params import Params
 from avalon.agent.common.util import pack_1d_list
 from avalon.agent.common.util import pack_2d_list
+from avalon.agent.common.experiment_tracking import ExperimentTracker
 from avalon.agent.common.util import seed_and_run_deterministically_if_enabled
 
 Info = Dict[str, Any]
@@ -103,13 +104,19 @@ ParamsType = TypeVar("ParamsType", bound=Params)
 class Algorithm(torch.nn.Module, ABC, Generic[ParamsType]):
     step_data_type: Type = StepData
 
-    def __init__(self, params: ParamsType, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+    def __init__(
+        self,
+        params: ParamsType,
+        obs_space: gym.spaces.Dict,
+        action_space: gym.spaces.Dict,
+        tracker: ExperimentTracker,
+    ):
         seed_and_run_deterministically_if_enabled()
-
         super().__init__()
         self.params = params
         self.obs_space = obs_space
         self.action_space = action_space
+        self.tracker = tracker
 
     @abstractmethod
     def rollout_step(
