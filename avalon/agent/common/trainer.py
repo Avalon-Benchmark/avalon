@@ -202,9 +202,6 @@ class Trainer(ABC, Generic[ParamsType]):
 class OffPolicyTrainer(Trainer[OffPolicyParams]):
     def __init__(self, params: OffPolicyParams):
         self.train_rollout_dir = str(Path(params.data_dir) / "train" / str(uuid.uuid4()))
-
-        wandb.setup()
-
         self.train_rollout_managers: list[AsyncRolloutManager] = []
         super().__init__(params)
         ModelStorage.clean()
