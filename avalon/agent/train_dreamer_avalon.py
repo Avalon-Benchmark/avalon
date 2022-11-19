@@ -11,6 +11,7 @@ from avalon.agent.godot.godot_eval import test
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.common.error_utils import capture_exception
+from avalon.common.log_utils import configure_remote_logger
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_ERROR_LOG_PATH
 
 FRAGMENT_LENGTH = 30
@@ -98,6 +99,7 @@ def run(params: DreamerParams):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    configure_remote_logger()
     default_params = DreamerGodotParams()
     default_params = parse_args(default_params)
     run(default_params)

@@ -16,7 +16,7 @@ from typing import List
 from typing import NamedTuple
 
 from avalon.common.imports import tqdm
-from avalon.common.log_utils import enable_debug_logging
+from avalon.common.log_utils import configure_local_logger
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
@@ -30,7 +30,7 @@ from avalon.datagen.human_playback import get_oculus_playback_config
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 
-enable_debug_logging()
+configure_local_logger()
 
 # %%
 

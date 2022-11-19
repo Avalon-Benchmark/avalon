@@ -23,6 +23,7 @@ from avalon.agent.common.util import pack_1d_list
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import DreamerParams
 from avalon.agent.dreamer.params import OffPolicyParams
+from avalon.common.log_utils import configure_remote_logger
 
 
 class DreamerTrainer(Trainer[OffPolicyParams]):
@@ -152,6 +153,7 @@ def run(params: DreamerDMCParams):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    configure_remote_logger()
     default_params = DreamerDMCParams()
     default_params = parse_args(default_params)
     # default_params = attr.evolve(

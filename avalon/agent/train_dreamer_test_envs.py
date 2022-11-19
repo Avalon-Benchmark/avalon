@@ -6,6 +6,7 @@ from avalon.agent.common.parse_args import parse_args
 from avalon.agent.common.test_envs import TestEnvironmentParams
 from avalon.agent.common.trainer import OffPolicyTrainer
 from avalon.agent.dreamer.params import DreamerParams
+from avalon.common.log_utils import configure_remote_logger
 
 FRAGMENT_LENGTH = 30
 
@@ -52,6 +53,7 @@ def run(params: DreamerParams):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    configure_remote_logger()
     default_params = DreamerTestEnvParams()
     default_params = parse_args(default_params)
     run(default_params)

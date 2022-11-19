@@ -14,7 +14,7 @@ import torch
 
 from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
-from avalon.common.log_utils import enable_debug_logging
+from avalon.common.log_utils import configure_remote_logger
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
@@ -152,7 +152,7 @@ def run_evaluation(worlds_path: Path, data_key: str, seed: int):
 
 
 if __name__ == "__main__":
-    enable_debug_logging()
+    configure_remote_logger()
     seed = 0
     worlds_path = Path(f"{FILESYSTEM_ROOT}/avalon/worlds/viewable_worlds")
     data_key = "avalon_worlds__0824_full.tar.gz"

@@ -1,3 +1,4 @@
+import itertools
 import sys
 import threading
 from typing import Optional
@@ -23,9 +24,10 @@ def pytest_sessionstart(session: Session):
 
 # noinspection SpellCheckingInspection
 def pytest_addoption(parser: Parser):
-    parser.addoption("--pycharm", action="store_true", default=False, help="enable pycharm debugging")
-    parser.addoption("--with-regression", action="store_const", const=True, dest="run_regression")
-    parser.addoption("--without-regression", action="store_const", const=False, dest="run_regression")
+    if "--pycharm" not in list(itertools.chain(*([x._long_opts for x in parser._anonymous.options]))):
+        parser.addoption("--pycharm", action="store_true", default=False, help="enable pycharm debugging")
+        parser.addoption("--with-regression", action="store_const", const=True, dest="run_regression")
+        parser.addoption("--without-regression", action="store_const", const=False, dest="run_regression")
 
 
 # noinspection SpellCheckingInspection

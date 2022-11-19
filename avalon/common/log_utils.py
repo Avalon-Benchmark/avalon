@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Dict
 from typing import Optional
 
-from fire import helptext
 from loguru import logger
 from tqdm import tqdm
 
@@ -15,7 +14,8 @@ from avalon.contrib.utils import is_notebook
 
 __all__ = [
     "logger",
-    "enable_debug_logging",
+    "configure_local_logger",
+    "configure_remote_logger",
     "get_log_path",
     "get_user_name",
     "get_experiment_name",
@@ -34,10 +34,10 @@ def get_experiment_name() -> str:
 
 def get_log_path() -> Path:
     if platform.system().lower() == "darwin":
-        log_folder = Path("/tmp")
+        log_folder = Path("/tmp/logs")
     else:
-        log_folder = Path(FILESYSTEM_ROOT)
-    assert log_folder.is_dir(), "Log dir does not exist. Please create it."
+        log_folder = Path(FILESYSTEM_ROOT) / "logs"
+    log_folder.mkdir(parents=True, exist_ok=True)
     return log_folder
 
 
@@ -63,36 +63,32 @@ def log_to_sentry_and_reraise(exception: BaseException):
     raise exception
 
 
-def _configure_logger(default_level: str = "INFO"):
-    logger.remove()
-    log_file = str(get_log_path() / "log.txt")
-    # logger.add(_log_with_tqdm, level=default_level, format="{message}")
-    logger.add(sys.stdout, level=default_level, format="{message}")
-    logger.add(log_file, level="DEBUG", format="{time}|{process.id}|{thread.id}| {level} | {file}:{line} | {message}")
-
-
-_configure_logger()
 tqdm.get_lock()
 # disable monitoring thread because it is not totally safe, caused some issues with multithreading.
 tqdm.monitor_interval = 0
 
 
-def enable_debug_logging():
-    _configure_logger("DEBUG")
-
-
-def add_simple_stderr_log():
-    logger.add(sys.stderr, format="{message}", level="DEBUG", diagnose=False)
-
-
-def make_fire_more_friendly(line_length: int = 200, is_using_simple_logger: bool = False):
-    # make fire stop truncating so many things
-    helptext.LINE_LENGTH = line_length
-
-    # this makes fire do what I would expect if you pass --help into the base command
-    if len(sys.argv) == 2 and sys.argv[-1] in ("--help", "-h"):
-        sys.argv.pop()
-
-    if is_using_simple_logger:
+def configure_local_logger(level: str = "DEBUG", format: Optional[str] = None):
+    try:
+        from computronium.common.log_utils import configure_local_logger as inner_configure_local_logger
+    except ImportError:
         logger.remove()
-        add_simple_stderr_log()
+        logger.add(sys.stdout, level=level, format="{message}")
+    else:
+        if format is None:
+            inner_configure_local_logger(level)
+        else:
+            inner_configure_local_logger(level, format)
+
+
+def configure_remote_logger(level: str = "DEBUG", format: Optional[str] = None):
+    try:
+        from computronium.common.log_utils import configure_remote_logger as inner_configure_remote_logger
+    except ImportError:
+        logger.remove()
+        logger.add(sys.stdout, level=level, format="{message}")
+    else:
+        if format is None:
+            inner_configure_remote_logger(level)
+        else:
+            inner_configure_remote_logger(level, format)

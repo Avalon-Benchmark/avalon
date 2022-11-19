@@ -7,14 +7,14 @@ Useful for testing out or getting a feel for the world generators.
 import shutil
 from pathlib import Path
 
-from avalon.common.log_utils import enable_debug_logging
+from avalon.common.log_utils import configure_local_logger
 from avalon.datagen.env_helper import display_video
 from avalon.datagen.env_helper import visualize_worlds_in_folder
 from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.types import DebugVisualizationConfig
 
-enable_debug_logging()
+configure_local_logger()
 
 NUM_WORLDS = 10
 IS_GRAPH_MODE = False

@@ -7,7 +7,8 @@ from typing import Optional
 
 from fire import Fire
 
-from avalon.common.log_utils import make_fire_more_friendly
+from avalon.common.log_utils import configure_local_logger
+from avalon.common.shared.fire_utils import make_fire_more_friendly
 from avalon.common.utils import AVALON_PACKAGE_DIR
 from avalon.contrib.utils import run_local_command
 
@@ -186,5 +187,6 @@ class UpdateChangelog:
 
 
 if __name__ == "__main__":
-    make_fire_more_friendly(is_using_simple_logger=True)
+    make_fire_more_friendly()
+    configure_local_logger()
     Fire(UpdateChangelog)

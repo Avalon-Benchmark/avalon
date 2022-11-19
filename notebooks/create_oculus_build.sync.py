@@ -5,7 +5,7 @@ from pathlib import Path
 from loguru import logger
 
 from avalon.common.imports import tqdm
-from avalon.common.log_utils import enable_debug_logging
+from avalon.common.log_utils import configure_local_logger
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.contrib.utils import TEMP_DIR
 from avalon.datagen.generate_apks import add_apk_version_to_server
@@ -16,7 +16,7 @@ from avalon.datagen.generate_apks import upload_apk_to_server
 from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.world_creation.constants import AvalonTask
 
-enable_debug_logging()
+configure_local_logger()
 
 # %%
 

@@ -417,7 +417,7 @@ class Entrance(Serializable):
 
 @attr.s(auto_attribs=True, eq=False, collect_by_mro=True)
 class Story:
-    """
+    r"""
      ___________
     |__________| \  } ceiling thickness (1), inset into room height
     |          |  \                     \

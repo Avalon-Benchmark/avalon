@@ -12,7 +12,7 @@ import attr
 import numpy as np
 from scipy import stats
 
-from avalon.common.log_utils import enable_debug_logging
+from avalon.common.log_utils import configure_local_logger
 from avalon.datagen.godot_env.interactive_godot_process import AVALON_HUMAN_WORLDS_PATH
 from avalon.datagen.world_creation.configs.export import ExportConfig
 from avalon.datagen.world_creation.configs.export import get_agent_export_config
@@ -28,7 +28,7 @@ from avalon.datagen.world_creation.worlds.creation import create_world_for_skill
 from avalon.datagen.world_creation.worlds.export import export_world
 from avalon.datagen.world_creation.worlds.export import get_world_slug
 
-enable_debug_logging()
+configure_local_logger()
 
 # %% [markdown]
 # ### `create_simple_world`

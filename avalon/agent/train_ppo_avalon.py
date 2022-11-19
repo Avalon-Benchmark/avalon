@@ -10,6 +10,7 @@ from avalon.agent.godot.godot_eval import test
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.agent.ppo.params import PPOParams
+from avalon.common.log_utils import configure_remote_logger
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -69,6 +70,7 @@ def run(params: AvalonPPOParams):
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore", category=DeprecationWarning)
+    configure_remote_logger()
     default_params = AvalonPPOParams()
     default_params = parse_args(default_params)
     run(default_params)

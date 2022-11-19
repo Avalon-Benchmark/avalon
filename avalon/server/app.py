@@ -8,12 +8,13 @@ from typing import Any
 from typing import Dict
 
 import attr
-import flask
 import sentry_sdk
-from flask import send_from_directory
-from flask import url_for
 from sentry_sdk.integrations.flask import FlaskIntegration
 from werkzeug.utils import secure_filename
+
+import flask
+from flask import send_from_directory
+from flask import url_for
 
 # note: using relative imports because this server runs independent from the rest of standalone/avalon
 from .server_state import RunID
