@@ -12,6 +12,22 @@ Unreleased changes can be installed via `pip install git+https://github.com/Aval
 - `avalon.for_humans` CLI utility for to assist with human-consumable world generation, inspection, and VR setup.
 - [VR guide](./docs/running_in_vr.md).
 - Made windows editor binary installable.
+- "Inspect Test Worlds" notebook/guide detailing how test worlds are generated and how to use `debug_act`.
+- `python -m avalon.for_humans launch_editor` now prints a cautionary note on not editing/breaking stuff in the editor.
+- `FixedWorldLoader` factored out from `FixedWorldGenerator`, making distinction between loading and runtime generation more explicit.
+- Baseline model determinism tests.
+- Improved `GodotError` clarity by extracting the first logged `ERROR`.
+
+### Changed
+-  Updated binary installed with `avalon.install_godot_binary` to latest version (`0.9.3`), fixing some editor & player runtime issues on mac.
+- `generate_worlds` parameterization is now deterministic, regardless of `is_async` parameter.
+- `generate_worlds.generate_worlds` renamed to `generate_worlds.generate_evaluation_worlds` and make it's purpose more internally explicit.
+- Internals: make the Godot API slightly more generic using `CombinedInputCollector`, `CombinedAction`, and `ControlledNode`. 
+  This is a step towards having multiple agents/actors controlling different in-godot entities.
+
+### Fixed
+- Added missing image in VR guide.
+- Factored out inlined resources from some scene files.
 
 
 ## [1.0.0rc5] - 2022-10-21
