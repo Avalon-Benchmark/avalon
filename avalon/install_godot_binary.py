@@ -20,7 +20,7 @@ RELEASES: Final = "https://github.com/Avalon-Benchmark/godot/releases/download"
 
 CURRENT_RELEASE: Final = "3.4.4.avalon.0.9.3"
 
-Platform = Literal["linux", "macos", "windows"]  # TODO: linux needs to have options for egl and x11
+Platform = Literal["linux", "macos", "windows"]
 
 BinaryType = Literal["runner", "editor"]
 

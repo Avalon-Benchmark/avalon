@@ -6,7 +6,7 @@ and `avalon-rl` adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 Unreleased changes can be installed via `pip install git+https://github.com/Avalon-Benchmark/avalon.git`.
 
 
-## [Unreleased]
+## [1.0.0]
 
 ### Added
 - `avalon.for_humans` CLI utility for to assist with human-consumable world generation, inspection, and VR setup.
@@ -40,5 +40,5 @@ Unreleased changes can be installed via `pip install git+https://github.com/Aval
 - Installation script issues.
 
 
-[Unreleased]: https://github.com/Avalon-benchmark/avalon
+[1.0.0]: https://pypi.org/project/avalon-rl/1.0.0
 [1.0.0rc5]: https://pypi.org/project/avalon-rl/1.0.0rc5
