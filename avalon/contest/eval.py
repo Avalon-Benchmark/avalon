@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Tuple
 
@@ -39,11 +40,13 @@ class ContestAlgorithmWrapper(Algorithm):
 
 
 if __name__ == "__main__":
+    fixed_worlds_path = os.getenv("FIXED_WORLDS_PATH", "/tmp/avalon_worlds/minival/")
+
     params = ContestAlgorithmParams(
         project="contest_agent",
         is_testing=True,
         is_training=False,
-        env_params=GodotEnvironmentParams(fixed_worlds_load_from_path=Path("/tmp/avalon_worlds/minieval/")),
+        env_params=GodotEnvironmentParams(fixed_worlds_load_from_path=Path(fixed_worlds_path)),
     )
     trainer = OnPolicyTrainer(params)
 

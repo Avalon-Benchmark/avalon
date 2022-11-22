@@ -6,13 +6,16 @@ See [installation instructions](../README.md).
 
 ## Step 2: Download the evaluation data
 
-Download the evaluation data ([instructions](../docs/avalon_baselines.md)).
+Download the evaluation data:
+* Minival phase: 
+https://avalon-benchmark.s3.us-west-2.amazonaws.com/contest/minival-20221117-03e70547d557.tar.gz (20 worlds, 3.0 MB)
+* Public test phase: https://avalon-benchmark.s3.us-west-2.amazonaws.com/contest/public-test-20221117-e3d7079216f4.tar.gz (1000 worlds, 1.0 GB)
 
-The link is: https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon_worlds__2f788115-ea32-4041-8cae-6e7cd33091b7.tar.gz
-
-They must be located in `/tmp/avalon_worlds/2f788115-ea32-4041-8cae-6e7cd33091b7/`.
+Unzip them to `/tmp/avalon_worlds/minival/` and `/tmp/avalon_worlds/public_test/` (or anywhere else you prefer).
 
 ## Step 3: Run environment with a random model
+
+Set the environment variable `FIXED_WORLDS_PATH` to the worlds you want to evaluate (eg: `/tmp/avalon_worlds/minival/`). Then run:
 
 ```
 PYTHONPATH=. python eval.py
@@ -41,8 +44,12 @@ docker run -it --gpus 'all,"capabilities=compute,utility,graphics"' avalon_conte
 
 ## Step 5: Upload docker container to EvalAI for evaluation
 
-See [instructions](https://cli.eval.ai/) for setting up EvalAI.
+Follow [these instructions](https://cli.eval.ai/) for setting up EvalAI.
+
+Run the following command to submit your container. The phase name must be one of: `avalon-minival`, `avalon-public-test`, or `avalon-private-test`.
 
 ```
-evalai push avalon_contest_agent:latest --phase random-dev-1882
+evalai push avalon_contest_agent:latest --phase avalon-minival
 ```
+
+Please make sure your container runs locally before submitting.

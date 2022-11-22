@@ -1,3 +1,4 @@
+# %%
 """
 This notebook generates a bunch of worlds and shows videos of them.
 
@@ -51,6 +52,9 @@ if base_output_path.exists():
 base_output_path.mkdir(parents=True, exist_ok=True)
 
 # %%
+# Warning: For the worlds to be playable by agent, you must comment out the debug_visualization_config
+# flag, since it replaces food with big orbs to be easier to visualize, but there will be no actual
+# food objects in the world.
 actual_worlds = generate_evaluation_worlds(
     base_output_path=base_output_path,
     tasks=tasks,

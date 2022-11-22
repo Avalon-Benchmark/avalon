@@ -1,4 +1,3 @@
-#!/bin/bash
 set -e
 
 THIS_FILE=$(realpath "$0")
