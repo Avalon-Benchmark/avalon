@@ -10,7 +10,7 @@ import numpy as np
 
 from avalon.common.utils import flatten
 from avalon.contrib.testing_utils import fixture
-from avalon.contrib.testing_utils import integration_test
+from avalon.contrib.testing_utils import slow_integration_test
 from avalon.contrib.testing_utils import use
 from avalon.datagen.avalon_godot_tests.conftest import behavior_test_folder_
 from avalon.datagen.avalon_godot_tests.conftest import godot_env_
@@ -158,7 +158,7 @@ def tree_food_observations_(
     return [scenario.run(godot_env, scenario_path) for scenario in tree_food_behaviors]
 
 
-@integration_test
+@slow_integration_test
 @use(
     item_behavior_manifest_,
     falling_food_observations_,
@@ -170,7 +170,7 @@ def test_falling_food_scenario_regressions(
     verify_observations(item_behavior_manifest, falling_food_observations)
 
 
-@integration_test
+@slow_integration_test
 @use(
     item_behavior_manifest_,
     ground_food_observations_,
@@ -182,7 +182,7 @@ def test_ground_food_scenario_regressions(
     verify_observations(item_behavior_manifest, ground_food_observations)
 
 
-@integration_test
+@slow_integration_test
 @use(
     item_behavior_manifest_,
     tree_food_observations_,

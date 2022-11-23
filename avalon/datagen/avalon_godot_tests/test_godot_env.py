@@ -12,6 +12,7 @@ from loguru import logger
 
 from avalon.contrib.testing_utils import fixture
 from avalon.contrib.testing_utils import integration_test
+from avalon.contrib.testing_utils import slow_integration_test
 from avalon.contrib.testing_utils import use
 from avalon.datagen.avalon_godot_tests.conftest import AvalonEnv
 from avalon.datagen.avalon_godot_tests.conftest import godot_env_
@@ -85,7 +86,7 @@ def never_ready_godot_process_patch_(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(InteractiveGodotProcess, "wait_for_ready_signal", mock_never_ready)
 
 
-@integration_test
+@slow_integration_test
 @use(
     godot_env_,
     caplog_,
@@ -106,7 +107,7 @@ def test_kill_switch_watches_startup(
     assert_eventually_true(lambda: "SIGKILL" in godot_env.process._error_code_repr(), max_wait_sec=1)
 
 
-@integration_test
+@slow_integration_test
 @use(
     godot_env_with_reset_,
     fast_kill_switch_patch_,
@@ -135,7 +136,7 @@ def test_kill_switch_watches_messages(
     godot_env._bridge.after_close()
 
 
-@integration_test
+@slow_integration_test
 @use(godot_env_)
 def test_env_opens_and_closes_nicely(godot_env: AvalonEnv):
     assert godot_env.process.is_running
@@ -196,7 +197,7 @@ def mock_create_error_artifact_path_(artifact_path: Path, monkeypatch: pytest.Mo
     )
 
 
-@integration_test
+@slow_integration_test
 @use(
     godot_env_with_reset_,
     artifact_path_,
