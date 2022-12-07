@@ -18,10 +18,13 @@ from avalon.datagen.world_creation.indoor.builders import HamiltonianHallwayBuil
 from avalon.datagen.world_creation.indoor.builders import HouseLikeRoomBuilder
 from avalon.datagen.world_creation.indoor.builders import RectangleFootprintBuilder
 from avalon.datagen.world_creation.indoor.builders import WindowBuilder
+from avalon.datagen.world_creation.indoor.builders import get_room_overlap
 from avalon.datagen.world_creation.indoor.building import Building
 from avalon.datagen.world_creation.indoor.building import BuildingAestheticsConfig
 from avalon.datagen.world_creation.indoor.building import BuildingNavGraph
 from avalon.datagen.world_creation.indoor.building import BuildingTask
+from avalon.datagen.world_creation.indoor.components import Room
+from avalon.datagen.world_creation.indoor.components import Story
 from avalon.datagen.world_creation.indoor.constants import Azimuth
 from avalon.datagen.world_creation.indoor.doors import DoorParams
 from avalon.datagen.world_creation.indoor.doors import get_door_params_from_difficulty
@@ -137,12 +140,26 @@ class OpenTaskGenerator(BuildingTaskGenerator):
         for from_node, to_node in zip(path[:-1], path[1:]):
             from_story, from_room = stories_and_rooms_by_node_id[from_node]
             to_story, to_room = stories_and_rooms_by_node_id[to_node]
+            self._check_connection_is_valid(from_story, from_room, to_story, to_room)
             all_door_params.append(
                 (story_num, from_room.id, to_room.id, get_door_params_from_difficulty(rand, difficulty))
             )
         initial_story, initial_room = stories_and_rooms_by_node_id[path[0]]
         target_story, target_room = stories_and_rooms_by_node_id[path[-1]]
         return initial_story.num, initial_room.id, target_story.num, target_room.id, tuple(all_door_params)
+
+    @staticmethod
+    def _check_connection_is_valid(from_story: Story, from_room: Room, to_story: Story, to_room: Room) -> None:
+        # Sometimes hallways can only be fit in the corner of rooms - this does not work for the Open task since locks
+        # must be placed on the sides and there might not be enough room.
+        if from_story == to_story:
+            x_overlap, z_overlap = get_room_overlap(from_room, to_room)
+            wall_overlap = x_overlap or z_overlap
+            is_hallway_going_to_be_forced_into_corner = wall_overlap is not None and wall_overlap.size < 3
+            if is_hallway_going_to_be_forced_into_corner:
+                raise ImpossibleWorldError(
+                    f"Wall overlap between {from_room.id} and {to_room.id} is too small to fit a door with locks properly."
+                )
 
     def add_principal_obstacles(
         self, rand: np.random.Generator, building: Building, obstacle_params: OpenTaskObstacleParams

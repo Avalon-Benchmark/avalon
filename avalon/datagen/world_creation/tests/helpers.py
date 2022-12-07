@@ -82,7 +82,7 @@ def create_indoor_world(
         final_export_config.is_tiled = False
     export_config = final_export_config
     world = make_indoor_task_world(
-        building, entities, difficulty, spawn_location, target_location, rand, export_config
+        building, entities, difficulty, spawn_location, target_location, rand, final_export_config
     )
     export_world(export_path, rand, world)
 
