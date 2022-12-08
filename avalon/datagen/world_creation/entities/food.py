@@ -107,7 +107,7 @@ class Food(InstancedDynamicItem):
     def is_tool_useful(self) -> bool:
         return self.get_tool_options()[0] > 0
 
-    def is_always_multiple(self):
+    def is_always_multiple(self) -> bool:
         return False
 
 
@@ -138,7 +138,7 @@ class OpenableFood(Food):
     is_openable: bool = True
 
     @property
-    def is_open(self):
+    def is_open(self) -> bool:
         return not self.is_openable
 
     def get_opened_version(self: "OpenableFood") -> "OpenableFood":
@@ -191,7 +191,7 @@ class Cherry(Food):
             return np.array([0.0, -0.5, 0.0])
         return super().additional_offset
 
-    def is_always_multiple(self):
+    def is_always_multiple(self) -> bool:
         return True
 
 

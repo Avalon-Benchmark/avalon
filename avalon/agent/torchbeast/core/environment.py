@@ -22,7 +22,7 @@ def _format_frame(frame):
 
 
 class Environment:
-    def __init__(self, gym_env: gym.Env, device: str = "cuda:0"):
+    def __init__(self, gym_env: gym.Env, device: str = "cuda:0") -> None:
         self.gym_env = gym_env
         self.episode_return = None
         self.episode_step = None
@@ -79,5 +79,5 @@ class Environment:
             info=info,
         )
 
-    def close(self):
+    def close(self) -> None:
         self.gym_env.close()

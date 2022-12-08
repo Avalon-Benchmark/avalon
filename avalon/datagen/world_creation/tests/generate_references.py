@@ -41,7 +41,7 @@ from avalon.datagen.world_creation.tests.params import OUTDOOR_WORLD_CATALOG
 from avalon.datagen.world_creation.worlds.world import build_building
 
 
-def generate_reference_buildings(export_path_base: Path):
+def generate_reference_buildings(export_path_base: Path) -> None:
     building_id = 0
     for config_id, building_config in BUILDING_CATALOG.items():
         logger.info(f"Generating reference building {config_id}")
@@ -59,7 +59,7 @@ def generate_reference_buildings(export_path_base: Path):
             export_path.write_text("")
 
 
-def generate_reference_indoor_worlds(export_path_base: Path):
+def generate_reference_indoor_worlds(export_path_base: Path) -> None:
     for world_name, params in INDOOR_WORLD_CATALOG.items():
         logger.info(f"Generating reference indoor world {world_name}")
         output_path = export_path_base / world_name
@@ -67,7 +67,7 @@ def generate_reference_indoor_worlds(export_path_base: Path):
         create_indoor_world(*params, export_path=output_path)
 
 
-def generate_reference_outdoor_worlds(export_path_base: Path):
+def generate_reference_outdoor_worlds(export_path_base: Path) -> None:
     for world_name, params in OUTDOOR_WORLD_CATALOG.items():
         logger.info(f"Generating reference outdoor world {world_name}")
         output_path = export_path_base / world_name
@@ -85,7 +85,7 @@ def clean_path(path: Path, glob_pattern: str) -> None:
             entry.unlink()
 
 
-def archive_and_clean(source_path: Path, glob_pattern: str, archive_name: str):
+def archive_and_clean(source_path: Path, glob_pattern: str, archive_name: str) -> None:
     make_tarball(source_path, glob_pattern, source_path / archive_name)
     clean_path(source_path, glob_pattern)
 

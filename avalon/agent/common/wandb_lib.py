@@ -45,7 +45,7 @@ def check_log_interval(step: int, freq: int, backoff: bool = True) -> bool:
     return step % freq == 0
 
 
-def log_from_queue(wandb_queue, prefix: str = ""):  # type: ignore
+def log_from_queue(wandb_queue, prefix: str = "") -> None:  # type: ignore
     """Allows logging from another process."""
     try:
         mode, key, value = wandb_queue.get_nowait()
@@ -175,7 +175,7 @@ def log_image(tag: str, value: Tensor, step: Optional[int] = None, freq: Optiona
     wandb.log({tag: wandb.Image(value)}, step=step)
 
 
-def log_table(tag: str, value: Tensor, step: int, freq: Optional[int] = None):
+def log_table(tag: str, value: Tensor, step: int, freq: Optional[int] = None) -> None:
     freq = MEDIA_FREQ if freq is None else freq
     # value should be a 1d tensor, in this current implementation. can add more columns in the future.
     if not check_log_interval(step, freq):

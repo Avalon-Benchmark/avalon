@@ -73,7 +73,7 @@ class PPOInferenceExtraInfoBatch(AlgorithmInferenceExtraInfoBatch):
 class PPO(Algorithm["PPOParams"]):
     step_data_type: Type = PPOStepData
 
-    def __init__(self, params: PPOParams, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+    def __init__(self, params: PPOParams, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict) -> None:
         self.params = params
         super().__init__(params, observation_space, action_space)
 

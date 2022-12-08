@@ -17,7 +17,7 @@ from avalon.datagen.world_creation.constants import WORLD_RAISE_AMOUNT
 IS_DEBUG_VIS = False
 
 
-def plot_points(points: Union[np.ndarray, List[np.ndarray]], index1: int, index2: int):
+def plot_points(points: Union[np.ndarray, List[np.ndarray]], index1: int, index2: int) -> None:
     if not isinstance(points, np.ndarray):
         points = np.array(points)
     plt.plot(points[:, index1], points[:, index2], "o")
@@ -26,7 +26,7 @@ def plot_points(points: Union[np.ndarray, List[np.ndarray]], index1: int, index2
     plt.show()
 
 
-def plot_triangulation(triangulation: Delaunay):
+def plot_triangulation(triangulation: Delaunay) -> None:
     plt.triplot(triangulation.points[:, 0], triangulation.points[:, 1], triangulation.simplices)
     plt.plot(triangulation.points[:, 0], triangulation.points[:, 1], "o")
     plt.show()
@@ -37,7 +37,7 @@ GridPlotDataType = NDArray[Shape["MapY, MapX"], Any]
 
 def plot_terrain(
     data: GridPlotDataType, title: str = "", markers: Iterable[Union[np.ndarray, Tuple[float, float]]] = tuple()
-):
+) -> None:
     data = data.copy()
     island = data > WORLD_RAISE_AMOUNT - 1_000
     min_island_height = data[island].min()
@@ -48,7 +48,7 @@ def plot_terrain(
 
 def plot_value_grid(
     data: GridPlotDataType, title: str = "", markers: Iterable[Union[np.ndarray, Tuple[float, float]]] = tuple()
-):
+) -> None:
     data = np.array(data)
     fig, ax = plt.subplots()
     fig.set_size_inches(12, 12)
@@ -73,7 +73,7 @@ def plot_value_grid_multi_marker(
     data: GridPlotDataType,
     title: str,
     marker_lists: Sequence[Tuple[Iterable[Union[np.ndarray, Tuple[int, int]]], str]],
-):
+) -> None:
     data = np.array(data)
     fig, ax = plt.subplots()
     fig.set_size_inches(12, 12)

@@ -275,7 +275,7 @@ def _read_debug_json_log(debug_json_path: Path, is_episode_ongoing: bool) -> Lis
 
 
 class ActionSmoother:
-    def __init__(self, decay: float = 0.999):
+    def __init__(self, decay: float = 0.999) -> None:
         self.state: dict[str, float] = {}
         self.decay = decay
 

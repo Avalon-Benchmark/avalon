@@ -396,7 +396,7 @@ def item_interaction_observations_(
 def test_inactive_scenario_regressions(
     animal_behavior_manifest: BehaviorManifest,
     inactive_behavior_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(animal_behavior_manifest, inactive_behavior_observations)
 
 
@@ -408,7 +408,7 @@ def test_inactive_scenario_regressions(
 def test_prey_flee_scenario_regressions(
     animal_behavior_manifest: BehaviorManifest,
     prey_flee_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(animal_behavior_manifest, prey_flee_observations)
 
 
@@ -420,7 +420,7 @@ def test_prey_flee_scenario_regressions(
 def test_predator_chase_scenario_regressions(
     animal_behavior_manifest: BehaviorManifest,
     predator_chase_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(animal_behavior_manifest, predator_chase_observations)
 
 
@@ -432,7 +432,7 @@ def test_predator_chase_scenario_regressions(
 def test_climb_scenario_regressions(
     animal_behavior_manifest: BehaviorManifest,
     climb_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(animal_behavior_manifest, climb_observations)
 
 
@@ -444,7 +444,7 @@ def test_climb_scenario_regressions(
 def test_complex_scenario_regressions(
     animal_behavior_manifest: BehaviorManifest,
     complex_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(animal_behavior_manifest, complex_observations)
 
 
@@ -456,7 +456,7 @@ def test_complex_scenario_regressions(
 def test_item_interaction_scenario_regressions(
     animal_behavior_manifest: BehaviorManifest,
     item_interaction_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(animal_behavior_manifest, item_interaction_observations)
 
 
@@ -484,7 +484,7 @@ def _turn_and_run(player_speed: float, frames: int, turn_frames: int = 2, degree
 # * custom parametrization schemes https://docs.pytest.org/en/7.1.x/how-to/parametrize.html
 
 
-def verify_observations(manifest: BehaviorManifest, observations: List[ScenarioObservations]):
+def verify_observations(manifest: BehaviorManifest, observations: List[ScenarioObservations]) -> None:
     for obs in observations:
         name = obs.scenario.name
         historical_checksums = manifest.get_checksums(name)

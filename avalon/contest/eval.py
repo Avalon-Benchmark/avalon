@@ -21,7 +21,7 @@ from avalon.contest.contest_params import ContestAlgorithmParams
 class ContestAlgorithmWrapper(Algorithm):
     """Wraps a user-provided algorithm into our internal Algorithm class."""
 
-    def __init__(self, params: Params, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+    def __init__(self, params: Params, observation_space: gym.spaces.Dict, action_space: gym.spaces.Dict) -> None:
         super().__init__(params, observation_space, action_space)
         self.contest_algorithm = load_algorithm()
 

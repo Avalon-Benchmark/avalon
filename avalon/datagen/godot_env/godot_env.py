@@ -93,7 +93,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
         is_godot_restarted_on_error: bool = False,
         is_dev_flag_added: bool = False,
         run_uuid: Optional[str] = None,
-    ):
+    ) -> None:
         self.config = config
         self.action_type = action_type
         self.goal_evaluator = goal_evaluator
@@ -140,7 +140,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
             WorldGenerator[GeneratedWorldParamsType], EmptyLevelGenerator(base_path=Path("/tmp/level_gen"), seed=0)
         )
 
-    def _restart_godot_quietly(self):
+    def _restart_godot_quietly(self) -> None:
         if self.is_running:
             if self._bridge.is_open:
                 try:
@@ -156,7 +156,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
             self.process, (self.config.recording_options.resolution_x, self.config.recording_options.resolution_y)
         )
 
-    def _restart_process(self, rebuild_observation_context: bool = False):
+    def _restart_process(self, rebuild_observation_context: bool = False) -> None:
         if self.is_running:
             self.close()
         self.world_generator = self._create_world_generator()
@@ -319,7 +319,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
             self.goal_evaluator.reset(observation, world_params=None)
         return observation
 
-    def close(self):
+    def close(self) -> None:
         if self._bridge.is_open:
             self._bridge.close()
         if not self.process.is_closed:
@@ -339,7 +339,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
             if self.is_running:
                 raise
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         shutil.rmtree(self.config.dir_root, ignore_errors=True)
 
     def get_action_log(self) -> "GodotEnvActionLog[ActionType]":

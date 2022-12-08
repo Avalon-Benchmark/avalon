@@ -47,7 +47,7 @@ from avalon.datagen.world_creation.worlds.world import build_building
 
 @slow_integration_test
 @use(seed_, building_catalog_id_)
-def test_building_is_reproducible(seed: int, building_catalog_id: str):
+def test_building_is_reproducible(seed: int, building_catalog_id: str) -> None:
     building_id = 0
     building_name = "building"
     building_config = VALID_BUILDING_CATALOG[building_catalog_id]
@@ -94,7 +94,7 @@ def test_building_matches_reference(
 
 @integration_test
 @use(seed_, incompatible_building_catalog_id_)
-def test_incompatible_building_raises(seed: int, incompatible_building_catalog_id: str):
+def test_incompatible_building_raises(seed: int, incompatible_building_catalog_id: str) -> None:
     building_id = 0
     incompatible_building_config = BUILDING_CATALOG[incompatible_building_catalog_id]
     rand = np.random.default_rng(seed)
@@ -106,7 +106,7 @@ def test_incompatible_building_raises(seed: int, incompatible_building_catalog_i
 @use(temp_path_, indoor_world_catalog_id_, indoor_worlds_manifest_)
 def test_indoor_world_matches_reference(
     temp_path: Path, indoor_world_catalog_id: str, indoor_worlds_manifest: ChecksumManifest
-):
+) -> None:
     indoor_world_params: IndoorWorldParams = INDOOR_WORLD_CATALOG[indoor_world_catalog_id]
     create_indoor_world(*indoor_world_params, export_path=temp_path)
     generated_world_checksum = get_path_checksum(temp_path)
@@ -149,7 +149,7 @@ def test_all_rooms_accessible(building: Building):
 
 
 @use(seed_, building_)
-def test_entrance_built(seed: int, building: Building):
+def test_entrance_built(seed: int, building: Building) -> None:
     add_entrance_if_has_none(building, np.random.default_rng(seed))
     for story in building.stories:
         tiles = building.generate_tiles(story.num)
@@ -160,7 +160,7 @@ def test_entrance_built(seed: int, building: Building):
 
 
 @use(seed_, building_)
-def test_entrance_unobstructed(seed: int, building: Building):
+def test_entrance_unobstructed(seed: int, building: Building) -> None:
     add_entrance_if_has_none(building, np.random.default_rng(seed))
     for story in building.stories:
         tiles = building.generate_tiles(story.num)
@@ -174,7 +174,7 @@ def test_entrance_unobstructed(seed: int, building: Building):
 
 
 @use(seed_, building_)
-def test_rebuild_with_aligned_entrance(seed: int, building: Building):
+def test_rebuild_with_aligned_entrance(seed: int, building: Building) -> None:
     rand = np.random.default_rng(seed)
     aligned_building = rebuild_with_aligned_entrance(building, rand, 0)
     entrance = only(aligned_building.stories[0].entrances)
@@ -188,7 +188,7 @@ def assert_buildings_equal(building_a: Building, building_b: Building) -> None:
 
 
 @use(building_)
-def test_rebuild_rotated(building: Building):
+def test_rebuild_rotated(building: Building) -> None:
     # Back and forth
     for rotation in {0, 90, -90, 180}:
         assert_buildings_equal(building, building.rebuild_rotated(rotation).rebuild_rotated(-rotation))

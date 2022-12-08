@@ -164,7 +164,7 @@ class InteractiveGodotProcess:
         keep_log: bool = True,
         is_dev_flag_added: bool = False,
         run_uuid: Optional[str] = None,
-    ):
+    ) -> None:
         self.gpu_id = gpu_id
         self.config = config
         self.keep_log = keep_log
@@ -203,11 +203,11 @@ class InteractiveGodotProcess:
         return basename(self.action_record_path) == _ACTION_REPLAY_FILENAME
 
     @property
-    def is_running(self):
+    def is_running(self) -> bool:
         return self.process is not None and self.process.returncode is None
 
     @property
-    def is_finished(self):
+    def is_finished(self) -> bool:
         return self.process is not None and self.process.returncode is not None
 
     @property
@@ -257,7 +257,7 @@ class InteractiveGodotProcess:
         }
         return bash_args, bash_env
 
-    def start(self):
+    def start(self) -> None:
         assert os.path.exists(GODOT_BINARY_PATH), (
             f"Cannot run avalon: Godot binary has not been installed to to {GODOT_BINARY_PATH_ENV_FLAG}={GODOT_BINARY_PATH}. "
             f"Please run `python -m avalon.install_godot_binary` and try again."
@@ -305,7 +305,7 @@ class InteractiveGodotProcess:
                 tar.add(tmp_file.name, arcname=f"meta.json")
         return tar_path
 
-    def check_for_errors(self):
+    def check_for_errors(self) -> None:
         """Raises a GodotError if an error was encountered"""
         file_size = os.path.getsize(self.log_path)
         unread_byte_count = file_size - self.output_file_read_loc
@@ -350,7 +350,7 @@ class InteractiveGodotProcess:
         name = next(matching_known_signal, "UNKNOWN")
         return f"returncode={name}({self.process.returncode})"
 
-    def _raise_error(self, log_content: Optional[str] = None):
+    def _raise_error(self, log_content: Optional[str] = None) -> None:
         _raise_godot_error(
             log_path=self.log_path,
             artifact_path=self.artifact_path,
@@ -358,16 +358,17 @@ class InteractiveGodotProcess:
             details=self._error_code_repr(),
         )
 
-    def raise_any_logged_godot_errors(self):
+    def raise_any_logged_godot_errors(self) -> None:
         lines, is_error_logged = _read_log(self.log_path)
         if is_error_logged:
             self._raise_error("\n".join(lines))
 
-    def wait_for_log_signal(self, log_signal: str):
+    def wait_for_log_signal(self, log_signal: str) -> None:
         process = self.process
         assert process is not None, "Cannot wait_for_ready_signal() before start()"
 
-        def wait_for_ready():
+        def wait_for_ready() -> bool:
+            assert process is not None
             process.poll()
             if process.returncode:
                 self._raise_error()
@@ -378,8 +379,7 @@ class InteractiveGodotProcess:
                     artifact_path=self.artifact_path,
                     log_content="\n".join(log_lines),
                 )
-            if any(log_signal in l for l in log_lines):
-                return True
+            return any(log_signal in l for l in log_lines)
 
         try:
             wait_until_true(wait_for_ready, sleep_inc=0.0001, max_wait_sec=20)
@@ -387,10 +387,10 @@ class InteractiveGodotProcess:
             err = f"did not observe ready message {log_signal}: {str(e)}"
             _raise_godot_error(log_path=self.log_path, artifact_path=self.artifact_path, details=err)
 
-    def wait_for_ready_signal(self):
+    def wait_for_ready_signal(self) -> None:
         self.wait_for_log_signal(READY_LOG_SIGNAL)
 
-    def _poll_for_exit(self):
+    def _poll_for_exit(self) -> bool:
         assert self.process is not None, "Cannot call _poll_for_exit() before start()"
         self.raise_any_logged_godot_errors()
         self.process.poll()

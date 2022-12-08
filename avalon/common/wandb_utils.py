@@ -95,7 +95,7 @@ def download_wandb_checkpoint_from_run(project: str, experiment_name: str, check
     return path
 
 
-def wandb_ensure_api_key():
+def wandb_ensure_api_key() -> None:
     assert os.getenv("WANDB_API_KEY"), "WANDB_API_KEY not defined, make sure it's included in your bashenv.sh!"
 
 

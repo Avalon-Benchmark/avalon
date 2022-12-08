@@ -30,7 +30,7 @@ class Flatten(nn.Module):
 
 
 class CNNBase(nn.Module):
-    def __init__(self, observation_space, action_space, hidden_size=512):
+    def __init__(self, observation_space, action_space, hidden_size=512) -> None:
         """Initializer.
         num_channels: the number of channels in the input images (eg 3
             for RGB images, or 12 for a stack of 4 RGB images).
@@ -84,7 +84,7 @@ class CNNBase(nn.Module):
 
 
 class MLPBase(nn.Module):
-    def __init__(self, observation_space, action_space, hidden_size=64):
+    def __init__(self, observation_space, action_space, hidden_size=64) -> None:
         super().__init__()
 
         # TODO: make this more general to allow non-scalar spaces
@@ -123,7 +123,7 @@ class MLPBase(nn.Module):
 class DiscreteHead(nn.Module):
     """A module that builds a Categorical distribution from logits."""
 
-    def __init__(self, num_outputs, **kwargs):
+    def __init__(self, num_outputs, **kwargs) -> None:
         super().__init__()
         self.num_inputs = num_outputs
         self.num_outputs = 1
@@ -139,7 +139,7 @@ class DiscreteHead(nn.Module):
 
 
 class BernoulliHead(nn.Module):
-    def __init__(self, n_outputs, bias: Optional[Tuple[float, ...]] = None, **kwargs):
+    def __init__(self, n_outputs, bias: Optional[Tuple[float, ...]] = None, **kwargs) -> None:
         super().__init__()
         self.num_inputs = n_outputs
         self.num_outputs = n_outputs
@@ -165,7 +165,7 @@ class NormalHead(nn.Module):
     Standard deviations are learned parameters in this module.
     """
 
-    def __init__(self, action_space: gym.spaces.Box, **kwargs):
+    def __init__(self, action_space: gym.spaces.Box, **kwargs) -> None:
         super().__init__()
         assert isinstance(action_space, gym.spaces.Box)
         assert len(action_space.shape) == 1
@@ -189,7 +189,7 @@ class NormalHead(nn.Module):
 
 
 class DictActionHead(torch.nn.Module):
-    def __init__(self, action_space):
+    def __init__(self, action_space) -> None:
         super().__init__()
         self.action_space = action_space
 
@@ -227,7 +227,7 @@ class DictActionHead(torch.nn.Module):
 
 
 class DictActionDist(torch.distributions.Distribution):
-    def __init__(self, dists, action_heads):
+    def __init__(self, dists, action_heads) -> None:
         super().__init__(validate_args=False)
         self.dists = dists
         self.action_heads = action_heads

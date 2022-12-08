@@ -5,11 +5,11 @@ from typing import Optional
 import sentry_sdk
 
 
-def _is_sentry_enabled():
+def _is_sentry_enabled() -> bool:
     return "SENTRY_DSN" in os.environ
 
 
-def setup_sentry(tags: Optional[Dict[str, str]] = None):
+def setup_sentry(tags: Optional[Dict[str, str]] = None) -> None:
     sentry_dsn = os.environ.get("SENTRY_DSN", "")
     if sentry_dsn:
         sentry_sdk.init(sentry_dsn, traces_sample_rate=0.0, attach_stacktrace=True)  # type: ignore
@@ -18,7 +18,7 @@ def setup_sentry(tags: Optional[Dict[str, str]] = None):
                 sentry_sdk.set_tag(key, value)
 
 
-def complain(message: str, extra: Optional[Dict[str, str]] = None):
+def complain(message: str, extra: Optional[Dict[str, str]] = None) -> None:
     if not _is_sentry_enabled():
         return
 

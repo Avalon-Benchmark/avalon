@@ -46,7 +46,7 @@ from avalon.agent.dreamer.tools import pack_list_of_dicts
 
 
 class Dreamer(Algorithm[DreamerParams]):
-    def __init__(self, params: DreamerParams, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+    def __init__(self, params: DreamerParams, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict) -> None:
         super().__init__(params, obs_space, action_space)
 
         self._encode = HybridEncoder(obs_space, mlp_hidden_dim=self.params.encoder_mlp_hidden_size)

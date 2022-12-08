@@ -68,7 +68,7 @@ tqdm.get_lock()
 tqdm.monitor_interval = 0
 
 
-def configure_local_logger(level: str = "DEBUG", format: Optional[str] = None):
+def configure_local_logger(level: str = "DEBUG", format: Optional[str] = None) -> None:
     try:
         from computronium.common.log_utils import configure_local_logger as inner_configure_local_logger
     except ImportError:
@@ -81,7 +81,7 @@ def configure_local_logger(level: str = "DEBUG", format: Optional[str] = None):
             inner_configure_local_logger(level, format)
 
 
-def configure_remote_logger(level: str = "DEBUG", format: Optional[str] = None):
+def configure_remote_logger(level: str = "DEBUG", format: Optional[str] = None) -> None:
     try:
         from computronium.common.log_utils import configure_remote_logger as inner_configure_remote_logger
     except ImportError:

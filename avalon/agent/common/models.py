@@ -35,7 +35,7 @@ class MLP(torch.nn.Module):
         num_layers: int = 2,
         activation_function: ActivationFunction = ActivationFunction.ACTIVATION_RELU,
         is_batch_normalized: bool = False,
-    ):
+    ) -> None:
         """Will have `num_layers` `torch.nn.Linear` layers.
 
         So num_layers=2 will yield a MLP with one hidden layer and one output layer."""

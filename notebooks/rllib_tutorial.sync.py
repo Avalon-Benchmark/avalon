@@ -53,7 +53,7 @@ Once you have those, let's get into the code!
 # so this wrapper splits them out into separate Discrete spaces.
 # The result is equivalent in what it represents, just differently specified.
 class RllibActionWrapper(gym.ActionWrapper):
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         super().__init__(env)
         self.action_space = copy.deepcopy(env.action_space)
         self.discrete_n = self.action_space.spaces["discrete"].n
@@ -72,7 +72,7 @@ class RllibActionWrapper(gym.ActionWrapper):
 # and we use (channels, height, width).
 # This wrapper swaps those.
 class RllibObservationWrapper(gym.ObservationWrapper):
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         super().__init__(env)
         self.observation_space = copy.deepcopy(env.observation_space)
         rgbd = env.observation_space["rgbd"]
@@ -132,7 +132,9 @@ register_env("godot", env_creator)
 # This includes the difficulty of that episode, and whether the agent succeeded in eating the food.
 # This callback grabs that information and exposes it to RLlib to include in the logging.
 class RayCallbacks(DefaultCallbacks):
-    def on_episode_end(self, *, worker, base_env, policies, episode, env_index: Optional[int] = None, **kwargs):
+    def on_episode_end(
+        self, *, worker, base_env, policies, episode, env_index: Optional[int] = None, **kwargs
+    ) -> None:
         info = episode.last_info_for()
         task = info["task"]
         episode.custom_metrics["success"] = info["success"]

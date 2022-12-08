@@ -79,7 +79,7 @@ class SceneryBorderMode(Enum):
 
 
 class IdGenerator:
-    def __init__(self):
+    def __init__(self) -> None:
         self.next_id: int = 0
 
     def get_next_id(self) -> int:

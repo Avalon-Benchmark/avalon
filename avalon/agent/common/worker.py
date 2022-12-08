@@ -63,7 +63,7 @@ class AsyncRolloutManager:
         env_step_counter,  # multiprocessing.Value, typing for this is broken
         multiprocessing_context: BaseContext,
         train_rollout_dir: str,
-    ):
+    ) -> None:
         seed_and_run_deterministically_if_enabled()
 
         self.params = params
@@ -193,7 +193,7 @@ class RolloutManager:
         model: Algorithm,
         rollout_device: torch.device,
         multiprocessing_context: BaseContext,
-    ):
+    ) -> None:
         self.multiprocessing = is_multiprocessing
         self.num_workers = num_workers
         self.storage_mode = storage_mode
@@ -225,7 +225,7 @@ class RolloutManager:
         num_steps: Optional[int] = None,
         num_episodes: Optional[int] = None,
         exploration_mode: str = "explore",
-    ):
+    ) -> None:
         """Set num_steps and/or num_episodes to run only that many steps/episodes,
         otherwise if left as None there will be no limit. Meets both criteria if both are set.
         """
@@ -347,7 +347,7 @@ class EnvironmentContainer:
         params: Params,
         is_multiprocessing: bool,
         multiprocessing_context: BaseContext,
-    ):
+    ) -> None:
         self.params = params
         self.i = i
         self.is_multiprocessing = is_multiprocessing
@@ -422,7 +422,7 @@ class EnvironmentContainer:
         # At a reset, this will be the new observation from the next episode, which is indeed what we want for inference.
         return received_obs, done, step_data, episode_id
 
-    def send_step(self, action: Action):
+    def send_step(self, action: Action) -> None:
         assert self.waiting_on_result is False
         action = {k: v.numpy() for k, v in action.items()}
         if self.is_multiprocessing:
@@ -449,7 +449,7 @@ class EnvironmentContainer:
         self.waiting_on_result = False
         return result
 
-    def close(self):
+    def close(self) -> None:
         if self.is_multiprocessing:
             try:
                 # need to receive the result to unblock the worker to receive the close signal
@@ -474,7 +474,7 @@ class EnvironmentContainerProcess:
         pipe,  # multiprocessing.Pipe (impossible to type afaik)
         mode: StorageMode,
         env_params: EnvironmentParams,
-    ):
+    ) -> None:
         self.mode = mode
         self.index = index
         self.pipe = pipe

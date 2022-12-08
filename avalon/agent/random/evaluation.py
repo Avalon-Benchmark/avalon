@@ -25,7 +25,7 @@ EVAL_TEMP_PATH = "/tmp/avalon_eval"
 
 
 class RandomActionDistribution:
-    def __init__(self, real_log_stds: Sequence[float], discrete_logits: Sequence[float], seed: int):
+    def __init__(self, real_log_stds: Sequence[float], discrete_logits: Sequence[float], seed: int) -> None:
         torch.random.manual_seed(seed)
         real_scales = torch.tensor(real_log_stds).exp()
         real_means = torch.zeros_like(real_scales)
@@ -81,7 +81,7 @@ def get_random_result_key(seed: int, data_key: str):
     return "__".join(["random_policy", str(seed), data_key]).replace("/", "_")
 
 
-def run_evaluation(worlds_path: Path, data_key: str, seed: int):
+def run_evaluation(worlds_path: Path, data_key: str, seed: int) -> None:
 
     s3_client = SimpleS3Client()
 
@@ -106,11 +106,11 @@ def run_evaluation(worlds_path: Path, data_key: str, seed: int):
     num_processes = 10
     all_results = {}
 
-    def on_done(result: Dict[str, float]):
+    def on_done(result: Dict[str, float]) -> None:
         logger.info(f"Finished generating {result}")
         all_results.update(result)
 
-    def on_error(error: BaseException):
+    def on_error(error: BaseException) -> None:
         logger.error(f"Evaluation failed! {error}")
         traceback.print_exc()
         sentry_sdk.capture_exception(error)

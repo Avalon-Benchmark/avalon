@@ -246,7 +246,7 @@ class GodotEnvironmentParams(EnvironmentParams):
         return len(get_all_tasks_for_task_groups(self.task_groups))
 
 
-def write_video_from_np_arrays(video_path: Path, arrays: List[np.ndarray], fps: float = 20):
+def write_video_from_np_arrays(video_path: Path, arrays: List[np.ndarray], fps: float = 20) -> None:
     # size = arrays[0].shape[:2]
     # out = cv2.VideoWriter(str(video_path), cv2.VideoWriter_fourcc(*"mp4v"), fps, size, False)
     # for array in arrays:
@@ -258,7 +258,7 @@ def write_video_from_np_arrays(video_path: Path, arrays: List[np.ndarray], fps: 
 
 
 class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams]):
-    def __init__(self, params: GodotEnvironmentParams):
+    def __init__(self, params: GodotEnvironmentParams) -> None:
         self.params = params
 
         base_config = create_base_benchmark_config(
@@ -346,7 +346,7 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
 
         return observation, goal_progress
 
-    def update_lame_observation(self, lame_observation: Dict[str, Any]):
+    def update_lame_observation(self, lame_observation: Dict[str, Any]) -> None:
         if self.params.is_frame_id_transformed_to_frames_remaining and "frame_id" in lame_observation:
             assert isinstance(self.goal_evaluator, AvalonGoalEvaluator)
             lame_observation["frame_id"] = self.goal_evaluator.frame_limit - lame_observation["frame_id"] - 1
@@ -434,7 +434,7 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
         state["_bridge"] = None
         return state
 
-    def __setstate__(self, state: Dict[str, Any]):
+    def __setstate__(self, state: Dict[str, Any]) -> None:
         """See __getstate__ docstring
 
         Args:
@@ -459,12 +459,12 @@ class AvalonEnv(GodotEnv[AvalonObservation, VRAction, GeneratedAvalonWorldParams
         else:
             assert False
 
-    def set_task_difficulty(self, task: AvalonTask, difficulty: float):
+    def set_task_difficulty(self, task: AvalonTask, difficulty: float) -> None:
         assert not self.params.is_fixed_generator
         assert isinstance(self.world_generator, (LocalProcessWorldGenerator, BlockingWorldGenerator))
         self.world_generator.set_task_difficulty(task, difficulty)
 
-    def set_meta_difficulty(self, difficulty: float):
+    def set_meta_difficulty(self, difficulty: float) -> None:
         assert not self.params.is_fixed_generator
         assert isinstance(self.world_generator, (LocalProcessWorldGenerator, BlockingWorldGenerator))
         self.world_generator.set_meta_difficulty(difficulty)
@@ -508,7 +508,7 @@ def _transform_observation_clamp(x: NDArray, min: Optional[float] = None, max: O
 
 
 class GodotObsTransformWrapper(gym.ObservationWrapper):
-    def __init__(self, env: GodotEnv, greyscale: bool = False):
+    def __init__(self, env: GodotEnv, greyscale: bool = False) -> None:
         super().__init__(env)
         self.transforms = {
             "rgbd": partial(_transform_observation_rgbd, greyscale=greyscale),
@@ -577,7 +577,7 @@ def squash_real(x: np.ndarray) -> np.ndarray:
 class ScaleAndSquashAction(gym.ActionWrapper):
     """Constrain to within [-1, 1] with a tanh and then scale the actions."""
 
-    def __init__(self, env: gym.Env, key: str = "real", scale: float = 1):
+    def __init__(self, env: gym.Env, key: str = "real", scale: float = 1) -> None:
         super().__init__(env)
         self.key = key
         self.scale = scale
@@ -593,7 +593,7 @@ class ScaleAndSquashAction(gym.ActionWrapper):
 
 # Note: the rate of update of difficulty (per global env step) depends on the number of workers.
 class CurriculumWrapper(Wrapper):
-    def __init__(self, env: AvalonEnv, task_difficulty_update: float, meta_difficulty_update: float):
+    def __init__(self, env: AvalonEnv, task_difficulty_update: float, meta_difficulty_update: float) -> None:
         super().__init__(env)
         self._env = env
         self.difficulties: DefaultDict[AvalonTask, float] = defaultdict(float)

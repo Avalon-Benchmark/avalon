@@ -16,7 +16,7 @@ TEMP_BUCKET_NAME = "untitled-ai-temp"
 
 
 class SimpleS3Client:
-    def __init__(self, bucket_name: str = TEMP_BUCKET_NAME, region: str = REGION):
+    def __init__(self, bucket_name: str = TEMP_BUCKET_NAME, region: str = REGION) -> None:
         self.bucket_name = bucket_name
         self.region = region
         access_key: Optional[str] = None
@@ -40,7 +40,7 @@ class SimpleS3Client:
             config=config,
         )
 
-    def save(self, key: str, data: bytes):
+    def save(self, key: str, data: bytes) -> None:
         self.client.put_object(
             Bucket=self.bucket_name,
             Key=key,
@@ -58,17 +58,17 @@ class SimpleS3Client:
         else:
             return cast(bytes, data)  # type: ignore
 
-    def download_to_file(self, key: str, output_path: Path):
+    def download_to_file(self, key: str, output_path: Path) -> None:
         self.client.download_file(self.bucket_name, key, str(output_path.absolute()))
 
-    def upload_from_file(self, input_path: Path, key: str, is_overwrite_allowed: bool = False):
+    def upload_from_file(self, input_path: Path, key: str, is_overwrite_allowed: bool = False) -> None:
         # TASK 20097119-dfe7-4abb-bdb1-3895db6742e5: remove overwrite ability from S3
         assert is_overwrite_allowed or not self.is_present(
             key
         ), f"Tried to upload to {key} but that path already exists in bucket {self.bucket_name}. Go delete that file manually (or more likely realize you did something wrong and fix that). Technically the file you tried to upload was {str(input_path)}"
         self.client.upload_file(str(input_path.absolute()), self.bucket_name, key)
 
-    def copy_object(self, src: str, dst: str, is_overwrite_allowed: bool = False):
+    def copy_object(self, src: str, dst: str, is_overwrite_allowed: bool = False) -> None:
         # TASK 20097119-dfe7-4abb-bdb1-3895db6742e5: remove overwrite ability from S3
         assert is_overwrite_allowed or not self.is_present(
             dst
@@ -93,10 +93,10 @@ class SimpleS3Client:
         else:
             return True
 
-    def make_bucket(self):
+    def make_bucket(self) -> None:
         self.client.create_bucket(
             Bucket=self.bucket_name,
-            CreateBucketConfiguration={"LocationConstraint": self.region},
+            CreateBucketConfiguration={"LocationConstraint": self.region},  # type: ignore[typeddict-item]
         )
 
 

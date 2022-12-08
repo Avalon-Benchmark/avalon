@@ -8,7 +8,7 @@ import numpy as np
 from avalon.agent.common.params import EnvironmentParams
 
 
-def overwrite_params(params, new_params):
+def overwrite_params(params, new_params) -> None:
     for k, v in new_params.items():
         print(f"WARNING: want arg {k} but got {getattr(params, k)} with {v}")
         # setattr(params, k, v)
@@ -59,7 +59,7 @@ def get_env(task, params: TestEnvironmentParams):
 
 
 class DummyEnv:
-    def __init__(self):
+    def __init__(self) -> None:
         self._random = np.random.RandomState(seed=0)
         self._step = None
 
@@ -90,7 +90,7 @@ class DummyEnv:
         info = {}
         return obs, reward, done, info
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 
@@ -105,7 +105,7 @@ class Test1:
 
     __test__ = False
 
-    def __init__(self, num_steps, discrete=True):
+    def __init__(self, num_steps, discrete=True) -> None:
         self._step = None
         self.num_steps = num_steps
         self.discrete = discrete
@@ -134,7 +134,7 @@ class Test1:
         info = {}
         return obs, reward, done, info
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 
@@ -143,7 +143,7 @@ class Test2:
 
     __test__ = False
 
-    def __init__(self, num_steps, reward_mode="obs_and_action"):
+    def __init__(self, num_steps, reward_mode="obs_and_action") -> None:
         self._step = None
         self.num_steps = num_steps
         self.last_obs = np.zeros((1,))
@@ -181,14 +181,14 @@ class Test2:
         self.last_obs = obs
         return obs.astype(dtype=np.float32), reward, done, info
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 
 class TestHybridAction:
     __test__ = False
 
-    def __init__(self, num_steps):
+    def __init__(self, num_steps) -> None:
         self._step = None
         self.num_steps = num_steps
         self.last_obs = np.zeros((1,))
@@ -226,5 +226,5 @@ class TestHybridAction:
         self.last_obs = obs
         return obs, reward, done, info
 
-    def close(self):
+    def close(self) -> None:
         pass

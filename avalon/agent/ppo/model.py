@@ -40,7 +40,7 @@ class Flatten(nn.Module):
 
 
 class CNNBase(PPOModel):
-    def __init__(self, params, observation_space, action_space, hidden_size=512):
+    def __init__(self, params, observation_space, action_space, hidden_size=512) -> None:
         """Initializer.
         num_channels: the number of channels in the input images (eg 3
             for RGB images, or 12 for a stack of 4 RGB images).
@@ -92,7 +92,7 @@ class CNNBase(PPOModel):
 
 
 class MLPBase(PPOModel):
-    def __init__(self, params, observation_space, action_space, hidden_size=64):
+    def __init__(self, params, observation_space, action_space, hidden_size=64) -> None:
         super().__init__()
 
         assert isinstance(observation_space, gym.spaces.Dict)

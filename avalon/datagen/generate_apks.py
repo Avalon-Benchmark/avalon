@@ -137,10 +137,10 @@ def generate_apks(
 ):
     errors = []
 
-    def on_done(result: APKGenerationResult):
+    def on_done(result: APKGenerationResult) -> None:
         pass
 
-    def on_error(error: BaseException):
+    def on_error(error: BaseException) -> None:
         traceback.print_exception(type(error), error, sys.exc_info()[2])
         errors.append(error)
 
@@ -188,7 +188,7 @@ def generate_apks(
 AVALON_SERVER_URL = "http://avalon.int8.ai:64080"
 
 
-def add_worlds_to_server(worlds: Sequence[GeneratedWorld]):
+def add_worlds_to_server(worlds: Sequence[GeneratedWorld]) -> None:
     world_ids = [world.world_id for world in worlds]
 
     for world_id in world_ids:
@@ -201,7 +201,7 @@ def add_worlds_to_server(worlds: Sequence[GeneratedWorld]):
     assert set(world_ids).issubset(set(state["user_ids_by_world_id"].keys()))
 
 
-def add_apk_version_to_server(apk_version: str):
+def add_apk_version_to_server(apk_version: str) -> None:
     r = requests.get(f"{AVALON_SERVER_URL}/add_apk_version/{apk_version}/")
     assert r.status_code == 200
 

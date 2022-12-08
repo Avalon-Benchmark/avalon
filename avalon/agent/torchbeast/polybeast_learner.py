@@ -148,7 +148,7 @@ parser.add_argument("--save_test_actions", action="store_true",
 # yapf: enable
 
 
-def _set_seed(seed):
+def _set_seed(seed) -> None:
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -183,7 +183,7 @@ class Net(nn.Module):
         img_dim: int = 96,
         encoder_out_dim: int = 256,
         is_sampling_mode: bool = False,
-    ):
+    ) -> None:
         super(Net, self).__init__()
         # TODO: get real action space
 
@@ -271,7 +271,7 @@ class Net(nn.Module):
         return unflatten_tensor(self._action_space, flat_action)
 
 
-def inference(flags, inference_batcher, model, lock=threading.Lock()):  # noqa: B008
+def inference(flags, inference_batcher, model, lock=threading.Lock()) -> None:  # noqa: B008
     with torch.no_grad():
         for batch in inference_batcher:
             batched_env_outputs, agent_state = batch.get_inputs()
@@ -300,7 +300,7 @@ def learn(
     scheduler,
     stats,
     lock=threading.Lock(),
-):
+) -> None:
     model.train()
     for tensors in learner_queue:
         if flags.mode != "train":
@@ -575,7 +575,7 @@ def train(flags):
     for t in learner_threads + inference_threads:
         t.start()
 
-    def checkpoint(step):
+    def checkpoint(step) -> None:
         if flags.disable_checkpoint:
             return
         checkpointpath = Path(wandb.run.dir) / f"model_step_{step}.tar"

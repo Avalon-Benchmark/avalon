@@ -31,7 +31,7 @@ from avalon.datagen.world_creation.worlds.compositional import get_building_task
 from avalon.datagen.world_creation.worlds.export import export_world
 
 
-def export_building(building: Building, building_name: str, export_path: Path):
+def export_building(building: Building, building_name: str, export_path: Path) -> None:
     scene = GodotScene()
     root_node = GDNode("root", "Spatial")
     with scene.use_tree() as tree:
@@ -47,7 +47,7 @@ def reset_unix_epoch_mtime(tar_info: tarfile.TarInfo) -> tarfile.TarInfo:
     return tar_info
 
 
-def make_tarball(root_path: Path, glob_pattern: str, archive_path: Path):
+def make_tarball(root_path: Path, glob_pattern: str, archive_path: Path) -> None:
     last_pwd = os.getcwd()
     try:
         with cast(IO[bytes], gzip.GzipFile(archive_path, mode="wb", mtime=1)) as gzip_file:
@@ -68,7 +68,7 @@ def create_indoor_world(
     location: Point3DNP,
     export_path: Path,
     export_config: ExportConfig = get_oculus_export_config(),
-):
+) -> None:
     task_generator = get_building_task_generator_class(building_task)()
     building, entities, spawn_location, target_location = create_building_for_skill_scenario(
         rand,
@@ -107,7 +107,7 @@ def get_reference_data_path(reference_name: str, snapshot_commit: str) -> Path:
     return cached_reference_path
 
 
-def compare_files(generated_file_path: Path, reference_file_path: Path):
+def compare_files(generated_file_path: Path, reference_file_path: Path) -> None:
     # Comparing the file contents directly generates a diff too big for Pycharm to view directly; instead we
     # store a copy of the files and output the paths, which you can throw into the diff tool yourself
     if not filecmp.cmp(generated_file_path, reference_file_path):

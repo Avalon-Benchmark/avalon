@@ -15,7 +15,7 @@ URLS = {
 
 
 class EvalAI_Interface:
-    def __init__(self, AUTH_TOKEN, EVALAI_API_SERVER, QUEUE_NAME, CHALLENGE_PK):  # type: ignore
+    def __init__(self, AUTH_TOKEN, EVALAI_API_SERVER, QUEUE_NAME, CHALLENGE_PK) -> None:  # type: ignore
         """Class to initiate call to EvalAI backend
 
         Arguments:

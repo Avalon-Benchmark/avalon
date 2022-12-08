@@ -54,7 +54,7 @@ class PPOParams(OnPolicyParams):
 
     model_params: ObservationModelParams = ObservationModelParams()
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         assert len(self.inference_gpus) == 1, "we can only use one inference gpu"
 
         # These should only be changed with great care.

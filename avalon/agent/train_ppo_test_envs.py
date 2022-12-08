@@ -22,7 +22,7 @@ class TestPPOParams(PPOParams):
     entropy_coef: float = 1e-3  # with a small entropy penalty, random actions should stay random unless useful
 
 
-def run(params: TestPPOParams):
+def run(params: TestPPOParams) -> None:
     assert params.num_batches == 1
     assert params.batch_size == params.num_steps * params.num_workers
 

@@ -166,7 +166,7 @@ def tree_food_observations_(
 def test_falling_food_scenario_regressions(
     item_behavior_manifest: BehaviorManifest,
     falling_food_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(item_behavior_manifest, falling_food_observations)
 
 
@@ -178,7 +178,7 @@ def test_falling_food_scenario_regressions(
 def test_ground_food_scenario_regressions(
     item_behavior_manifest: BehaviorManifest,
     ground_food_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(item_behavior_manifest, ground_food_observations)
 
 
@@ -190,7 +190,7 @@ def test_ground_food_scenario_regressions(
 def test_tree_food_scenario_regressions(
     item_behavior_manifest: BehaviorManifest,
     tree_food_observations: List[ScenarioObservations],
-):
+) -> None:
     verify_observations(item_behavior_manifest, tree_food_observations)
 
 

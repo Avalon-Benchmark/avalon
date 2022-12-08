@@ -122,7 +122,7 @@ aggregate_func = lambda x: np.array(
 )
 
 
-def print_aggregate_results(score_numpys: Dict[str, np.ndarray]):
+def print_aggregate_results(score_numpys: Dict[str, np.ndarray]) -> None:
     aggregate_scores, aggregate_score_cis = rly.get_interval_estimates(score_numpys, aggregate_func, reps=1000)
     for task in PRINT_TASK_ORDER:
         if task not in aggregate_scores:
@@ -354,7 +354,7 @@ FINISHED_RUNS = {
 }
 
 
-def get_wandb_result_key(xpid: str, fixed_world_key: str, checkpoint: str = "final"):
+def get_wandb_result_key(xpid: str, fixed_world_key: str, checkpoint: str = "final") -> str:
     return f"avalon_eval__{xpid}__{fixed_world_key}__{checkpoint}"
 
 
@@ -640,7 +640,7 @@ def drop_rows_by_columns(rows: List, ignore: List[int]):
     return rows_without_ignored_columns
 
 
-def print_latex_table(rows):
+def print_latex_table(rows) -> None:
     table = tabulate(rows, headers="firstrow", tablefmt="latex_raw")
     table = table.replace("\\hline", "\\midrule")
     # manual fixes to get the right formatting
@@ -736,7 +736,7 @@ def get_tasks_in_sorted_order(data: Dict[str, np.ndarray]) -> List[str]:
     return [t for t in tasks if t not in {"simple", "compositional", "all"}]
 
 
-def make_taskwise_cdf_plot(ax, data, title="", no_ylabel=False, task_order=None):
+def make_taskwise_cdf_plot(ax, data, title="", no_ylabel=False, task_order=None) -> None:
     if task_order is None:
         tasks = get_tasks_in_sorted_order(data)
     else:
@@ -788,7 +788,7 @@ def make_taskwise_cdf_plot(ax, data, title="", no_ylabel=False, task_order=None)
     ax.spines["top"].set_visible(False)
 
 
-def make_aggregate_cdf_plot(ax, datasets, names, title="", no_ylabel=False):
+def make_aggregate_cdf_plot(ax, datasets, names, title="", no_ylabel=False) -> None:
     # colors = get_colors(len(names))
     # colors = [.9,.2,0], [0,.5,.8]
     colors = hsv_to_rgb([0.95, 0.7, 0.9]), hsv_to_rgb([0.65, 0.75, 0.9]), hsv_to_rgb((0.45, 0.8, 0.7))
@@ -866,7 +866,7 @@ curves = {task: [learning_curve_score_numpys[t][task].mean() for t in ts] for ta
 # fig, ax = plt.subplots(figsize=(8, 6))
 
 
-def plot_all_tasks(ax):
+def plot_all_tasks(ax) -> None:
     colors = [
         hsv_to_rgb(c)
         for c in [

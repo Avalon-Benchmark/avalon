@@ -581,7 +581,7 @@ class TileGraph(Graph):
 
 
 class RoomTileGraph(TileGraph):
-    def __init__(self, rooms: Iterable[Room]):
+    def __init__(self, rooms: Iterable[Room]) -> None:
         super().__init__()
         length = max([r.position.z + r.length for r in rooms])
         width = max([r.position.x + r.width for r in rooms])
@@ -599,7 +599,7 @@ class RoomTileGraph(TileGraph):
 
 
 class StoryNavGraph(TileGraph):
-    def __init__(self, story: Story, exclude_exterior: bool = True):
+    def __init__(self, story: Story, exclude_exterior: bool = True) -> None:
         super().__init__()
         nx.grid_2d_graph(story.length, story.width, create_using=self)
         tiles = story.generate_tiles()

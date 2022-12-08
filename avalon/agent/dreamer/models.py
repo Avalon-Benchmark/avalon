@@ -45,7 +45,9 @@ def init_weights(m: torch.nn.Module, gain: float = 1.0) -> None:
 class GRUCell(nn.Module):
     # This is the custom cell Danijar wrote in his dreamerv2 repo.
     # Default initializer values are the values used for all configs.
-    def __init__(self, input_dim: int, state_size: int, norm: bool = True, act=torch.tanh, update_bias: float = -1):
+    def __init__(
+        self, input_dim: int, state_size: int, norm: bool = True, act=torch.tanh, update_bias: float = -1
+    ) -> None:
         """
         - input_dim: the size of the input vector
         - state_size: the size of the reset, cand, update, state, and output vectors
@@ -76,7 +78,7 @@ class GRUCell(nn.Module):
 
 
 class RSSM(nn.Module):
-    def __init__(self, actdim, embed_size=1024, stoch=30, deter=200, hidden=200, act=F.elu):
+    def __init__(self, actdim, embed_size=1024, stoch=30, deter=200, hidden=200, act=F.elu) -> None:
         super().__init__()
         self._activation = act
         self._stoch_size = stoch
@@ -224,7 +226,7 @@ class HybridEncoder(nn.Module):
         obs_space: gym.spaces.Dict,
         mlp_hidden_dim=400,
         activation_function: ActivationFunction = ActivationFunction.ACTIVATION_ELU,
-    ):
+    ) -> None:
         super().__init__()
         assert isinstance(obs_space, gym.spaces.Dict)
         self.obs_space = obs_space
@@ -306,7 +308,7 @@ class HybridDecoder(nn.Module):
         skip_keys: Tuple[str] = (),
         mlp_hidden_dim=400,
         activation_function: ActivationFunction = ActivationFunction.ACTIVATION_ELU,
-    ):
+    ) -> None:
         super().__init__()
         assert isinstance(obs_space, gym.spaces.Dict)
         self.obs_space = obs_space
@@ -383,7 +385,7 @@ def compute_conv_transpose_output_res(
 
 
 class ConvEncoder(nn.Module):
-    def __init__(self, input_channels: int = 3, input_res: int = 96):
+    def __init__(self, input_channels: int = 3, input_res: int = 96) -> None:
         super().__init__()
         self.input_channels = input_channels
         self.input_res = input_res
@@ -430,7 +432,7 @@ class ConvEncoder(nn.Module):
 
 
 class ConvDecoder(nn.Module):
-    def __init__(self, input_dim: int, out_channels: int, depth: int = 48, res: int = 96):
+    def __init__(self, input_dim: int, out_channels: int, depth: int = 48, res: int = 96) -> None:
         super().__init__()
         self._depth = depth
         self.res = res
@@ -485,7 +487,7 @@ class DenseDecoder(nn.Module):
         dist: str,
         action_head: Optional[DictActionHead] = None,
         activation_function: ActivationFunction = ActivationFunction.ACTIVATION_ELU,
-    ):
+    ) -> None:
         super().__init__()
         self.output_shape = output_shape
         self.dist = dist

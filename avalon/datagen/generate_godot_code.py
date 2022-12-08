@@ -34,16 +34,16 @@ T = TypeVar("T")
 _BUILTIN_TYPE_NAMES = ("String", "bool", "int", "float", "Vector2", "Vector3")
 
 
-def main():
+def main() -> None:
     generate_godot_code()
     generate_python_code()
 
 
-def generate_godot_code():
+def generate_godot_code() -> None:
     pass
 
 
-def generate_python_code():
+def generate_python_code() -> None:
     spec_lines_by_name = load_files("specs")
     distribution_lines_by_name = load_files("utils/distributions")
     externally_defined_types = set(_BUILTIN_TYPE_NAMES + tuple(distribution_lines_by_name.keys()))
@@ -77,7 +77,7 @@ def get_const_lines() -> List[str]:
 
 
 class ParsedAttribute:
-    def __init__(self, name: str, type_name: str, docstring: str, requirements: Set[str], is_optional: bool):
+    def __init__(self, name: str, type_name: str, docstring: str, requirements: Set[str], is_optional: bool) -> None:
         self.name = name
         self.type_name = type_name
         self.docstring = docstring
@@ -106,7 +106,7 @@ class ParsedAttribute:
 
 
 class ParsedClass:
-    def __init__(self, name: str, base: str, attributes: List[ParsedAttribute]):
+    def __init__(self, name: str, base: str, attributes: List[ParsedAttribute]) -> None:
         self.name = name
         self.base = base
         self.attributes = attributes

@@ -69,7 +69,7 @@ def run_checkpoint_on_world_ids(
     return result
 
 
-def run_evaluation(worlds_path: Path, data_key: Optional[str], wandb_run: str, checkpoint_filename: str):
+def run_evaluation(worlds_path: Path, data_key: Optional[str], wandb_run: str, checkpoint_filename: str) -> None:
 
     s3_client = SimpleS3Client()
     result_key = get_wandb_result_key(wandb_run, checkpoint_filename, data_key)
@@ -115,11 +115,11 @@ def run_evaluation(worlds_path: Path, data_key: Optional[str], wandb_run: str, c
     ]
     logger.info(f"Splitting workload into {[len(x) for x in process_world_ids]}")
 
-    def on_done(result):
+    def on_done(result) -> None:
         logger.info(f"Finished generating {result}")
         all_results.update(result)
 
-    def on_error(error: BaseException):
+    def on_error(error: BaseException) -> None:
         logger.error(f"Evaluation failed! {error}")
         traceback.print_exc()
         sentry_sdk.capture_exception(error)

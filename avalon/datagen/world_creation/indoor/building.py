@@ -287,7 +287,7 @@ class Building:
         building_name: str,
         is_indoor_lighting_enabled: bool = False,
         scaling_factor: float = 1,
-    ):
+    ) -> None:
         blocks_by_story: BlocksByStory = {}
         for story in self.stories:
             blocks_by_story[story.num] = self._generate_blocks(story.num)
@@ -725,7 +725,7 @@ class Building:
             level_blocks.append(WindowBlock.make(window.position, window.size, is_collider=not window.is_passable))
         return level_blocks
 
-    def plot(self):
+    def plot(self) -> None:
         import seaborn as sns
 
         vmin = min(tile_symbol.value for tile_symbol in TileIdentity)
@@ -738,7 +738,7 @@ class Building:
             "lightgray": TileIdentity.HALLWAY.value,
             "#eee": TileIdentity.VOID.value,
         }
-        cmap = sorted(colors, key=colors.get)
+        cmap = sorted(colors, key=colors.__getitem__)
 
         fig, axes = plt.subplots(len(self.stories), 1, figsize=(5, 5 * len(self.stories)))
         for i, story in enumerate(self.stories):
@@ -912,7 +912,7 @@ class Building:
 
 
 class BuildingNavGraph(Graph):
-    def __init__(self, building: Building, excluded_stories: Tuple[int, ...] = tuple()):
+    def __init__(self, building: Building, excluded_stories: Tuple[int, ...] = tuple()) -> None:
         """
         Represents the building with rooms as nodes and hallways + story links as edges.
         Does not check for room traversability (there may be blocked hallways / links or impassable terrain) - use
@@ -923,7 +923,7 @@ class BuildingNavGraph(Graph):
         self._add_story_edges(building)
         self._add_story_link_edges(building)
 
-    def _add_story_edges(self, building: Building):
+    def _add_story_edges(self, building: Building) -> None:
         y_offset = 0.0
         for story in building.stories:
             if story.num in self.excluded_stories:
@@ -949,7 +949,7 @@ class BuildingNavGraph(Graph):
                 self.add_edge(from_room_node, to_room_node, distance=total_length)
             y_offset += story.outer_height
 
-    def _add_story_link_edges(self, building: Building):
+    def _add_story_link_edges(self, building: Building) -> None:
         for link in building.story_links:
             if link.bottom_story_id in self.excluded_stories or link.top_story_id in self.excluded_stories:
                 continue
@@ -1124,7 +1124,7 @@ def make_pretty_building_meshes(building: Building, blocks_by_story: BlocksBySto
     z_offset = -building.length / 2
     tile_size = 1
 
-    def add_mesh_data(parent_name: str, child_mesh: Trimesh):
+    def add_mesh_data(parent_name: str, child_mesh: Trimesh) -> None:
         nonlocal mesh_datasets
         parent_mesh_data = mesh_datasets[parent_name]
         parent_mesh_data.vertices.extend(child_mesh.vertices)
@@ -1133,7 +1133,7 @@ def make_pretty_building_meshes(building: Building, blocks_by_story: BlocksBySto
         if child_mesh.visual:
             parent_mesh_data.face_colors.extend(child_mesh.visual.face_colors)
         else:
-            parent_mesh_data.face_colors.extend([0, 0, 0] * len(child_mesh.faces))
+            parent_mesh_data.face_colors.extend([0.0, 0.0, 0.0] * len(child_mesh.faces))
         parent_mesh_data.index_offset += len(child_mesh.vertices)
 
     for story_num, blocks in blocks_by_story.items():

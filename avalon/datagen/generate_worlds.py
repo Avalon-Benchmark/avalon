@@ -214,7 +214,7 @@ def generate_evaluation_worlds(
     all_unhandled_errors = []
     total_error_counter = [0]
 
-    def on_done(result: GeneratedWorld):
+    def on_done(result: GeneratedWorld) -> None:
         if is_verbose:
             logger.info(f"Finished generating {result.world_id}")
         if not result.was_successful:
@@ -224,7 +224,7 @@ def generate_evaluation_worlds(
 
     errors = []
 
-    def on_error(error: BaseException):
+    def on_error(error: BaseException) -> None:
         errors.append(error)
         logger.error("BAD: one of the level generators failed")
 

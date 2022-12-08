@@ -84,7 +84,7 @@ def is_notebook() -> bool:
     return not hasattr(main, "__file__")
 
 
-def set_all_seeds(seed: int):
+def set_all_seeds(seed: int) -> None:
     # make deterministic. was getting weird behavior
     torch.manual_seed(seed + 1)
     np.random.seed(seed + 2)
@@ -92,7 +92,7 @@ def set_all_seeds(seed: int):
 
 
 # if training multiple networks, may want to call this before training each!
-def make_deterministic(seed: int, num_intraop_threads: int = 1):
+def make_deterministic(seed: int, num_intraop_threads: int = 1) -> None:
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     set_all_seeds(seed)
     # ref: https://github.com/pytorch/pytorch/issues/88718

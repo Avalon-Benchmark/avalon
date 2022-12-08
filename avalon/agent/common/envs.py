@@ -160,7 +160,7 @@ class DeepMindControl(gym.Env):
         camera: Any = None,
         include_state: bool = False,
         include_rgb: bool = True,
-    ):
+    ) -> None:
         from dm_control import suite
 
         domain, task = name.split("_", 1)
@@ -305,7 +305,7 @@ class Atari(gym.Env):
         life_done: bool = False,
         sticky: bool = True,
         all_actions: bool = False,
-    ):
+    ) -> None:
         assert size[0] == size[1]
         import gym.envs.atari
         import gym.wrappers

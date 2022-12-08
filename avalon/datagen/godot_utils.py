@@ -18,7 +18,7 @@ GODOT_TEXTURES_PATH = Path(".") / "datagen" / "godot" / "Textures"
 S3_AVALON_ERROR_BUCKET = "avalon-error-logs"
 
 
-def download_godot_textures(download_path: Path = GODOT_TEXTURES_PATH):
+def download_godot_textures(download_path: Path = GODOT_TEXTURES_PATH) -> None:
     logger.info(f"Copying Godot textures from S3 to {download_path}")
     if not os.path.exists(str(download_path)):
         os.mkdir(download_path)

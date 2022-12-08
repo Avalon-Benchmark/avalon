@@ -34,7 +34,7 @@ from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
 
 
-def run_env(flags, actor_id, exit_event):
+def run_env(flags, actor_id, exit_event) -> None:
     np.random.seed()  # Get new random seed in forked process.
     polybeast_env.main(flags, exit_event)
 
@@ -57,7 +57,7 @@ def get_flags(check_argv_empty: bool = False):
     return flags
 
 
-def restore_curriculum_files():
+def restore_curriculum_files() -> None:
     api = wandb.Api()
     run_api = api.run(wandb.run.path)
     curriculum_filenames = [file.name for file in run_api.files() if file.name.startswith("curriculum")]

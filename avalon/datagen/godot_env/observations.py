@@ -81,7 +81,7 @@ class GodotObservationContext(Generic[ObservationType]):
         observation_type: Type[ObservationType],
         is_space_flattened: bool,
         available_features: FeatureSpecDict,
-    ):
+    ) -> None:
         self.observation_type = observation_type
         self.is_space_flattened = is_space_flattened
         self.available_features = available_features

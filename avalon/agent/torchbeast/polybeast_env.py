@@ -98,7 +98,7 @@ def create_env(env_name, config):
         )
 
 
-def serve(env_name, server_address, config):
+def serve(env_name, server_address, config) -> None:
     logging.info(f"serve called with config {config}")
     init = Env if env_name == "Mock" else lambda: create_env(env_name, config)
     server = libtorchbeast.Server(init, server_address=server_address)

@@ -55,7 +55,7 @@ class DreamerAtariParams(DreamerParams):
     prefill_eps_per_dataloader: int = 1
 
 
-def run(params: DreamerAtariParams):
+def run(params: DreamerAtariParams) -> None:
     # params = attr.evolve(params, name=f"{params.name}_{params.env_params.suite}_{params.env_params.task}")
     trainer = DreamerTrainer(params)
     try:

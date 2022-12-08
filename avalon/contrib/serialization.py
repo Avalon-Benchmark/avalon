@@ -1,6 +1,6 @@
 from __future__ import (
-    annotations,
-)  # using this to get Postponed Evaluation of Annotations -- https://www.python.org/dev/peps/pep-0563/
+    annotations,  # using this to get Postponed Evaluation of Annotations -- https://www.python.org/dev/peps/pep-0563/
+)
 
 import multiprocessing
 from contextlib import contextmanager
@@ -194,7 +194,7 @@ def _get_all_subclasses(cls: Any) -> List[Type[Serializable]]:
     return all_subclasses
 
 
-def _compute_unserializable(qualnames: List[str]):
+def _compute_unserializable(qualnames: List[str]) -> None:
     global unserializable_types
 
     if not unserializable_types:

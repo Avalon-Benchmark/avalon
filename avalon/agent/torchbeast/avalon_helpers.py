@@ -45,7 +45,7 @@ def get_dict_action_space(num_actions: int):
 
 
 class DictifyAtari(gym.Wrapper):
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         """Make action space a dictionary"""
         gym.Wrapper.__init__(self, env)
         # self.observation_space = spaces.Dict({"rgb": self.env.observation_space})
@@ -181,7 +181,7 @@ class GodotToPyTorch(GodotObsTransformWrapper):
     Image shape to channels x weight x height, add extra channels for proprioception
     """
 
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         super().__init__(env)
         self.transforms["rgbd"] = _transform_observation_rgbd
         new_shape = self.observation_space.spaces["rgbd"].shape
@@ -365,14 +365,14 @@ def wrap_evaluation_godot_env(env) -> Environment:
     return Environment(env)
 
 
-def force_cudnn_initialization():
+def force_cudnn_initialization() -> None:
     s = 32
     dev = torch.device("cuda")
     torch.nn.functional.conv2d(torch.zeros(s, s, s, s, device=dev), torch.zeros(s, s, s, s, device=dev))
 
 
 # TODO: continue stopping children and looking for children until there are no new ones
-def _destroy_process_tree(parent_pid: int, final_signal: int = signal.SIGKILL):
+def _destroy_process_tree(parent_pid: int, final_signal: int = signal.SIGKILL) -> None:
     """
     First stop everything, then kill everything
     Inspired by this: http://stackoverflow.com/a/3211182/1380514
@@ -395,7 +395,9 @@ def _destroy_process_tree(parent_pid: int, final_signal: int = signal.SIGKILL):
 
 
 class CurriculumWrapper(Wrapper):
-    def __init__(self, env, task_difficulty_update: float, meta_difficulty_update: float, is_resume_allowed: bool):
+    def __init__(
+        self, env, task_difficulty_update: float, meta_difficulty_update: float, is_resume_allowed: bool
+    ) -> None:
         super().__init__(env)
         self.difficulties = defaultdict(float)
         self.task_difficulty_update = task_difficulty_update
@@ -424,11 +426,11 @@ class CurriculumWrapper(Wrapper):
             self.save_curriculum_state_to_file()
         return observation, reward, done, info
 
-    def save_curriculum_state_to_file(self):
+    def save_curriculum_state_to_file(self) -> None:
         with open(self.env.curriculum_save_path, "wb") as f:
             pickle.dump({"difficulties": self.difficulties, "meta_difficulty": self.meta_difficulty}, f)
 
-    def load_curriculum_state_from_file_if_exists(self):
+    def load_curriculum_state_from_file_if_exists(self) -> None:
         filepath = self.env.curriculum_save_path
         if os.path.exists(filepath):
             with open(filepath, "rb") as f:

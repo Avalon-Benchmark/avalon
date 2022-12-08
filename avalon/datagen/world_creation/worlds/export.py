@@ -65,7 +65,7 @@ def export_world(
     output_folder: Path,
     rand: np.random.Generator,
     world: World,
-):
+) -> None:
     # first we create the biome map
     if world.export_config.is_biome_fast:
         biome_config = attr.evolve(world.biome_config, is_scenery_added=False)

@@ -32,7 +32,7 @@ def assert_eventually_true(
     callback: Callable[[], Optional[bool]],
     max_wait_sec: float = 1,
     sleep_inc: float = 0.001,
-):
+) -> None:
     try:
         wait_until_true(callback, max_wait_sec, sleep_inc)
     except TimeoutError as e:
@@ -54,7 +54,7 @@ def caplog_(caplog: LogCaptureFixture):
 
 
 @fixture
-def fast_kill_switch_patch_(monkeypatch: pytest.MonkeyPatch):
+def fast_kill_switch_patch_(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_timeout = 0.5
 
     def mock_watch_fast_timeout(self: _BridgeKillSwitch, _: Optional[float] = None):
@@ -66,18 +66,18 @@ def fast_kill_switch_patch_(monkeypatch: pytest.MonkeyPatch):
 
 
 @fixture
-def fast_open_close_kill_switch_patch_(monkeypatch: pytest.MonkeyPatch):
+def fast_open_close_kill_switch_patch_(monkeypatch: pytest.MonkeyPatch) -> None:
     mock_timeout = 0.5
     monkeypatch.setattr(GodotEnvBridge.__init__, "__defaults__", (mock_timeout, mock_timeout))
 
 
 @fixture
-def never_ready_godot_process_patch_(monkeypatch: pytest.MonkeyPatch):
-    def mock_never_ready(self: InteractiveGodotProcess):
+def never_ready_godot_process_patch_(monkeypatch: pytest.MonkeyPatch) -> None:
+    def mock_never_ready(self: InteractiveGodotProcess) -> None:
         process = self.process
         assert process is not None, "Cannot wait_for_ready_signal() before start()"
 
-        def just_raise():
+        def just_raise() -> None:
             if process.returncode:
                 self._raise_error()
 
@@ -97,7 +97,7 @@ def never_ready_godot_process_patch_(monkeypatch: pytest.MonkeyPatch):
 def test_kill_switch_watches_startup(
     godot_env: AvalonEnv,
     caplog: LogCaptureFixture,
-):
+) -> None:
     godot_env.close()
 
     with pytest.raises(GodotError):
@@ -115,7 +115,7 @@ def test_kill_switch_watches_startup(
 def test_kill_switch_watches_messages(
     godot_env_with_reset: AvalonEnv,
     monkeypatch: pytest.MonkeyPatch,
-):
+) -> None:
     godot_env = godot_env_with_reset
 
     def blocking_to_bytes(_: VRAction) -> bytes:
@@ -138,7 +138,7 @@ def test_kill_switch_watches_messages(
 
 @slow_integration_test
 @use(godot_env_)
-def test_env_opens_and_closes_nicely(godot_env: AvalonEnv):
+def test_env_opens_and_closes_nicely(godot_env: AvalonEnv) -> None:
     assert godot_env.process.is_running
     assert godot_env._bridge.is_open
 
@@ -159,14 +159,14 @@ def test_env_opens_and_closes_nicely(godot_env: AvalonEnv):
 
 @integration_test
 @use(godot_env_)
-def test_requires_reset(godot_env: AvalonEnv):
+def test_requires_reset(godot_env: AvalonEnv) -> None:
     with pytest.raises(Exception, match=r"reset.*act"):
         godot_env.act(get_vr_action())
     godot_env.close()
 
 
 @fixture
-def godot_env_bridge_with_godot_error_on_act_(monkeypatch: pytest.MonkeyPatch):
+def godot_env_bridge_with_godot_error_on_act_(monkeypatch: pytest.MonkeyPatch) -> None:
     def mock_act_to_throw_exception(*args):  # type: ignore[no-untyped-def]
         raise GodotError
 
@@ -174,7 +174,7 @@ def godot_env_bridge_with_godot_error_on_act_(monkeypatch: pytest.MonkeyPatch):
 
 
 @fixture
-def interactive_godot_process_with_godot_error_on_check_for_errors_(monkeypatch: pytest.MonkeyPatch):
+def interactive_godot_process_with_godot_error_on_check_for_errors_(monkeypatch: pytest.MonkeyPatch) -> None:
     def mock_check_for_errors_to_throw_exception(*args):  # type: ignore[no-untyped-def]
         raise GodotError
 
@@ -191,7 +191,7 @@ def artifact_path_() -> Generator[Path, None, None]:
 
 @fixture
 @use(artifact_path_)
-def mock_create_error_artifact_path_(artifact_path: Path, monkeypatch: pytest.MonkeyPatch):
+def mock_create_error_artifact_path_(artifact_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         "avalon.datagen.godot_env.interactive_godot_process.create_error_artifact_path", lambda: artifact_path
     )
@@ -207,7 +207,7 @@ def mock_create_error_artifact_path_(artifact_path: Path, monkeypatch: pytest.Mo
 )
 def test_replay_from_error_artifacts(
     godot_env_with_reset: AvalonEnv, artifact_path: Path, monkeypatch: pytest.MonkeyPatch
-):
+) -> None:
     godot_env = godot_env_with_reset
 
     monkeypatch.setattr(godot_env.process, "artifact_path", artifact_path)

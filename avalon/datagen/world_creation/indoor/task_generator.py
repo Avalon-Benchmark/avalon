@@ -104,7 +104,7 @@ class BuildingTaskGenerator(Generic[PrincipalObstacleParams]):
 
     def add_entrance(
         self, rand: np.random.Generator, building: Building, viable_entrance_sites: Tuple[EntranceSite, ...]
-    ):
+    ) -> None:
         site_idx = rand.choice(range(len(viable_entrance_sites)))
         story_id, room_id, permitted_azimuths = viable_entrance_sites[site_idx]
         entrance_builder = DefaultEntranceBuilder(top=False, bottom=True)

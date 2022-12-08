@@ -15,7 +15,7 @@ from tree import map_structure
 
 
 class SampleDist(torch.distributions.Distribution):
-    def __init__(self, dist: torch.distributions.Distribution, samples: int = 100):
+    def __init__(self, dist: torch.distributions.Distribution, samples: int = 100) -> None:
         self._dist = dist
         self._samples = samples
 
@@ -54,7 +54,7 @@ class SampleDist(torch.distributions.Distribution):
 
 
 class TanhBijector(torch.distributions.Transform):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.bijective = True
         self.domain = torch.distributions.constraints.real

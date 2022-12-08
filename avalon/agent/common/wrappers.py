@@ -44,7 +44,7 @@ class DictObsActionWrapper(Wrapper[DictObservationType, DictActionType]):
         env: gym.Env[Union[DictObservationType, NDArray], Union[DictObservationType, NDArray]],
         obs_key: str = "wrapped",
         action_key: str = "wrapped",
-    ):
+    ) -> None:
         super().__init__(env)
 
         # Build observation space
@@ -89,7 +89,7 @@ class DictObsActionWrapper(Wrapper[DictObservationType, DictActionType]):
 class PixelObsWrapper(gym.ObservationWrapper):
     """Render state-based envs to pixels and use that as the observation."""
 
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         super().__init__(env)
         pixels: NDArray = self.env.render(mode="rgb_array")
         # Some envs (eg CartPole-v1) won't render without being reset first.
@@ -105,7 +105,7 @@ class PixelObsWrapper(gym.ObservationWrapper):
 
 
 class ImageTransformWrapper(gym.ObservationWrapper):
-    def __init__(self, env: gym.Env, key: str, resolution: Optional[int] = None, greyscale: bool = False):
+    def __init__(self, env: gym.Env, key: str, resolution: Optional[int] = None, greyscale: bool = False) -> None:
         """Transform a uint8 image into the format expected by a model.
 
         We actually leave images as uint8s until training, for the 4x lower data size."""
@@ -156,7 +156,7 @@ class ImageTransformWrapper(gym.ObservationWrapper):
 class ClipActionWrapper(gym.ActionWrapper):
     """Clip actions in Box envs that are out of bounds."""
 
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         assert isinstance(env.action_space, gym.spaces.Dict)
         super().__init__(env)
 
@@ -176,7 +176,7 @@ class DiscreteActionToIntWrapper(gym.ActionWrapper):
 
     So for now I'll leave them in floats in my code, and convert them in this wrapper."""
 
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         super().__init__(env)
 
     def action(self, action: np.floating) -> Union[np.floating, int]:
@@ -194,7 +194,7 @@ class OneHotDiscrete(gym.spaces.Discrete):
 
 
 class OneHotMultiDiscrete(gym.spaces.MultiDiscrete):
-    def __init__(self, nvec: List[int], dtype: DTypeLike = np.int64):
+    def __init__(self, nvec: List[int], dtype: DTypeLike = np.int64) -> None:
         assert np.issubdtype(dtype, (int, np.integer))
         self.max_categories = max(nvec)
         super().__init__(nvec=nvec, dtype=dtype)
@@ -214,7 +214,7 @@ class OneHotActionWrapper(gym.ActionWrapper):
     for each dimension. Since we'll use max(num_classes) as the one-hot vector length for all.
     """
 
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         super().__init__(env)
         assert isinstance(env.action_space, gym.spaces.Dict)
         self._env = env
@@ -252,7 +252,7 @@ class OneHotActionWrapper(gym.ActionWrapper):
 
 
 class TimeLimit(gym.Wrapper[GenericObservationType, GenericActionType]):
-    def __init__(self, env: gym.Env, max_episode_steps: Optional[int] = None):
+    def __init__(self, env: gym.Env, max_episode_steps: Optional[int] = None) -> None:
         super().__init__(env)
         self._max_episode_steps: Optional[int] = max_episode_steps
         self._elapsed_steps: Optional[int] = None
@@ -273,7 +273,7 @@ class TimeLimit(gym.Wrapper[GenericObservationType, GenericActionType]):
 
 
 class ElapsedTimeWrapper(gym.Wrapper[DictObservationType, GenericActionType]):
-    def __init__(self, env: gym.Env, max_episode_steps: Optional[int] = None):
+    def __init__(self, env: gym.Env, max_episode_steps: Optional[int] = None) -> None:
         super().__init__(env)
         self._max_episode_steps: Optional[int] = max_episode_steps
         self._elapsed_steps: Optional[int] = None
@@ -305,7 +305,7 @@ class NormalizeActions(gym.ActionWrapper):
 
     Does not adapt non-Box spaces or dimensions that have non-finite bounds."""
 
-    def __init__(self, env: gym.Env):
+    def __init__(self, env: gym.Env) -> None:
         super().__init__(env)
         self._env = env
         self.bounds = {}
@@ -337,7 +337,7 @@ class NormalizeActions(gym.ActionWrapper):
 
 
 class ScaleRewards(gym.RewardWrapper):
-    def __init__(self, env: gym.Env, scale: float = 1.0, func: Callable[[float], float] = lambda x: x):
+    def __init__(self, env: gym.Env, scale: float = 1.0, func: Callable[[float], float] = lambda x: x) -> None:
         super().__init__(env)
         self.scale = scale
         self.func = func
@@ -347,7 +347,7 @@ class ScaleRewards(gym.RewardWrapper):
 
 
 class ActionRepeat(gym.Wrapper[GenericObservationType, GenericActionType]):
-    def __init__(self, env: gym.Env, amount: int):
+    def __init__(self, env: gym.Env, amount: int) -> None:
         super().__init__(env)
         self._amount = amount
 
@@ -370,7 +370,7 @@ class DictFrameStack(gym.ObservationWrapper):
     the observation at t=0 will be repeated back in time to fill.
     """
 
-    def __init__(self, env: gym.Env, num_stack: int):
+    def __init__(self, env: gym.Env, num_stack: int) -> None:
         super().__init__(env)
         self._env = env
         self.num_stack = num_stack

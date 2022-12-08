@@ -210,7 +210,7 @@ class CombinedAction(ActionProtocol, Generic[ActionType, ActionType2]):
         return (a, b)
 
     @classmethod
-    def _prefixed_space_key(cls, key: str, index: int):
+    def _prefixed_space_key(cls, key: str, index: int) -> str:
         return f"{cls.SPACE_DICT_PREFIX}_{index}_{str}"
 
     @classmethod

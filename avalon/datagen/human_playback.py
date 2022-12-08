@@ -80,7 +80,7 @@ DISCRETE_KEYS = [
 ]
 
 
-def _write_message(fp: BinaryIO, message_type: int, message: bytes):
+def _write_message(fp: BinaryIO, message_type: int, message: bytes) -> None:
     fp.write(message_type.to_bytes(1, byteorder="little", signed=False))
     fp.write(message)
 

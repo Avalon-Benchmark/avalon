@@ -77,7 +77,7 @@ def get_godot_editor_path() -> Path:
     return path
 
 
-def _extract_singular_as(zipped: Path, target: Path):
+def _extract_singular_as(zipped: Path, target: Path) -> None:
     with ZipFile(zipped, "r") as archive:
         members = archive.namelist()
         assert len(members) == 1, "Should only contain a single executable binary"
@@ -86,7 +86,7 @@ def _extract_singular_as(zipped: Path, target: Path):
     os.rename(extracted_destination, target)
 
 
-def fetch_binary(build: str, target: Path):
+def fetch_binary(build: str, target: Path) -> None:
     archive_path = target.parent / build
     release = f"{CURRENT_RELEASE}/{build}"
     logger.info(f"Downloading {release} into {_friendly_path(target)}")
@@ -95,12 +95,12 @@ def fetch_binary(build: str, target: Path):
     os.remove(archive_path)
 
 
-def ensure_executable(path: Path):
+def ensure_executable(path: Path) -> None:
     current_permissions_plus_executable = os.stat(path).st_mode | stat.S_IEXEC
     os.chmod(path, current_permissions_plus_executable)
 
 
-def handle_overwrite(target_path: Path, is_overwriting: bool):
+def handle_overwrite(target_path: Path, is_overwriting: bool) -> None:
     if target_path.exists() or target_path.is_symlink():
         if not is_overwriting:
             logger.error(f"Refusing to overwrite existing file {target_path} without --overwrite")
@@ -108,7 +108,7 @@ def handle_overwrite(target_path: Path, is_overwriting: bool):
         os.remove(target_path)
 
 
-def install_binary(build: str, target_path: Path, is_overwriting: bool):
+def install_binary(build: str, target_path: Path, is_overwriting: bool) -> None:
     handle_overwrite(target_path, is_overwriting)
     if target_path.exists():
         if not is_overwriting:
@@ -119,7 +119,7 @@ def install_binary(build: str, target_path: Path, is_overwriting: bool):
     ensure_executable(target_path)
 
 
-def install_available_binaries_for_current_platform(is_overwriting: bool):
+def install_available_binaries_for_current_platform(is_overwriting: bool) -> None:
     platform = get_platform()
     binary_path = get_godot_binary_path()
     editor_path = get_godot_editor_path()

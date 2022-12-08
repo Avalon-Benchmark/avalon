@@ -10,7 +10,7 @@ class RandomAlgorithm:
     Instruction to participant: replace this class with your own algorithm.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         torch.manual_seed(0)
         self.real_dist = torch.distributions.Normal(loc=torch.tensor([0.0] * 18), scale=torch.tensor([1.0] * 18))
         self.discrete_dist = torch.distributions.Bernoulli(probs=torch.tensor([0.5] * 3))

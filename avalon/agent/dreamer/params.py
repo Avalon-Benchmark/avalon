@@ -94,7 +94,7 @@ class DreamerParams(OffPolicyParams):
     eval_workers: int = 16
     train_every: int = 5  # only used in the dreamerv2-style trainer. how many env steps per training step.
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         # These should only be changed with great care.
         assert self.obs_first is False
         assert self.time_limit_bootstrapping is False

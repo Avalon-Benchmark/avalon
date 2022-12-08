@@ -13,7 +13,7 @@ from _pytest.runner import CallInfo
 
 
 # noinspection SpellCheckingInspection
-def pytest_sessionstart(session: Session):
+def pytest_sessionstart(session: Session) -> None:
     assert session, "to satisfy linter"
     if "--pycharm" in sys.argv:
         # noinspection PyUnresolvedReferences
@@ -23,7 +23,7 @@ def pytest_sessionstart(session: Session):
 
 
 # noinspection SpellCheckingInspection
-def pytest_addoption(parser: Parser):
+def pytest_addoption(parser: Parser) -> None:
     if "--pycharm" not in list(itertools.chain(*([x._long_opts for x in parser._anonymous.options]))):
         parser.addoption("--pycharm", action="store_true", default=False, help="enable pycharm debugging")
         parser.addoption("--with-regression", action="store_const", const=True, dest="run_regression")
@@ -32,7 +32,7 @@ def pytest_addoption(parser: Parser):
 
 # noinspection SpellCheckingInspection
 @pytest.hookimpl(tryfirst=True)
-def pytest_runtest_setup(item: Item):
+def pytest_runtest_setup(item: Item) -> None:
     """
     Checks whether tests should be skipped based on integration settings
     """
@@ -73,7 +73,7 @@ def pytest_exception_interact(node: Module, call: CallInfo, report: CollectRepor
         additional_info.suspended_at_unhandled = True
         pydevd_tracing.SetTrace(None)  # no tracing from here
 
-        def actually_stop():
+        def actually_stop() -> None:
             debugger.stop_on_unhandled_exception(
                 debugger, pydevd.thread, additional_info, (exc_type, value, traceback)
             )

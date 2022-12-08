@@ -44,7 +44,7 @@ class ReplayDataset(IterableDataset):
     The full dataset is split among the `params.num_dataloader_workers` workers to save memory.
     """
 
-    def __init__(self, params: OffPolicyParams, storage_dir: str, update_interval: int = 100):
+    def __init__(self, params: OffPolicyParams, storage_dir: str, update_interval: int = 100) -> None:
         self.params = params
         self.cache: dict[str, SequenceData] = {}
         # For O(1) key sampling. Must manually maintain that set(self.storage.keys()) == set(self.storage_keys)

@@ -31,7 +31,7 @@ class TruncatedStandardNormal(Distribution):
     }
     has_rsample = True
 
-    def __init__(self, a: TensorOrNumber, b: TensorOrNumber, validate_args: Optional[bool] = None):
+    def __init__(self, a: TensorOrNumber, b: TensorOrNumber, validate_args: Optional[bool] = None) -> None:
         self.a: Tensor
         self.b: Tensor
         self.a, self.b = broadcast_all(a, b)
@@ -139,7 +139,7 @@ class TruncatedNormal(TruncatedStandardNormal):
         low: TensorOrNumber,
         high: TensorOrNumber,
         validate_args: Optional[bool] = None,
-    ):
+    ) -> None:
         self.loc: Tensor
         self.scale: Tensor
         self.low: Tensor
@@ -176,7 +176,7 @@ class ClippedTruncatedNormal(TruncatedNormal):
 
     def __init__(
         self, loc: TensorOrNumber, scale: TensorOrNumber, low: TensorOrNumber, high: TensorOrNumber, clip: float = 1e-6
-    ):
+    ) -> None:
         super().__init__(loc, scale, low, high)
         self.lower_clip: Tensor = low + clip  # type: ignore
         self.upper_clip: Tensor = high - clip  # type: ignore

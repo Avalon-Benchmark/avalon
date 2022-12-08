@@ -257,7 +257,7 @@ class CompositionalSolutionData:
     def update_goal(self, radius: float) -> "CompositionalSolutionData":
         return attr.evolve(self, current_goal_side_radius=radius)
 
-    def plot(self, map: HeightMap):
+    def plot(self, map: HeightMap) -> None:
         map.plot()
         heights = map.Z.copy()
         max_height = np.max(map.Z)

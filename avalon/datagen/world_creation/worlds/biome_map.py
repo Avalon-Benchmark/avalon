@@ -313,7 +313,7 @@ class BiomeMap:
         result[:, 1] = np.clip(result[:, 1], self.map.region.z.min_ge, self.map.region.z.max_lt)
         return cast(Point2DListNP, result)
 
-    def plot(self):
+    def plot(self) -> None:
         self.map.plot()
 
 
@@ -562,7 +562,7 @@ def _map_to_biome_id(
     return cast(MapIntNP, biome_id)
 
 
-def plot_biome_grid(data: np.ndarray, config: BiomeConfig, title: str = ""):
+def plot_biome_grid(data: np.ndarray, config: BiomeConfig, title: str = "") -> None:
     data = np.array(data)
     fig, ax = plt.subplots()
     fig.set_size_inches(8, 8)
@@ -581,7 +581,7 @@ def plot_biome_grid(data: np.ndarray, config: BiomeConfig, title: str = ""):
     plt.show()
 
 
-def print_biome_legend(config: BiomeConfig):
+def print_biome_legend(config: BiomeConfig) -> None:
     display(HTML(f"<h1>Biomes:</h1>"))
 
     for biome in config.biomes:

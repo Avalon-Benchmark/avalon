@@ -103,7 +103,7 @@ ParamsType = TypeVar("ParamsType", bound=Params)
 class Algorithm(torch.nn.Module, ABC, Generic[ParamsType]):
     step_data_type: Type = StepData
 
-    def __init__(self, params: ParamsType, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict):
+    def __init__(self, params: ParamsType, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict) -> None:
         seed_and_run_deterministically_if_enabled()
 
         super().__init__()

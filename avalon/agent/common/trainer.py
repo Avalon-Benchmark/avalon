@@ -50,7 +50,7 @@ class Cleanable(Protocol):
 
 
 class Trainer(ABC, Generic[ParamsType]):
-    def __init__(self, params: ParamsType):
+    def __init__(self, params: ParamsType) -> None:
         # TODO: fix this properly
         import openturns
 
@@ -80,7 +80,7 @@ class Trainer(ABC, Generic[ParamsType]):
         self.wandb_run = self.wandb_init()
         self.algorithm = self.algorithm.to(self.params.train_device)
 
-    def get_spaces(self):
+    def get_spaces(self) -> None:
         dummy_env = build_env(self.params.env_params)
         self.params = attr.evolve(
             self.params, observation_space=dummy_env.observation_space, action_space=dummy_env.action_space
@@ -127,7 +127,7 @@ class Trainer(ABC, Generic[ParamsType]):
     def create_dataloader(self) -> Iterator:
         raise NotImplementedError
 
-    def train(self):
+    def train(self) -> None:
         if not self.start:
             self.start = time.time()
         while True:
@@ -143,7 +143,7 @@ class Trainer(ABC, Generic[ParamsType]):
     def frames_per_batch(self):
         return self.params.batch_size
 
-    def train_step(self):
+    def train_step(self) -> None:
         rollouts: BatchSequenceData = next(self.train_dataloader)
         start = time.time()
         start_i = self.i
@@ -181,7 +181,7 @@ class Trainer(ABC, Generic[ParamsType]):
         # val.update(algorithm, i, env_step)
         # self.i += 1
 
-    def checkpoint(self, filename: Optional[str] = None):
+    def checkpoint(self, filename: Optional[str] = None) -> None:
         if not filename:
             filename = f"model_{self.i}.pt"
         model_filename = Path(wandb.run.dir) / filename  # type: ignore
@@ -193,7 +193,7 @@ class Trainer(ABC, Generic[ParamsType]):
         if not self.params.is_train_only:
             raise NotImplementedError
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         # The main thread won't join until we close all the processes we have open.
         for item in self.to_cleanup:
             item.shutdown()
@@ -201,7 +201,7 @@ class Trainer(ABC, Generic[ParamsType]):
 
 
 class OffPolicyTrainer(Trainer[OffPolicyParams]):
-    def __init__(self, params: OffPolicyParams):
+    def __init__(self, params: OffPolicyParams) -> None:
         self.train_rollout_dir = str(Path(params.data_dir) / "train" / str(uuid.uuid4()))
 
         # Necessary to fix some bug: https://github.com/wandb/client/issues/1994
@@ -213,18 +213,18 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
         super().__init__(params)
         ModelStorage.clean()
 
-    def log_rollout_stats(self):
+    def log_rollout_stats(self) -> None:
         for manager in self.train_rollout_managers:
             wandb_lib.log_from_queue(manager.wandb_queue, prefix=f"rollout_manager_{manager.rollout_manager_id}/")
 
-    def start_train_rollouts(self):
+    def start_train_rollouts(self) -> None:
         [manager.start() for manager in self.train_rollout_managers]
 
-    def shutdown_train_rollouts(self):
+    def shutdown_train_rollouts(self) -> None:
         [manager.shutdown() for manager in self.train_rollout_managers]
         self.train_rollout_managers = []
 
-    def create_rollout_manager(self):
+    def create_rollout_manager(self) -> None:
         self.env_step_counters = []
         for i in range(self.params.worker_managers):
             # we don't need a lock here because there's only one writer and precise read/write ordering doesn't matter
@@ -258,7 +258,7 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
             )
         )
 
-    def train_step(self):
+    def train_step(self) -> None:
         old_i = self.i
         super().train_step()
         assert self.i == old_i + 1, "Off-policy algorithms must increment i by only 1"
@@ -275,7 +275,7 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
 
 
 class OnPolicyTrainer(Trainer[OnPolicyParams]):
-    def __init__(self, params: OnPolicyParams):
+    def __init__(self, params: OnPolicyParams) -> None:
         super().__init__(params)
 
     def create_rollout_manager(self):
@@ -296,7 +296,7 @@ class OnPolicyTrainer(Trainer[OnPolicyParams]):
     def create_train_storage(self) -> TrajectoryStorage:
         return InMemoryStorage(self.params)
 
-    def rollout_step(self):
+    def rollout_step(self) -> None:
         # Run rollouts
         start = time.time()
         self.train_rollout_manager.run_rollout(

@@ -75,7 +75,7 @@ class TrajectoryStorage(ABC):
     def reset(self) -> None:
         pass
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         pass
 
 
@@ -87,7 +87,7 @@ class InMemoryStorage(TrajectoryStorage):
     Could have two instances of this class for both cases if needed, if the implementation is sufficiently abstracted.
     """
 
-    def __init__(self, params: Params):
+    def __init__(self, params: Params) -> None:
         self.storage: Dict[str, List[StepData]] = defaultdict(list)
         self.params = params
 
@@ -114,7 +114,7 @@ class DiskStorage(TrajectoryStorage):
         # wandb: Optional[Run],
         wandb_queue=None,  # not typeable, but a Optional[Queue] :(
         discard_short_eps: bool = True,  # should be true in training, false in eval
-    ):
+    ) -> None:
         self.ongoing: Dict[str, List[StepData]] = defaultdict(list)
         self.params = params
         # self.wandb = wandb
@@ -224,7 +224,7 @@ class DiskStorage(TrajectoryStorage):
         with filename.open("wb") as f2:
             pickle.dump(episode, f2)
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         shutil.rmtree(str(self.data_dir), ignore_errors=True)
 
 
@@ -240,7 +240,7 @@ class LambdaStorage(TrajectoryStorage):
 
     def __init__(
         self, params: Params, lambdas: Tuple[Callable[[List[StepData]], None], ...], storage_mode: StorageMode
-    ):
+    ) -> None:
         self.params = params
         self.lambdas = lambdas
         self.storage_mode = storage_mode

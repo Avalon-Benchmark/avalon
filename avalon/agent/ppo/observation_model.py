@@ -35,7 +35,7 @@ class ObservationModel(PPOModel):
     # policy_net: Optional[MLP]
     # value_net: MLP
 
-    def __init__(self, params: PPOParams, obs_space: Space, action_space: Space):
+    def __init__(self, params: PPOParams, obs_space: Space, action_space: Space) -> None:
         assert isinstance(obs_space, spaces.Dict), "We must have a dict obs space for this ObservationModel"
         assert isinstance(action_space, spaces.Dict), "We must have a dict action space for this ObservationModel"
         self.obs_space: spaces.Dict = obs_space
@@ -131,7 +131,9 @@ IMPALA_RES_OUT_LOOKUP = {64: 8, 84: 11, 96: 12}
 class ImpalaConvNet(nn.Module):
     """This is used in godot PPO."""
 
-    def __init__(self, out_dim: int = 256, img_dim: int = 96, input_channels: int = 4, num_base_channels: int = 16):
+    def __init__(
+        self, out_dim: int = 256, img_dim: int = 96, input_channels: int = 4, num_base_channels: int = 16
+    ) -> None:
         super().__init__()
 
         feat_convs: list[Module] = []

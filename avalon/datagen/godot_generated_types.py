@@ -8,7 +8,6 @@ import attr
 
 from avalon.datagen.godot_base_types import *
 
-
 BRIDGE_LOG_SIGNAL: Final = "Establishing Bridge"
 READY_LOG_SIGNAL: Final = "GODATA!"
 FIXED_FPS: Final = 10

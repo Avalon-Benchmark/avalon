@@ -152,7 +152,7 @@ def get_all_human_scores(root_path: Path) -> HumanScores:
     uncaught_errors: List[BaseException] = []
     expected_errors: List[ScoreResult] = []
 
-    def on_done(result: ScoreResult):
+    def on_done(result: ScoreResult) -> None:
         if result.is_error:
             expected_errors.append(result)
         elif result.is_reset:

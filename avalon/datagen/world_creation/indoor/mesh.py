@@ -1,3 +1,4 @@
+from typing import List
 from typing import Optional
 
 import numpy as np
@@ -27,11 +28,11 @@ def make_color_visuals(mesh: Trimesh, rgba: RGBATuple) -> ColorVisuals:
 
 
 class MeshData:
-    def __init__(self):
-        self.vertices = []
-        self.faces = []
-        self.face_normals = []
-        self.face_colors = []
+    def __init__(self) -> None:
+        self.vertices: List[List[float]] = []
+        self.faces: List[List[float]] = []
+        self.face_normals: List[List[float]] = []
+        self.face_colors: List[float] = []
         self.index_offset = 0
 
 

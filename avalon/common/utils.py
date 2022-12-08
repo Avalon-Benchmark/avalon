@@ -56,7 +56,7 @@ def show(x: Any, **kwargs):  # type: ignore
     return display(x, **kwargs)
 
 
-def create_random_image():
+def create_random_image() -> None:
     import numpy
     from PIL import Image
 

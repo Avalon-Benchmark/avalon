@@ -61,7 +61,7 @@ class _BridgeKillSwitch:
         godot_process: InteractiveGodotProcess,
         check_period_seconds: float = 5.0,
         default_timeout: float = 30.0,
-    ):
+    ) -> None:
         self._kill_time: float = math.inf
         self._godot_process = godot_process
         self._default_timeout = default_timeout
@@ -98,7 +98,7 @@ class _BridgeKillSwitch:
     def raise_any_logged_errors(self) -> None:
         self._godot_process.raise_any_logged_godot_errors()
 
-    def _kill_if_blocked(self):
+    def _kill_if_blocked(self) -> None:
         while True:
             time.sleep(self._check_period_seconds)
             if self._godot_process.is_finished:
@@ -125,7 +125,7 @@ class GodotEnvBridge(Generic[ActionType]):
         kill_switch: _BridgeKillSwitch,
         close_timeout_seconds: float,
         screen_shape: Tuple[int, int, int],
-    ):
+    ) -> None:
         self._action_pipe = action_pipe
         self._action_record_pipe = action_record_pipe
         self._observation_pipe = observation_pipe
@@ -178,7 +178,7 @@ class GodotEnvBridge(Generic[ActionType]):
         return bridge
 
     @property
-    def is_open(self):
+    def is_open(self) -> bool:
         return not (self._action_pipe.closed or self._observation_pipe.closed or self._action_record_pipe.closed)
 
     def query_available_features(self) -> FeatureSpecDict:
@@ -196,14 +196,14 @@ class GodotEnvBridge(Generic[ActionType]):
                 available_features[feature_name] = (data_type, dims)
             return available_features
 
-    def select_and_cache_features(self, selected_features: FeatureSpecDict):
+    def select_and_cache_features(self, selected_features: FeatureSpecDict) -> None:
         self._selected_features = selected_features
         with self._kill_switch.watch_blocking_action():
             size_doubleword = (len(selected_features)).to_bytes(4, byteorder="little", signed=False)
             feature_names_bytes = ("\n".join(selected_features.keys()) + "\n").encode("UTF-8")
             self._send_message(SELECT_FEATURES_MESSAGE, size_doubleword + feature_names_bytes)
 
-    def seed(self, episode_seed: int):
+    def seed(self, episode_seed: int) -> None:
         with self._kill_switch.watch_blocking_action():
             message_bytes = episode_seed.to_bytes(8, byteorder="little", signed=True)
             self._send_message(SEED_MESSAGE, message_bytes)
@@ -268,7 +268,7 @@ class GodotEnvBridge(Generic[ActionType]):
         except BrokenPipeError:
             pass
 
-    def _send_message(self, message_type: int, message: bytes):
+    def _send_message(self, message_type: int, message: bytes) -> None:
         """Send a message down the godot action pipe.
 
         This is always a single byte message_type, followed by the message.
@@ -280,7 +280,7 @@ class GodotEnvBridge(Generic[ActionType]):
         self._action_pipe.flush()
         self._action_record_pipe.flush()
 
-    def _action_pipe_write(self, data: bytes):
+    def _action_pipe_write(self, data: bytes) -> None:
         self._action_pipe.write(data)
         self._action_record_pipe.write(data)
 
@@ -317,7 +317,7 @@ class GodotEnvBridge(Generic[ActionType]):
         return feature_data
 
 
-def _mkpipe(pipe: str):
+def _mkpipe(pipe: str) -> None:
     if os.path.exists(pipe):
         os.remove(pipe)
     os.mkfifo(pipe)

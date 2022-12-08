@@ -180,7 +180,7 @@ class ChoicesDistribution(BaseDistribution[T]):
 class ConstDistribution(BaseDistribution[T]):
     value: T
 
-    def __init__(self, value: T):
+    def __init__(self, value: T) -> None:
         self.value = value
 
     def sample(self, rand: Random) -> T:
@@ -192,7 +192,7 @@ class GaussianDistribution(BaseDistribution[FloatT]):
     value_mean: FloatT
     value_std: FloatT
 
-    def __init__(self, value_mean: FloatT, value_std: FloatT):
+    def __init__(self, value_mean: FloatT, value_std: FloatT) -> None:
         self.value_mean = value_mean
         self.value_std = value_std
 
@@ -215,7 +215,7 @@ class BernoulliDistribution(BaseDistribution[bool]):
     probability: float
     value: bool
 
-    def __init__(self, probability: float, value: bool = True):
+    def __init__(self, probability: float, value: bool = True) -> None:
         self.probability = probability
         self.value = value
 
@@ -225,7 +225,7 @@ class UniformDistribution(BaseDistribution[FloatT]):
     value_min: FloatT
     value_max: FloatT
 
-    def __init__(self, value_min: FloatT, value_max: FloatT):
+    def __init__(self, value_min: FloatT, value_max: FloatT) -> None:
         self.value_min = value_min
         self.value_max = value_max
 

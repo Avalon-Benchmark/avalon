@@ -21,7 +21,7 @@ from avalon.datagen.world_creation.tests.params import OutdoorWorldParams
 
 @slow_integration_test
 @use(outdoor_world_catalog_id_)
-def test_world_is_reproducible(outdoor_world_catalog_id: str):
+def test_world_is_reproducible(outdoor_world_catalog_id: str) -> None:
     outdoor_world_params: OutdoorWorldParams = OUTDOOR_WORLD_CATALOG[outdoor_world_catalog_id]
     export_config = attr.evolve(get_eval_agent_export_config(), is_tiled=False)
 
@@ -43,7 +43,7 @@ def test_world_is_reproducible(outdoor_world_catalog_id: str):
 @use(temp_path_, outdoor_world_catalog_id_, outdoor_worlds_manifest_)
 def test_outdoor_world_matches_reference(
     temp_path: Path, outdoor_world_catalog_id: str, outdoor_worlds_manifest: ChecksumManifest
-):
+) -> None:
     outdoor_world_params: OutdoorWorldParams = OUTDOOR_WORLD_CATALOG[outdoor_world_catalog_id]
     create_world(*outdoor_world_params, export_path=temp_path)
     for path in temp_path.iterdir():

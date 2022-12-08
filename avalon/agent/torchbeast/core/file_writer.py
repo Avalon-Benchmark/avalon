@@ -69,7 +69,7 @@ class FileWriter:
         xp_args: Optional[dict] = None,
         rootdir: str = "~/logs",
         symlink_to_latest: bool = True,
-    ):
+    ) -> None:
         if not xpid:
             # Make unique id.
             xpid = "{proc}_{unixtime}".format(proc=os.getpid(), unixtime=int(time.time()))

@@ -34,7 +34,7 @@ class DreamerTrainer(Trainer[OffPolicyParams]):
     This results in a fixed constant ratio between training and env steps.
     """
 
-    def __init__(self, params: OffPolicyParams):
+    def __init__(self, params: OffPolicyParams) -> None:
         self.wandb_queue = queue.Queue()  # type: ignore[var-annotated]
         self.train_rollout_dir = str(Path(params.data_dir) / "train" / str(uuid.uuid4()))
         super().__init__(params)
@@ -88,7 +88,7 @@ class DreamerTrainer(Trainer[OffPolicyParams]):
             )
         )
 
-    def train_step(self):
+    def train_step(self) -> None:
         rollout_steps = self.params.train_every
         self.train_rollout_manager.run_rollout(
             num_steps=rollout_steps,
@@ -140,7 +140,7 @@ class DreamerDMCParams(DreamerParams):
     prefill_eps_per_dataloader: int = 1
 
 
-def run(params: DreamerDMCParams):
+def run(params: DreamerDMCParams) -> None:
     # TODO: do this!!
     # assert False, "check param counts match before running this again!"
 

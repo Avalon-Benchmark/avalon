@@ -41,7 +41,7 @@ class Terrain:
         point_density_in_points_per_square_meter: float,
         rand: np.random.Generator,
         special_regions: Tuple[Region, ...] = tuple(),
-    ):
+    ) -> None:
         self.biome_map = biome_map
         self.height_map = biome_map.map
         self.fine_triangulation = TerrainTriangulation(
@@ -189,7 +189,7 @@ class Terrain:
         tile_x: int,
         tile_z: int,
         tree: Tree,
-    ):
+    ) -> None:
         flora_list_by_resource = get_scenery_with_tile_ids(
             flora_by_tile_ids_and_resource, neighboring_and_this_tile_ids
         )
@@ -373,7 +373,7 @@ class TerrainTriangulation:
         rand: np.random.Generator,
         special_regions: Tuple[Region, ...] = tuple(),
         extra_points: Optional[Point2DListNP] = None,
-    ):
+    ) -> None:
         self.config = biome_map.config
         height_map = biome_map.map
         points_per_meter = point_density_in_points_per_square_meter**0.5

@@ -140,7 +140,7 @@ def tree_food_snapshot_behaviors_in_unique_envs_(
 def test_animal_inactive_snapshot_behavior_regressions(
     snapshot_behavior_manifest: BehaviorManifest,
     animal_inactive_snapshot_behaviors: List[SnapshotCollection],
-):
+) -> None:
     for scenario_snapshots in animal_inactive_snapshot_behaviors:
         verify_combined_snapshot_observations(snapshot_behavior_manifest, scenario_snapshots)
 
@@ -150,7 +150,7 @@ def test_animal_inactive_snapshot_behavior_regressions(
 def test_prey_flee_snapshot_behavior_regressions(
     snapshot_behavior_manifest: BehaviorManifest,
     prey_flee_snapshot_behaviors: List[SnapshotCollection],
-):
+) -> None:
     for scenario_snapshots in prey_flee_snapshot_behaviors:
         verify_combined_snapshot_observations(snapshot_behavior_manifest, scenario_snapshots)
 
@@ -160,7 +160,7 @@ def test_prey_flee_snapshot_behavior_regressions(
 def test_predator_chase_snapshot_behavior_regressions(
     snapshot_behavior_manifest: BehaviorManifest,
     predator_chase_snapshot_behaviors: List[SnapshotCollection],
-):
+) -> None:
     for scenario_snapshots in predator_chase_snapshot_behaviors:
         verify_combined_snapshot_observations(snapshot_behavior_manifest, scenario_snapshots)
 
@@ -170,7 +170,7 @@ def test_predator_chase_snapshot_behavior_regressions(
 def test_animal_climb_snapshot_behavior_regressions(
     snapshot_behavior_manifest: BehaviorManifest,
     animal_climb_snapshot_behaviors: List[SnapshotCollection],
-):
+) -> None:
     for scenario_snapshots in animal_climb_snapshot_behaviors:
         verify_combined_snapshot_observations(snapshot_behavior_manifest, scenario_snapshots)
 
@@ -180,7 +180,7 @@ def test_animal_climb_snapshot_behavior_regressions(
 def test_animal_item_interaction_snapshot_behavior_regressions(
     snapshot_behavior_manifest: BehaviorManifest,
     animal_item_interaction_snapshot_behaviors: List[SnapshotCollection],
-):
+) -> None:
     for scenario_snapshots in animal_item_interaction_snapshot_behaviors:
         verify_combined_snapshot_observations(snapshot_behavior_manifest, scenario_snapshots)
 
@@ -190,7 +190,7 @@ def test_animal_item_interaction_snapshot_behavior_regressions(
 def test_tree_food_snapshot_behavior_regressions(
     snapshot_behavior_manifest: BehaviorManifest,
     tree_food_snapshot_behaviors: List[SnapshotCollection],
-):
+) -> None:
     for scenario_snapshots in tree_food_snapshot_behaviors:
         verify_combined_snapshot_observations(snapshot_behavior_manifest, scenario_snapshots)
 
@@ -200,7 +200,7 @@ def test_tree_food_snapshot_behavior_regressions(
 def test_animal_item_interaction_snapshot_regressions_in_unique_envs(
     animal_item_interaction_snapshot_behaviors: List[SnapshotCollection],
     animal_item_interaction_snapshot_behaviors_in_unique_envs: List[SnapshotCollection],
-):
+) -> None:
     same_envs_vs_unique = zip(
         animal_item_interaction_snapshot_behaviors, animal_item_interaction_snapshot_behaviors_in_unique_envs
     )
@@ -217,18 +217,18 @@ def test_animal_item_interaction_snapshot_regressions_in_unique_envs(
 def test_tree_food_snapshot_regressions_in_unique_envs(
     tree_food_snapshot_behaviors: List[SnapshotCollection],
     tree_food_snapshot_behaviors_in_unique_envs: List[SnapshotCollection],
-):
+) -> None:
     for same_env, unique_envs in zip(tree_food_snapshot_behaviors, tree_food_snapshot_behaviors_in_unique_envs):
         verify_low_difference(same_env, unique_envs, acceptable_difference=0.005)
 
 
-def verify_combined_snapshot_observations(manifest: BehaviorManifest, collection: SnapshotCollection):
+def verify_combined_snapshot_observations(manifest: BehaviorManifest, collection: SnapshotCollection) -> None:
     historical_checksums = manifest.get_checksums(collection.manifest_key)
     checksums = collection._checksum_dict(is_testing=True)
     assert checksums == historical_checksums, f"{collection.manifest_key}'s checksums have changed!"
 
 
-def verify_low_difference(a: SnapshotCollection, b: SnapshotCollection, acceptable_difference: float):
+def verify_low_difference(a: SnapshotCollection, b: SnapshotCollection, acceptable_difference: float) -> None:
     a_rgbd = combined_snapshot_rgbd(a.snapshots)
     b_rgbd = combined_snapshot_rgbd(b.snapshots)
     difference = percent_difference(a_rgbd, b_rgbd)

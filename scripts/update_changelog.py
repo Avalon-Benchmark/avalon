@@ -72,7 +72,7 @@ class UpdateChangelog:
                     changes[section_name].append(change)
         return changes
 
-    def _update_changelog_in_place(self, changes: Dict[str, List[str]], changelog_file: Path):
+    def _update_changelog_in_place(self, changes: Dict[str, List[str]], changelog_file: Path) -> None:
         changelog_actions = ["Added", "Changed", "Deprecated", "Removed", "Fixed", "Security"]
         flags = re.IGNORECASE | re.MULTILINE
         with open(changelog_file, "r+") as changelog:
@@ -116,7 +116,7 @@ class UpdateChangelog:
             changelog.seek(0)
             changelog.write(reconstructed_updated_changelog + "\n")
 
-    def from_commit_log(self, since_commit: Optional[str] = None):
+    def from_commit_log(self, since_commit: Optional[str] = None) -> None:
         """
         Update the avalon CHANGELOG.md based on commits since it's last edit for manual review and commit.
 
@@ -169,7 +169,7 @@ class UpdateChangelog:
         self._update_changelog_in_place(changes, CHANGELOG_PATH)
         print(f"CHANGELOG.md updated! Please review the changes before committing them.")
 
-    def from_literal_message(self, message: str):
+    def from_literal_message(self, message: str) -> None:
         """
         Update CHANGELOG.md with raw message text. See `from_commit_log` for formatting details.
         Message must still contain "avalon changes" sub-header.

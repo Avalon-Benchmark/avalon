@@ -147,7 +147,7 @@ def generate_baseball_task(
     output_path: Path,
     export_config: ExportConfig,
     task_config: BaseballIndoorTaskConfig = BaseballIndoorTaskConfig(),
-):
+) -> None:
     """
     This part is mostly boilerplate that actually drives the task generator and exports the final level to a set of
     .tscn files that can be played in Godot (directly for human testing, or via GodotEnv for agent training).

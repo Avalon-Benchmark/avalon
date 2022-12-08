@@ -163,7 +163,7 @@ class TLShapeFootprintBuilder(FootprintBuilder):
         return footprint
 
 
-def _smooth(array: np.ndarray):
+def _smooth(array: np.ndarray) -> None:
     raveled = array.ravel()
     cuts = np.where(np.diff(raveled) != 0)[0] + 1
     chunks = np.split(raveled, cuts)
@@ -172,7 +172,7 @@ def _smooth(array: np.ndarray):
             chunk[True] = 0
 
 
-def smooth_footprint(footprint: np.ndarray):
+def smooth_footprint(footprint: np.ndarray) -> None:
     """
     Removes sections of the footprint that are effectively zero-width (left wall
     is adjacent to right wall / top wall is adjacent to bottom wall).
@@ -1111,7 +1111,7 @@ class WindowBuilder:
             stories_with_windows.append(attr.evolve(story, windows=windows))
         return stories_with_windows
 
-    def visualise(self, story: Story, wall_footprints: List[WallFootprint], windows: List[Window]):
+    def visualise(self, story: Story, wall_footprints: List[WallFootprint], windows: List[Window]) -> None:
         fig, ax = plt.subplots()
         plt.gca().set_aspect("equal")
         plt.gca().xaxis.set_major_locator(plt.MultipleLocator(1))

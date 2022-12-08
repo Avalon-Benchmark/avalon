@@ -42,7 +42,7 @@ class DreamerTestEnvParams(DreamerParams):
     log_freq_media: int = 25
 
 
-def run(params: DreamerParams):
+def run(params: DreamerParams) -> None:
     trainer = OffPolicyTrainer(params)
     try:
         trainer.start_train_rollouts()

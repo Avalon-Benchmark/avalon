@@ -418,7 +418,7 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
 
     step, stats = 0, {}
 
-    def batch_and_learn(i, lock=threading.Lock()):
+    def batch_and_learn(i, lock=threading.Lock()) -> None:
         """Thread target for the learning process."""
         nonlocal step, stats
         timings = prof.Timings()
@@ -460,7 +460,7 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
         thread.start()
         threads.append(thread)
 
-    def checkpoint():
+    def checkpoint() -> None:
         if flags.disable_checkpoint:
             return
         logging.info("Saving checkpoint to %s", checkpointpath)
@@ -516,7 +516,7 @@ def train(flags):  # pylint: disable=too-many-branches, too-many-statements
     plogger.close()
 
 
-def test(flags, num_episodes: int = 10):
+def test(flags, num_episodes: int = 10) -> None:
     if flags.xpid is None:
         checkpointpath = "./latest/model.tar"
     else:
@@ -550,7 +550,7 @@ def test(flags, num_episodes: int = 10):
 
 
 class AtariNet(nn.Module):
-    def __init__(self, observation_shape, action_space: spaces.Space, use_lstm=False):
+    def __init__(self, observation_shape, action_space: spaces.Space, use_lstm=False) -> None:
         super(AtariNet, self).__init__()
         self.observation_shape = observation_shape
 
@@ -675,7 +675,7 @@ def create_env(flags):
         )
 
 
-def main(flags):
+def main(flags) -> None:
     if flags.mode == "train":
         train(flags)
     else:

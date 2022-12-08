@@ -37,7 +37,7 @@ cv2.ocl.setUseOpenCL(False)
 
 
 class NoopResetEnv(gym.Wrapper):
-    def __init__(self, env, noop_max=30):
+    def __init__(self, env, noop_max=30) -> None:
         """Sample initial states by taking random number of no-ops on reset.
         No-op is assumed to be action 0.
         """
@@ -67,7 +67,7 @@ class NoopResetEnv(gym.Wrapper):
 
 
 class FireResetEnv(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         """Take action on reset for environments that are fixed until firing."""
         gym.Wrapper.__init__(self, env)
         assert env.unwrapped.get_action_meanings()[1] == "FIRE"
@@ -88,7 +88,7 @@ class FireResetEnv(gym.Wrapper):
 
 
 class EpisodicLifeEnv(gym.Wrapper):
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         """Make end-of-life == end-of-episode, but only reset on true game over.
         Done by DeepMind for the DQN and co. since it helps value estimation.
         """
@@ -125,7 +125,7 @@ class EpisodicLifeEnv(gym.Wrapper):
 
 
 class MaxAndSkipEnv(gym.Wrapper):
-    def __init__(self, env, skip=4):
+    def __init__(self, env, skip=4) -> None:
         """Return only every `skip`-th frame"""
         gym.Wrapper.__init__(self, env)
         # most recent raw observations (for max pooling across time steps)
@@ -156,7 +156,7 @@ class MaxAndSkipEnv(gym.Wrapper):
 
 
 class ClipRewardEnv(gym.RewardWrapper):
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         gym.RewardWrapper.__init__(self, env)
 
     def reward(self, reward):
@@ -165,7 +165,7 @@ class ClipRewardEnv(gym.RewardWrapper):
 
 
 class WarpFrame(gym.ObservationWrapper):
-    def __init__(self, env, width=84, height=84, grayscale=True, dict_space_key=None):
+    def __init__(self, env, width=84, height=84, grayscale=True, dict_space_key=None) -> None:
         """
         Warp frames to 84x84 as done in the Nature paper and later work.
 
@@ -217,7 +217,7 @@ class WarpFrame(gym.ObservationWrapper):
 
 
 class FrameStack(gym.Wrapper):
-    def __init__(self, env, k):
+    def __init__(self, env, k) -> None:
         """Stack k last frames.
 
         Returns lazy array, which is much more memory efficient.
@@ -251,7 +251,7 @@ class FrameStack(gym.Wrapper):
 
 
 class ScaledFloatFrame(gym.ObservationWrapper):
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         gym.ObservationWrapper.__init__(self, env)
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=env.observation_space.shape, dtype=np.float32)
 
@@ -262,7 +262,7 @@ class ScaledFloatFrame(gym.ObservationWrapper):
 
 
 class LazyFrames(object):
-    def __init__(self, frames):
+    def __init__(self, frames) -> None:
         """This object ensures that common frames between the observations are only stored once.
         It exists purely to optimize memory usage which can be huge for DQN's 1M frames replay
         buffers.
@@ -285,7 +285,7 @@ class LazyFrames(object):
             out = out.astype(dtype)
         return out
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._force())
 
     def __getitem__(self, i):
@@ -331,7 +331,7 @@ class ImageToPyTorch(gym.ObservationWrapper):
     Image shape to channels x weight x height
     """
 
-    def __init__(self, env):
+    def __init__(self, env) -> None:
         super(ImageToPyTorch, self).__init__(env)
         old_shape = self.observation_space.shape
         self.observation_space = gym.spaces.Box(

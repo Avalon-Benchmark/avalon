@@ -54,7 +54,7 @@ class NormalHead(nn.Module):
         min_std: float,
         clipped_normal_mode: ClippedNormalMode,
         model_provides_std: bool = True,
-    ):
+    ) -> None:
         super().__init__()
         assert isinstance(action_space, gym.spaces.Box)
         assert len(action_space.shape) == 1
@@ -134,7 +134,7 @@ class StraightThroughOneHotCategorical(OneHotCategorical):
 class MultiCategoricalHead(nn.Module):
     """Represents multiple categorical dists. All must have the same number of categories."""
 
-    def __init__(self, num_actions: int, num_categories: int):
+    def __init__(self, num_actions: int, num_categories: int) -> None:
         super().__init__()
         self.num_categories = num_categories
         self.num_actions = num_actions
@@ -157,7 +157,7 @@ class DictActionHead(torch.nn.Module):
     Latents should be passed in with shape (..., self.num_inputs), and a DictActionDist will be returned.
     """
 
-    def __init__(self, action_space: gym.spaces.Dict, params: Params):
+    def __init__(self, action_space: gym.spaces.Dict, params: Params) -> None:
         super().__init__()
         self.action_space = action_space
 
@@ -207,7 +207,7 @@ class DictActionDist(torch.distributions.Distribution):
 
     Operations like entropy() will reduce over all dists to return a single value (per batch element)."""
 
-    def __init__(self, dists: Dict[str, torch.distributions.Distribution]):
+    def __init__(self, dists: Dict[str, torch.distributions.Distribution]) -> None:
         super().__init__(validate_args=False)
         self.dists = dists
 
@@ -300,7 +300,7 @@ def visualize_action_dists(
 
 def visualize_actions(
     action_space: gym.spaces.Dict, action_dict: dict[str, Tensor], prefix: str = "actions", freq: Optional[int] = None
-):
+) -> None:
     """Log a batch of actions to wandb (any batch shape is fine)."""
     for k, space in action_space.spaces.items():
         action = action_dict[k]

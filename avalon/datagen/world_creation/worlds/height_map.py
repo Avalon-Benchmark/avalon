@@ -147,12 +147,12 @@ class HeightMap:
         plt.show()
         return self
 
-    def add_noise(self, scale: float, rand: np.random.Generator):
+    def add_noise(self, scale: float, rand: np.random.Generator) -> None:
         self.Z += rand.uniform(-scale / 2.0, scale / 2.0, self.Z.shape)
 
     def add_center_biased_noise(
         self, mountain_center: Tuple[float, float], scale: float, mountain_radius: float, rand: np.random.Generator
-    ):
+    ) -> None:
         noise = rand.normal(scale, scale / 3.0, self.Z.shape)
         max_dist = mountain_radius * self.region.x.size
         dist_sq_to_mountain = self.get_dist_sq_to(np.array(mountain_center))
@@ -379,12 +379,12 @@ class HeightMap:
 
         return EdgedRegion(region.x, region.z, all_vertices_np)
 
-    def blur(self, blur_meters_std_dev: float):
+    def blur(self, blur_meters_std_dev: float) -> None:
         if blur_meters_std_dev > 0:
             blur = blur_meters_std_dev * self.cells_per_meter
             self.Z = gaussian_filter(self.Z, sigma=blur)
 
-    def tilt(self, x_delta: float, y_delta: float):
+    def tilt(self, x_delta: float, y_delta: float) -> None:
         for i, j in np.ndindex(*self.Z.shape):
             x = self.X[i, j]
             y = self.Y[i, j]
@@ -398,7 +398,7 @@ class HeightMap:
         fade_noise_scale: float,
         fade_noise_min: float,
         extra_weight: float = 1.0,
-    ):
+    ) -> None:
         fade_weights = np.zeros_like(self.Z)
         assert fade_weights.shape[0] == fade_weights.shape[1], "Doesnt support rectangular arrays"
 
@@ -431,7 +431,7 @@ class HeightMap:
         max_height = np.max(self.Z)
         self.Z -= max_height * fade_weights * extra_weight
 
-    def lower_edges(self, final_height: float, fade_over_cells: int):
+    def lower_edges(self, final_height: float, fade_over_cells: int) -> None:
         Z2 = self.Z.copy()
         _min_helper(Z2[0, :], final_height)
         _min_helper(Z2[-1, :], final_height)
@@ -474,7 +474,7 @@ class HeightMap:
         flood_fill(ocean_mask, ocean_index, 2, in_place=True)
         return cast(MapBoolNP, ocean_mask == 2)
 
-    def add_debug_circle_lake(self, position: Point2DNP, radius: float, fade_radius: float):
+    def add_debug_circle_lake(self, position: Point2DNP, radius: float, fade_radius: float) -> None:
         points = self.get_2d_points()
         deltas = points - position
         distances = np.linalg.norm(deltas, axis=2)
@@ -805,7 +805,7 @@ class HeightMap:
     def index_to_point_2d(self, indices: Tuple[int, int]) -> Point2DNP:
         return np.array([self.X[indices], self.Y[indices]])
 
-    def raise_island(self, island: MapBoolNP, delta: float):
+    def raise_island(self, island: MapBoolNP, delta: float) -> None:
         self.Z[island] += delta
 
     def lower_island(self, island: MapBoolNP, set_to_height: float):
@@ -825,7 +825,7 @@ class HeightMap:
             mask, np.logical_not(morphology.dilation(np.logical_not(mask), morphology.disk(num_cells)))
         )
 
-    def interpolate_heights(self, region: MapBoolNP, border: MapBoolNP):
+    def interpolate_heights(self, region: MapBoolNP, border: MapBoolNP) -> None:
         expanded_region = morphology.dilation(region, morphology.disk(1))
         border = np.logical_and(expanded_region, border)
 
@@ -848,10 +848,10 @@ class HeightMap:
 
         # plot_value_grid(self.Z - old_z)
 
-    def log_simplicity_warning(self, message: str):
+    def log_simplicity_warning(self, message: str) -> None:
         self._simplicity_warnings.append(message)
 
-    def clear_simplicity_warnings(self):
+    def clear_simplicity_warnings(self) -> None:
         self._simplicity_warnings.clear()
 
     def get_simplicity_warnings(self) -> Tuple[str, ...]:
@@ -869,7 +869,7 @@ class HeightMap:
 
         return result
 
-    def add_hill(self, point: Point2DNP, scale: float, radius: float, mask: MapBoolNP):
+    def add_hill(self, point: Point2DNP, scale: float, radius: float, mask: MapBoolNP) -> None:
         assert_isinstance(point, Point2DNP)
         dist_sq = self.get_dist_sq_to(point)
 
@@ -904,7 +904,7 @@ def _get_shore_points(rand: np.random.Generator, water_points: np.ndarray):
     return border_points
 
 
-def _min_helper(value: np.ndarray, min_value: float):
+def _min_helper(value: np.ndarray, min_value: float) -> None:
     value[value > min_value] = min_value
 
 

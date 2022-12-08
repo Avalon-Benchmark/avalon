@@ -58,7 +58,7 @@ def _rerun_this_command_with_env(env: Dict[str, str]) -> None:
     os.execve(sys.executable, [sys.executable, "-m", "avalon.for_humans", *args], new_env)
 
 
-def _edit_project_settings(replacements: Dict[str, str]):
+def _edit_project_settings(replacements: Dict[str, str]) -> None:
     with open(GODOT_PROJECT_FILE_PATH, "r+") as project_file:
         settings = project_file.read()
         for search_pattern, replacement_pattern in replacements.items():
@@ -71,7 +71,7 @@ def _edit_project_settings(replacements: Dict[str, str]):
 class VRHelperCLI:
     """CLI for human-centric usage of avalon (world generation, editor config, launching the editor)"""
 
-    def available_tasks(self, exclude_groups: bool = False):
+    def available_tasks(self, exclude_groups: bool = False) -> None:
         """print available tasks and task groups for generation
 
         :param no_groups: Suppress task group output
@@ -195,7 +195,7 @@ class VRHelperCLI:
             )
         )
 
-    def print_godot_project_path(self):
+    def print_godot_project_path(self) -> None:
         print(GODOT_SOURCE_PATH)
 
     def setup_android_export_presets(
@@ -207,7 +207,7 @@ class VRHelperCLI:
         debug_template_apk_path: Optional[str] = None,
         release_template_apk_path: Optional[str] = None,
         overwrite_apk_templates: bool = False,
-    ):
+    ) -> None:
         """Fill in the godot android export_presets.cfg template for running on oculus.
 
         All APK paths default to avalon/bin/{kind}.apk
@@ -256,7 +256,7 @@ class VRHelperCLI:
             preset_file.write(template)
         print("Android export configured. You will need to restart the editor to see changes.")
 
-    def remove_openxr_plugin(self):
+    def remove_openxr_plugin(self) -> None:
         """Remove the openxr plugin installed with `install_openxr_plugin` and attempts to clean the project configuration.
 
         Closing the editor before running ths command is recommended.
@@ -270,7 +270,7 @@ class VRHelperCLI:
         )
         print("OpenXR plugin successfully removed and disabled.")
 
-    def _configure_openxr_plugin(self):
+    def _configure_openxr_plugin(self) -> None:
         print(f"Configuring project settings...")
         _find_enabled_plugin_array = r"^(\[editor_plugins\](.|\n)*enabled=PoolStringArray\(.*) \)$"
         _append_openxr_plugin = r'\1"res://addons/godot-openxr/plugin.cfg" )'
@@ -283,7 +283,7 @@ class VRHelperCLI:
             }
         )
 
-    def install_openxr_plugin(self, overwrite: bool = False):
+    def install_openxr_plugin(self, overwrite: bool = False) -> None:
         """Installs and enables Godot's OpenXR plugin for VR support.
 
         Closing the editor before running ths command is recommended.
@@ -326,7 +326,7 @@ class VRHelperCLI:
 
         print("OpenXR plugin successfully installed")
 
-    def launch_editor(self, verbose: bool = False):
+    def launch_editor(self, verbose: bool = False) -> None:
         """Launch the godot editor installed with `python -m avalon.install_godot_binary` pointing at the internal godot project
 
         .. caution::

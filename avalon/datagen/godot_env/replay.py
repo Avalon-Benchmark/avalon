@@ -77,7 +77,7 @@ class GodotEnvReplay(Generic[ObservationType, ActionType, GeneratedWorldParamsTy
         log = GodotEnvActionLog.parse(action_record_path, env.action_type)
         return cls(env, log, world_path)
 
-    def __attrs_post_init__(self):
+    def __attrs_post_init__(self) -> None:
         env = self.env
         action_log = self.action_log
         assert not env.is_reset_called_already, f"{env} looks like it has already been run."

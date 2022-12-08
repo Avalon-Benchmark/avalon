@@ -83,7 +83,7 @@ def generate_eat_task(
     export_config: ExportConfig,
     task_config: EatTaskConfig = EatTaskConfig(),
     _FORCED: Optional[ForcedFood] = None,
-):
+) -> None:
     world, locations, difficulty = create_eat_obstacle(
         rand, difficulty, export_config, task_config=task_config, _FORCED=_FORCED
     )

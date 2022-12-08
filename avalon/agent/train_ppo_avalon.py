@@ -49,7 +49,7 @@ class AvalonPPOParams(PPOParams):
     clipped_normal_mode: ClippedNormalMode = ClippedNormalMode.NO_CLIPPING
 
 
-def run(params: AvalonPPOParams):
+def run(params: AvalonPPOParams) -> None:
     assert params.num_batches == 1
     assert params.batch_size == params.num_steps * params.num_workers
 

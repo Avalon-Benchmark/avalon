@@ -201,7 +201,7 @@ def percent_difference(original_rgbd: np.ndarray, combined_snapshot_rgbd: np.nda
     return float(differing) / original_rgbd.size
 
 
-def verify_snapshot_observations(snapshot: SnapshotObservations):
+def verify_snapshot_observations(snapshot: SnapshotObservations) -> None:
     assert np.equal(
         rgbd_observations(snapshot.expected_observations), rgbd_observations(snapshot.observations)
     ), f"{snapshot.original.scenario.name} snapshot {snapshot.index} at frame {snapshot.start_frame} failed to produce equal observations"

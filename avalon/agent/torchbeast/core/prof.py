@@ -20,16 +20,16 @@ import timeit
 class Timings:
     """Not thread-safe."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._means = collections.defaultdict(int)
         self._vars = collections.defaultdict(int)
         self._counts = collections.defaultdict(int)
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.last_time = timeit.default_timer()
 
-    def time(self, name: str):
+    def time(self, name: str) -> None:
         """Save an update for event `name`.
 
         Nerd alarm: We could just store a

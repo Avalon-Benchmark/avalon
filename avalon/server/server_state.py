@@ -115,7 +115,7 @@ class ServerState:
     resets_by_world_id: Dict[WorldID, Set[UserID]]
     ignored_world_ids: Set[WorldID]
 
-    def add_apk_version(self, apk_version: str):
+    def add_apk_version(self, apk_version: str) -> None:
         apk_version_path = self.root_path / APK_VERSIONS_PATH / f"{apk_version}.marker"
         apk_version_path.touch(exist_ok=True)
         self.valid_apk_versions.add(apk_version)
@@ -292,7 +292,7 @@ class ServerState:
         file_path = user_with_apk_version_path / f"{filename}.gz"
         file_path.write_bytes(data)
 
-    def ignore_world(self, world_id: WorldID):
+    def ignore_world(self, world_id: WorldID) -> None:
         world_path = self.get_world_path_from_world_id(world_id=world_id)
         ignored_marker_path = world_path / IGNORED_MARKER
         if not ignored_marker_path.exists():
