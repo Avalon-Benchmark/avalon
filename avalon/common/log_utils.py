@@ -41,10 +41,6 @@ def get_log_path() -> Path:
     return log_folder
 
 
-def _log_with_tqdm(msg: str) -> None:
-    tqdm.write(msg, end="")
-
-
 def log_to_sentry(exception: BaseException, extra: Optional[Dict[str, str]] = None):
     if is_notebook():
         raise exception
