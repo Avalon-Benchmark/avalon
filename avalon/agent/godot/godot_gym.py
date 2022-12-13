@@ -44,6 +44,7 @@ from avalon.datagen.world_creation.constants import TRAIN_TASK_GROUPS
 from avalon.datagen.world_creation.constants import AvalonTask
 from avalon.datagen.world_creation.constants import AvalonTaskGroup
 from avalon.datagen.world_creation.constants import get_all_tasks_for_task_groups
+from avalon.datagen.world_creation.constants import int_to_avalon_task
 from avalon.datagen.world_creation.entities.spawn_point import PLAYER_SPAWN_POINT
 from avalon.datagen.world_creation.world_generator import AvalonWorldGenerator
 from avalon.datagen.world_creation.world_generator import BlockingWorldGenerator
@@ -165,7 +166,7 @@ def task_groups_from_training_protocol(
 @attr.s(auto_attribs=True, frozen=True)
 class GodotEnvironmentParams(EnvironmentParams):
     suite: str = "godot"
-    seed: int = 0
+    # seed: int = 0
     # whether to use per-task curriculum learning. requires a wrapper.
     is_task_curriculum_used: bool = True
     # how much to update the task difficulty per successful or failed episode.
@@ -222,6 +223,16 @@ class GodotEnvironmentParams(EnvironmentParams):
     # difficulty bin size for eval logging histograms
     eval_difficulty_bin_size: float = 0.1
 
+    info_fields: list[str] = [
+        "cumulative_episode_return",
+        "cumulative_episode_length",
+        "task",
+        "difficulty",
+        "success",
+        "score",
+        "world_index",
+    ]
+
     @property
     def is_fixed_generator(self) -> bool:
         """Use the `fixed` world genenerator for evaluation."""
@@ -244,6 +255,10 @@ class GodotEnvironmentParams(EnvironmentParams):
     @property
     def num_tasks(self) -> int:
         return len(get_all_tasks_for_task_groups(self.task_groups))
+
+    @property
+    def seed(self) -> int:
+        return self.env_index
 
 
 def write_video_from_np_arrays(video_path: Path, arrays: List[np.ndarray], fps: float = 20) -> None:
@@ -604,7 +619,7 @@ class CurriculumWrapper(Wrapper):
     def step(self, action: Dict[str, torch.Tensor]):
         observation, reward, done, info = self.env.step(action)  # type: ignore[misc]
         if done:
-            task = AvalonTask[info["task"]]
+            task = AvalonTask[int_to_avalon_task[int(info["task"])]]
             update_step = self.task_difficulty_update  # * np.random.uniform()
             if info["success"] == 1:
                 self.difficulties[task] += update_step

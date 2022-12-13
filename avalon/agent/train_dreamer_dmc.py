@@ -1,13 +1,13 @@
 import queue
 import time
 import uuid
-import warnings
 from functools import partial
 from pathlib import Path
 from typing import Iterator
 
 import attr
 import torch
+from loguru import logger
 from torch.utils.data import DataLoader
 
 from avalon.agent.common import wandb_lib
@@ -15,15 +15,16 @@ from avalon.agent.common.dataloader import ReplayDataset
 from avalon.agent.common.dataloader import worker_init_fn
 from avalon.agent.common.params import DmcEnvironmentParams
 from avalon.agent.common.parse_args import parse_args
-from avalon.agent.common.storage import DiskStorage
-from avalon.agent.common.storage import StorageMode
+from avalon.agent.common.storage import EpisodeStorage
+
+# from avalon.agent.common.storage import StorageMode
 from avalon.agent.common.trainer import Trainer
 from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.util import pack_1d_list
+from avalon.agent.common.util import setup_new_process
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import DreamerParams
 from avalon.agent.dreamer.params import OffPolicyParams
-from avalon.common.log_utils import configure_remote_logger
 
 
 class DreamerTrainer(Trainer[OffPolicyParams]):
@@ -61,7 +62,6 @@ class DreamerTrainer(Trainer[OffPolicyParams]):
             is_multiprocessing=self.params.multiprocessing,
             storage=self.train_storage,
             obs_space=self.params.observation_space,
-            storage_mode=StorageMode.FRAGMENT,
             model=self.algorithm,
             rollout_device=torch.device(f"cuda:{self.params.inference_gpus[0]}"),
             multiprocessing_context=self.multiprocessing_context,
@@ -69,8 +69,8 @@ class DreamerTrainer(Trainer[OffPolicyParams]):
         self.to_cleanup.append(rollout_manager)
         return rollout_manager
 
-    def create_train_storage(self) -> DiskStorage:
-        return DiskStorage(self.params, self.train_rollout_dir, self.wandb_queue)
+    def create_train_storage(self) -> EpisodeStorage:
+        return EpisodeStorage(self.params, self.train_rollout_dir, self.wandb_queue)
 
     def create_dataloader(self) -> Iterator[BatchSequenceData]:
         train_dataset = ReplayDataset(self.params, self.train_rollout_dir, update_interval=4000)
@@ -152,12 +152,15 @@ def run(params: DreamerDMCParams) -> None:
 
 
 if __name__ == "__main__":
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    configure_remote_logger()
-    default_params = DreamerDMCParams()
-    default_params = parse_args(default_params)
-    # default_params = attr.evolve(
-    #     default_params,
-    #     name=f"{default_params.name}_{default_params.env_params.suite}_{default_params.env_params.task}",
-    # )
-    run(default_params)
+    setup_new_process()
+    try:
+        default_params = DreamerDMCParams()
+        default_params = parse_args(default_params)
+        # default_params = attr.evolve(
+        #     default_params,
+        #     name=f"{default_params.name}_{default_params.env_params.suite}_{default_params.env_params.task}",
+        # )
+        run(default_params)
+    except Exception as e:
+        logger.exception(e)
+        raise

@@ -18,8 +18,7 @@ def groom_observation_for_agent(
 ) -> Dict[str, torch.Tensor]:
     with torch.no_grad():
         torch_obs = {
-            k: torch.from_numpy(v).broadcast_to((num_workers, *v.shape)).to(device=device)
-            for k, v in observation.items()
+            k: torch.tensor(v).broadcast_to((num_workers, *v.shape)).to(device=device) for k, v in observation.items()
         }
         return postprocess_uint8_to_float(torch_obs)
 
@@ -52,10 +51,9 @@ def run_deterministic_forward_pass(
     assert agent.params.num_workers == 1, "Can't guarantee determinism when num_workers > 1"
     num_workers = 1
 
-    ready_for_new_step = [True for _ in range(num_workers)]
-    dones = [False for _ in range(num_workers)]
+    ready_for_new_step = torch.ones((num_workers,), dtype=torch.bool)
     device = next(agent.parameters()).device
-    torch_dones = torch.tensor(dones, dtype=torch.bool, device=device)
+    torch_dones = torch.zeros((num_workers,), dtype=torch.bool, device=device)
     torch_obs = groom_observation_for_agent(observation, num_workers, device)
     make_deterministic(seed)
     agent.reset_state()

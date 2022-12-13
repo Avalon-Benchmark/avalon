@@ -7,6 +7,7 @@ from torch import Tensor
 
 def gae(rewards: Tensor, values: Tensor, dones: Tensor, gamma: float, lam: float, last_values: Tensor) -> Tensor:
     """Compute generalized advantage estimate.
+    Expects ordering from rollouts with obs_first=True, ie (obs/value, action, reward/done).
     rewards: a list of rewards at each step.
     values: the value estimate of the state at each step.
     dones: an array of the same shape as rewards, with a 1 if the

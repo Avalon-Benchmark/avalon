@@ -4,7 +4,6 @@ import shutil
 import signal
 import time
 import uuid
-import warnings
 from multiprocessing import Lock
 from multiprocessing import Pool
 from pathlib import Path
@@ -28,6 +27,7 @@ import numpy as np
 from godot_parser import Node as GDNode
 from typing_extensions import TypeGuard
 
+from avalon.agent.common.util import setup_new_process
 from avalon.common.errors import SwitchError
 from avalon.common.log_utils import logger
 from avalon.contrib.serialization import Serializable
@@ -467,7 +467,6 @@ class LocalProcessWorldGenerator(AvalonWorldGenerator):
         start_difficulty: float = 0,
         num_workers: int = 2,
         buffer_size: int = 20,
-        offset: int = 0,
         is_task_curriculum_used: bool = True,
     ) -> None:
         super().__init__(base_path, seed)
@@ -480,7 +479,7 @@ class LocalProcessWorldGenerator(AvalonWorldGenerator):
         self.buffer: List[GeneratedAvalonWorldParams] = []
         self.lock = Lock()
         self.worker_pool = Pool(processes=num_workers, initializer=disable_sigint)
-        self.offset = offset
+        self.offset = 0  # roughly, stores the index of the world to be generated next.
         self._request_batch(buffer_size)
 
     def generate_batch(self, start_world_id: Optional[int], batch_size: int = 1) -> List[GeneratedAvalonWorldParams]:
@@ -606,7 +605,7 @@ MAX_NOISE_SCALE = 0.3
 
 
 def generate_world(params: GenerateAvalonWorldParams) -> GeneratedAvalonWorldParams:
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    setup_new_process()
     output_path = Path(params.output)
     output_path.mkdir(parents=True)
     rand = np.random.default_rng([params.seed, params.index])

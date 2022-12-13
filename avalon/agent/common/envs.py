@@ -1,3 +1,4 @@
+import warnings
 from typing import Any
 from typing import List
 from typing import Tuple
@@ -11,13 +12,15 @@ from loguru import logger
 from avalon.agent.common import wrappers
 from avalon.agent.common.params import DmcEnvironmentParams
 from avalon.agent.common.params import EnvironmentParams
+from avalon.agent.common.params import ProcgenEnvironmentParams
 from avalon.agent.common.test_envs import TestEnvironmentParams
 from avalon.agent.common.wrappers import ElapsedTimeWrapper
 from avalon.common.type_utils import assert_not_none
 
 
-def build_env(env_params: EnvironmentParams) -> gym.Env:
+def build_env(env_params: EnvironmentParams, torchify: bool = True) -> gym.Env:
     # TODO: I should add a "checker" wrapper that checks that observations and actions match that specced in the Space.
+    seed = env_params.env_index
     env: gym.Env
     if env_params.suite == "dmc":
         # For rendering, you'll need libglew-(dev/2.0/2.1), and MUJOCO_GL=egl
@@ -39,7 +42,9 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
             include_state=env_params.include_proprio,
             include_rgb=env_params.include_rgb,
             camera=camera,
+            seed=seed,
         )
+        env = wrappers.RecordEpisodeStatistics(env)  # must happen before reward scaling
         env = wrappers.ActionRepeat(env, env_params.action_repeat)
         # rescales actions from standard ranges to the envs desired range.
         if env_params.time_limit:
@@ -57,6 +62,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         assert env_params.time_limit is None, "godot has its own time limit"
         assert env_params.action_repeat == 1
 
+        # Note: This will seed itself properly using env_index
         env = AvalonEnv(env_params)
         # We don't use the TimeLimit wrapper because the time limit is dynamic,
         # so we trust that the godot env gives the proper TimeLimit.truncated signal
@@ -74,6 +80,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         env = wrappers.OneHotActionWrapper(env)
         # env = RewardSoftClipWrapper(env, scale=5)
     elif env_params.suite == "test":
+        # Note: haven't implemented proper seeding in these test envs.
         assert env_params.action_repeat == 1
         from avalon.agent.common.test_envs import get_env
 
@@ -81,16 +88,19 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         env = get_env(env_params.task, env_params)
         env = wrappers.DictObsActionWrapper(env)
         env = wrappers.OneHotActionWrapper(env)
+        env = wrappers.RecordEpisodeStatistics(env)  # must happen before reward scaling
+        if env_params.time_limit:
+            env = wrappers.TimeLimit(env, max_episode_steps=env_params.time_limit // env_params.action_repeat)
     elif env_params.suite == "gym":
         assert env_params.action_repeat == 1
         # Annoyingly, gym envs apply their own time limit already.
         logger.info("time limit arg ignored in gym envs")
         env = gym.make(assert_not_none(env_params.task))
+        env.seed(seed)
         # Hacky. Relies on the TimeWrapper being the outermost wrapper. Not sure the better way.
         assert isinstance(env, (ElapsedTimeWrapper, TimeLimit))
         max_steps = env._max_episode_steps
         logger.info(f"env has a time limit of {max_steps} steps")
-        # env = DiscreteActionToIntWrapper(env)
         if env_params.pixel_obs_wrapper:
             env = wrappers.PixelObsWrapper(env)
             env = wrappers.DictObsActionWrapper(env, obs_key="rgb")
@@ -101,6 +111,7 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         env = wrappers.OneHotActionWrapper(env)
         if env_params.elapsed_time_obs:
             env = wrappers.ElapsedTimeWrapper(env, max_steps)
+        env = wrappers.RecordEpisodeStatistics(env)  # must happen before reward scaling
     elif env_params.suite == "atari":
         assert env_params.task is not None
         assert env_params.action_repeat == 4
@@ -108,13 +119,38 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
         assert env_params.elapsed_time_obs is False
         # These are the settings from dreamerv2
         env = Atari(env_params.task, action_repeat=env_params.action_repeat, size=(64, 64), grayscale=True)
+        env.seed(seed)
         if env_params.time_limit:
             # danijar applies the time limit in agent-steps, not action-repeated env steps
             env = wrappers.TimeLimit(env, max_episode_steps=env_params.time_limit)
         env = wrappers.DictObsActionWrapper(env, obs_key="rgb")
         env = wrappers.OneHotActionWrapper(env)
+        env = wrappers.RecordEpisodeStatistics(env)  # must happen before reward scaling
         # Note the tanh here!
         env = wrappers.ScaleRewards(env, func=np.tanh)
+        # Just converts from hwc to chw
+        env = wrappers.ImageTransformWrapper(env, key="rgb")
+    elif env_params.suite == "procgen":
+        warnings.filterwarnings("ignore", message=".*Future gym versions will require.*")
+        # Need this import to register the procgen envs?
+        import procgen  # isort: skip
+
+        assert isinstance(env_params, ProcgenEnvironmentParams)
+        assert env_params.task is not None
+        assert env_params.time_limit is None, "procgen has its own time limits (altho they don't set the info flags)"
+
+        env = gym.make(
+            f"procgen-{env_params.task}-v0",
+            start_level=env_params.start_level,
+            num_levels=env_params.num_levels,
+            distribution_mode=env_params.distribution_mode,
+            rand_seed=env_params.env_index,
+        )
+        env = wrappers.DictObsActionWrapper(env, obs_key="rgb")
+        env = wrappers.OneHotActionWrapper(env)
+        env = wrappers.RecordEpisodeStatistics(env)  # must happen before reward scaling
+        env = gym.wrappers.NormalizeReward(env)
+        env = gym.wrappers.TransformReward(env, lambda reward: np.clip(reward, -10, 10))  # type: ignore[no-any-return]
         # Just converts from hwc to chw
         env = wrappers.ImageTransformWrapper(env, key="rgb")
     else:
@@ -124,7 +160,9 @@ def build_env(env_params: EnvironmentParams) -> gym.Env:
     env = wrappers.ClipActionWrapper(env)
     if env_params.frame_stack != 1:
         env = wrappers.DictFrameStack(env, num_stack=env_params.frame_stack)
-    # env = wrappers.NumpyToTorch(env)
+    if torchify:
+        # My worker requires this, but it won't work with eg the builtin gym vecenv.
+        env = wrappers.Torchify(env)
     return env
 
 
@@ -151,6 +189,25 @@ DMC_TASKS = [
     "walker_run",
 ]
 
+PROCGEN_ENVS = [
+    "coinrun",
+    "starpilot",
+    "caveflyer",
+    "dodgeball",
+    "fruitbot",
+    "chaser",
+    "miner",
+    "jumper",
+    "leaper",
+    "maze",
+    "bigfish",
+    "heist",
+    "climber",
+    "plunder",
+    "ninja",
+    "bossfight",
+]
+
 
 class DeepMindControl(gym.Env):
     def __init__(
@@ -160,13 +217,14 @@ class DeepMindControl(gym.Env):
         camera: Any = None,
         include_state: bool = False,
         include_rgb: bool = True,
+        seed: int = 0,
     ) -> None:
         from dm_control import suite
 
         domain, task = name.split("_", 1)
         if domain == "cup":  # Only domain with multiple words.
             domain = "ball_in_cup"
-        self._env = suite.load(domain, task)
+        self._env = suite.load(domain, task, task_kwargs={"random": seed})
         self._size = size
         if camera is None:
             camera = dict(quadruped=2).get(domain, 0)

@@ -1,16 +1,15 @@
-import warnings
-
 import attr
 import torch
+from loguru import logger
 
 from avalon.agent.common.params import ClippedNormalMode
 from avalon.agent.common.parse_args import parse_args
 from avalon.agent.common.trainer import OnPolicyTrainer
+from avalon.agent.common.util import setup_new_process
 from avalon.agent.godot.godot_eval import test
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.agent.ppo.params import PPOParams
-from avalon.common.log_utils import configure_remote_logger
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -28,6 +27,8 @@ class AvalonPPOParams(PPOParams):
     lr: float = 2.5e-4
     clip_grad_norm: float = 0.5
     env_params: GodotEnvironmentParams = GodotEnvironmentParams(
+        # if 100% success, difficulty in N steps will be N / (avg_ep_len * num_workers * num_tasks) * diff_update
+        # eg 10M steps / (200 steps * 16 workers * 16 tasks) * 3e-4 = ~.06 max achievable difficulty
         task_difficulty_update=3e-4,
         meta_difficulty_update=3e-5,
         is_meta_curriculum_used=False,
@@ -47,6 +48,7 @@ class AvalonPPOParams(PPOParams):
     policy_normal_init_std: float = 1
     policy_normal_min_std: float = 0.01
     clipped_normal_mode: ClippedNormalMode = ClippedNormalMode.NO_CLIPPING
+    center_and_clamp_discrete_logits = True
 
 
 def run(params: AvalonPPOParams) -> None:
@@ -69,8 +71,11 @@ def run(params: AvalonPPOParams) -> None:
 
 
 if __name__ == "__main__":
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    configure_remote_logger()
-    default_params = AvalonPPOParams()
-    default_params = parse_args(default_params)
-    run(default_params)
+    setup_new_process()
+    try:
+        default_params = AvalonPPOParams()
+        default_params = parse_args(default_params)
+        run(default_params)
+    except Exception as e:
+        logger.exception(e)
+        raise

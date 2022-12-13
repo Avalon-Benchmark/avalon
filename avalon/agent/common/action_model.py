@@ -12,7 +12,6 @@ from torch import Tensor
 from torch.distributions import Independent
 from torch.distributions import Normal
 from torch.distributions import OneHotCategorical
-from torch.distributions import constraints
 from torch.distributions.transformed_distribution import TransformedDistribution
 from torch.nn import functional as F
 
@@ -32,12 +31,26 @@ class NormalWithMode(Normal):
         assert isinstance(mean, Tensor)
         return mean
 
+    def __getitem__(self, item):
+        # slicing
+        assert isinstance(item, (int, tuple))
+        return NormalWithMode(self.loc[item], self.scale[item])
+
 
 class IndependentWithMode(Independent):
     def mode(self) -> Tensor:
         mode = self.base_dist.mode()
         assert isinstance(mode, Tensor)
         return mode
+
+    def __getitem__(self, item):
+        # slicing
+        assert isinstance(item, (int, tuple))
+        if isinstance(item, tuple):
+            assert len(item) == 1  # this could be lifted
+        assert self.reinterpreted_batch_ndims == 1
+        # if this was an Independent(1), then slicing just removes this wrapper?
+        return self.base_dist[item]
 
 
 class NormalHead(nn.Module):
@@ -130,23 +143,33 @@ class StraightThroughOneHotCategorical(OneHotCategorical):
     def mode(self) -> Tensor:
         return F.one_hot(self.probs.argmax(dim=-1), self.event_shape[-1]).float()  # type: ignore
 
+    def __getitem__(self, item):
+        # slicing
+        assert isinstance(item, (int, tuple))
+        return StraightThroughOneHotCategorical(self.logits[item])
+
 
 class MultiCategoricalHead(nn.Module):
     """Represents multiple categorical dists. All must have the same number of categories."""
 
-    def __init__(self, num_actions: int, num_categories: int) -> None:
+    def __init__(self, num_actions: int, num_categories: int, center_and_clamp_logits: bool = False) -> None:
         super().__init__()
         self.num_categories = num_categories
         self.num_actions = num_actions
         self.num_inputs = num_categories * num_actions
         self.num_outputs = num_categories * num_actions
+        self.center_and_clamp_logits = center_and_clamp_logits
 
     def forward(self, x: Tensor) -> torch.distributions.Distribution:
         assert x.shape[-1] == self.num_actions * self.num_categories
         x = rearrange(x, "... (a c) -> ... a c", a=self.num_actions, c=self.num_categories)
-        x = x - x.mean(dim=-1, keepdim=True)
-        x = torch.clamp(x, -4, 4)
+        if self.center_and_clamp_logits:
+            # This was found to consistently hurt performance across PPO Procgen envs,
+            # but was used (and presumably helped at some point) in Avalon
+            x = x - x.mean(dim=-1, keepdim=True)
+            x = torch.clamp(x, -4, 4)
         dist = StraightThroughOneHotCategorical(logits=x)
+        # TODO: i'm not sure this is right if there's multiple actions in this MultiCategorical dist.
         independent_dist = IndependentWithMode(dist, 1)
         return independent_dist
 
@@ -181,7 +204,11 @@ class DictActionHead(torch.nn.Module):
                 # We coerce all discrete space types into this with a wrapper
                 # This won't work if the discretes have different num_categories.
                 assert len(set(space.nvec)) == 1
-                head = MultiCategoricalHead(num_actions=len(space.nvec), num_categories=space.max_categories)
+                head = MultiCategoricalHead(
+                    num_actions=len(space.nvec),
+                    num_categories=space.max_categories,
+                    center_and_clamp_logits=params.center_and_clamp_discrete_logits,
+                )
             else:
                 assert False
             action_heads[k] = head
@@ -207,7 +234,7 @@ class DictActionDist(torch.distributions.Distribution):
 
     Operations like entropy() will reduce over all dists to return a single value (per batch element)."""
 
-    def __init__(self, dists: Dict[str, torch.distributions.Distribution]) -> None:
+    def __init__(self, dists: dict[str, torch.distributions.Distribution]) -> None:
         super().__init__(validate_args=False)
         self.dists = dists
 
@@ -218,7 +245,7 @@ class DictActionDist(torch.distributions.Distribution):
     def rsample(self) -> ActionBatch:  # type: ignore
         return {k: v.rsample() for k, v in self.dists.items()}
 
-    def log_prob(self, actions: Dict[str, Tensor]) -> Tensor:
+    def log_prob(self, actions: dict[str, Tensor]) -> Tensor:
         """Compute the log prob of the given action under the given dist (batchwise).
 
         Log prob is a scalar (per batch element.)"""
@@ -247,12 +274,18 @@ class DictActionDist(torch.distributions.Distribution):
         return {k: v.mode() for k, v in self.dists.items()}
 
     def __getitem__(self, item: str):
-        return self.dists[item]
+        if isinstance(item, str):
+            # user is treating this as a dict
+            return self.dists[item]
+        elif isinstance(item, (int, tuple)):
+            # user is slicing in the batch dim
+            return DictActionDist({k: v[item] for k, v in self.dists.items()})
+        else:
+            raise ValueError
 
-    @property
-    def arg_constraints(self) -> Dict[str, constraints.Constraint]:
-        """needed for repr() to work"""
-        return {}
+    def __iter__(self):
+        # in case anyone tries to iterate on this (cough cough wandb.watch)
+        return self.dists.values()
 
 
 def visualize_action_dists(
@@ -274,7 +307,7 @@ def visualize_action_dists(
             probs = action_dist.base_dist.probs
             probs = probs.reshape(-1, probs.shape[-2], probs.shape[-1])
             for act_i in range(len(space.nvec)):
-                for cat_i in range(space.nvec[act_i]):
+                for cat_i in range(int(space.nvec[act_i])):
                     wandb_lib.log_histogram(
                         f"{prefix}/{k}_{act_i}_{cat_i}", probs[:, act_i, cat_i], mean_freq=freq, hist_freq=freq
                     )
@@ -309,9 +342,11 @@ def visualize_actions(
             # flatten the batch dim
             action = action.reshape(-1, action.shape[-2], action.shape[-1])
             for act_i in range(len(space.nvec)):
-                for cat_i in range(space.nvec[act_i]):
+                for cat_i in range(int(space.nvec[act_i])):
                     # Histograms don't make sense, we'll just log the % of actions where this category is selected
-                    wandb_lib.log_scalar(f"{prefix}/{k}_{act_i}_{cat_i}", action[:, act_i, cat_i].mean(), freq=freq)
+                    wandb_lib.log_scalar(
+                        f"{prefix}/{k}_{act_i}_{cat_i}", action[:, act_i, cat_i].float().mean(), freq=freq
+                    )
                     if space.nvec[act_i] == 2:
                         # a binary space only needs one of the categories logged
                         break

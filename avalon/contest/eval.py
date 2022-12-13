@@ -9,7 +9,6 @@ from avalon.agent.common.params import Params
 from avalon.agent.common.trainer import OnPolicyTrainer
 from avalon.agent.common.types import ActionBatch
 from avalon.agent.common.types import Algorithm
-from avalon.agent.common.types import AlgorithmInferenceExtraInfoBatch
 from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.types import ObservationBatch
 from avalon.agent.godot.godot_eval import test
@@ -31,9 +30,9 @@ class ContestAlgorithmWrapper(Algorithm):
         dones: Tensor,  # shape (batch_size, )
         indices_to_run: list[bool],  # shape (batch_size, )
         exploration_mode: str,
-    ) -> Tuple[ActionBatch, AlgorithmInferenceExtraInfoBatch]:
+    ) -> Tuple[ActionBatch, dict]:
         step_actions = self.contest_algorithm.rollout_step(next_obs, dones)
-        return step_actions, AlgorithmInferenceExtraInfoBatch()
+        return step_actions, {}
 
     def train_step(self, batch_data: BatchSequenceData, step: int) -> int:
         raise NotImplementedError

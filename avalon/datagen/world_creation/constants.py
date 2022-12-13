@@ -38,6 +38,10 @@ class AvalonTask(Enum):
     SURVIVE = "SURVIVE"
 
 
+avalon_task_to_int = {member.value: i for i, member in enumerate(AvalonTask)}
+int_to_avalon_task = {i: member.value for i, member in enumerate(AvalonTask)}
+
+
 class AvalonTaskGroup(Enum):
     ONE = "ONE"
     TWO = "TWO"

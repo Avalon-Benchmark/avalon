@@ -29,8 +29,8 @@ def init(module: Module, weight_init: Callable, bias_init: Callable, gain: float
 
 def mlp_init(module: Module, gain: float = np.sqrt(2), bias: float = 0.0) -> Module:
     """Helper to initialize a layer weight and bias."""
-    nn.init.orthogonal_(module.weight.data, gain=gain)
-    nn.init.constant_(module.bias.data, bias)
+    nn.init.orthogonal_(module.weight, gain=gain)
+    nn.init.constant_(module.bias, bias)
     return module
 
 

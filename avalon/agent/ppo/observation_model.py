@@ -8,7 +8,6 @@ from gym import Space
 from gym import spaces
 from torch import Tensor
 from torch import nn
-from torch.nn import Module
 from torch.nn import functional as F
 
 from avalon.agent.common.action_model import DictActionDist
@@ -25,15 +24,7 @@ class ObservationModel(PPOModel):
     """This model is designed to match the sb3 model closely.
 
     Not exactly sure how close it ended up being, but that was the intent.
-
-    This is used in non-godot PPO.
     """
-
-    # vector_encoder_fc: Optional[torch.nn.Linear]
-    # action_encoder_fc: Optional[torch.nn.Linear]
-    # reward_encoder_fc: Optional[torch.nn.Linear]
-    # policy_net: Optional[MLP]
-    # value_net: MLP
 
     def __init__(self, params: PPOParams, obs_space: Space, action_space: Space) -> None:
         assert isinstance(obs_space, spaces.Dict), "We must have a dict obs space for this ObservationModel"
@@ -47,13 +38,15 @@ class ObservationModel(PPOModel):
         # logger.info(f"ObservationModel with params {self.params}")
 
         # Concatenate image inputs, then concatenate the rest of the inputs
-        _image_inputs = ("rgbd",)
+        _image_inputs = ("rgbd", "rgb")
         self.image_keys = sorted([x for x in obs_space.spaces.keys() if x in _image_inputs])
         encoder_output_dim = self.params.model_params.encoder_output_dim
         self.image_encoder = None
         if len(self.image_keys) > 0:
-            img_size = assert_not_none(obs_space["rgbd"].shape)[1]
-            img_channels = assert_not_none(obs_space["rgbd"].shape)[0]
+            assert len(self.image_keys) == 1, "concatenatenation of multiple images is not yet supported"
+            image_key = self.image_keys[0]
+            img_size = assert_not_none(obs_space[image_key].shape)[1]
+            img_channels = assert_not_none(obs_space[image_key].shape)[0]
             self.image_encoder = ImpalaConvNet(
                 input_channels=img_channels,
                 img_dim=img_size,
@@ -84,18 +77,27 @@ class ObservationModel(PPOModel):
             output_dim=self.action_head.num_inputs,
             num_layers=self.params.model_params.num_mlp_layers,
             hidden_dim=encoder_output_dim,
+            activation_function=self.params.model_params.mlp_activation_fn,
         )
-        if isinstance(self.policy_net.net, torch.nn.Linear):
-            mlp_init(self.policy_net.net, gain=0.01)
-        else:
-            mlp_init(self.policy_net.net[-1], gain=0.01)  # type: ignore
+        # Note: this init matches baselines:ppo2 for the case of num_mlp_layers==1, but not otherwise.
+        if self.params.model_params.num_mlp_layers == 1:
+            mlp_init(self.policy_net.net, gain=0.01, bias=0)
+        elif self.params.model_params.num_mlp_layers > 1:
+            # I believe this is in ppo2. Haven't tried it yet though, been just using the default.
+            # for layer in self.policy_net.net[:-1]:
+            #     mlp_init(layer, gain=math.sqrt(2))
+            mlp_init(self.policy_net.net[-1], gain=0.01, bias=0)  # type: ignore
 
         self.value_net = MLP(
             input_dim=encoder_output_dim,
             output_dim=1,
             num_layers=self.params.model_params.num_mlp_layers,
             hidden_dim=encoder_output_dim,
+            activation_function=self.params.model_params.mlp_activation_fn,
         )
+        # Note: this init matches baselines:ppo2 for the case of num_mlp_layers==1, but not otherwise.
+        if self.params.model_params.num_mlp_layers == 1:
+            mlp_init(self.value_net.net, gain=1, bias=0)
 
     def forward(self, obs: ObservationBatch) -> Tuple[Tensor, DictActionDist]:
         encodings = []
@@ -116,7 +118,7 @@ class ObservationModel(PPOModel):
         return value, action_dist
 
     def _get_image_observation(self, obs: Dict[str, Tensor]) -> Tensor:
-        return obs["rgbd"]
+        return obs[self.image_keys[0]]
 
     def _get_vector_observation(self, obs: Dict[str, Tensor]) -> Tensor:
         """Convert the dict obs to a single vector input."""
@@ -128,76 +130,51 @@ class ObservationModel(PPOModel):
 IMPALA_RES_OUT_LOOKUP = {64: 8, 84: 11, 96: 12}
 
 
-class ImpalaConvNet(nn.Module):
-    """This is used in godot PPO."""
-
-    def __init__(
-        self, out_dim: int = 256, img_dim: int = 96, input_channels: int = 4, num_base_channels: int = 16
-    ) -> None:
+class ResnetBlock(nn.Module):
+    def __init__(self, n_channels: int) -> None:
         super().__init__()
+        self.conv = nn.Sequential(
+            nn.ReLU(),
+            nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=3, stride=1, padding=1),
+        )
 
-        feat_convs: list[Module] = []
-        resnet1: list[Module] = []
-        resnet2: list[Module] = []
+    def forward(self, x):
+        x = x + self.conv(x)
+        return x
 
-        for num_ch in [num_base_channels, num_base_channels * 2, num_base_channels * 2]:
-            sub_feats_convs: list[Module] = []
-            sub_feats_convs.append(
-                nn.Conv2d(
-                    in_channels=input_channels,
-                    out_channels=num_ch,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                )
-            )
-            sub_feats_convs.append(nn.MaxPool2d(kernel_size=3, stride=2, padding=1))
-            feat_convs.append(nn.Sequential(*sub_feats_convs))
 
-            input_channels = num_ch
+def impala_block(in_channels, out_channels):
+    return nn.Sequential(
+        nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=3, stride=1, padding=1),
+        nn.MaxPool2d(kernel_size=3, stride=2, padding=1),
+        ResnetBlock(out_channels),
+        ResnetBlock(out_channels),
+    )
 
-            for i in range(2):
-                resnet_block: list[Module] = []
-                resnet_block.append(nn.ReLU())
-                resnet_block.append(
-                    nn.Conv2d(
-                        in_channels=input_channels,
-                        out_channels=num_ch,
-                        kernel_size=3,
-                        stride=1,
-                        padding=1,
-                    )
-                )
-                resnet_block.append(nn.ReLU())
-                resnet_block.append(
-                    nn.Conv2d(
-                        in_channels=input_channels,
-                        out_channels=num_ch,
-                        kernel_size=3,
-                        stride=1,
-                        padding=1,
-                    )
-                )
-                if i == 0:
-                    resnet1.append(nn.Sequential(*resnet_block))
-                else:
-                    resnet2.append(nn.Sequential(*resnet_block))
 
-        self.feat_convs = nn.ModuleList(feat_convs)
-        self.resnet1 = nn.ModuleList(resnet1)
-        self.resnet2 = nn.ModuleList(resnet2)
+class ImpalaConvNet(nn.Module):
+    """This has been matched carefully to the one in dreamerv2, and also openai/baselines."""
+
+    def __init__(self, out_dim, img_dim, input_channels, num_base_channels: int = 16) -> None:
+        super().__init__()
+        blocks = []
+        in_channels = input_channels
+        for out_channels in [num_base_channels, num_base_channels * 2, num_base_channels * 2]:
+            blocks.append(impala_block(in_channels, out_channels))
+            in_channels = out_channels
+
+        self.conv = nn.Sequential(*blocks)
 
         if img_dim not in IMPALA_RES_OUT_LOOKUP:
             raise NotImplementedError()
         res_out_dim = IMPALA_RES_OUT_LOOKUP[img_dim]
+        # Note: (intentionally) leaving this with default init
         self.fc = nn.Linear(res_out_dim * res_out_dim * num_base_channels * 2, out_dim)
 
     def forward(self, x: torch.Tensor):
-        for i, fconv in enumerate(self.feat_convs):
-            x = fconv(x)
-            x = x + self.resnet1[i](x)
-            x = x + self.resnet2[i](x)
-
+        x = self.conv(x)
         x = F.relu(x)
         x = torch.flatten(x, start_dim=1)
         x = F.relu(self.fc(x))

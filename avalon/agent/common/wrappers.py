@@ -15,20 +15,20 @@ from typing import TypeVar
 from typing import Union
 
 import gym
-import nptyping
 import numpy as np
 import torch
 from gym import Wrapper
 from gym import spaces
 from gym.spaces import Box
 from loguru import logger
-from nptyping import NDArray
 from numpy.typing import DTypeLike
+from numpy.typing import NDArray
 from torch.nn import functional as F
 from torchvision import transforms
+from tree import map_structure
 
 # All wrappers should operate only on ndarrays, no torch Tensors!
-ArrayType = nptyping.NDArray
+ArrayType = np.typing.NDArray
 DictActionType = dict[str, ArrayType]
 DictObservationType = dict[str, ArrayType]
 
@@ -80,7 +80,7 @@ class DictObsActionWrapper(Wrapper[DictObservationType, DictActionType]):
 
     def observation(self, observation: Union[NDArray, DictObservationType]) -> DictObservationType:
         if self.wrapped_obs:
-            assert isinstance(observation, NDArray)
+            assert isinstance(observation, np.ndarray)
             return {self.obs_key: observation}
         else:
             return observation
@@ -194,15 +194,25 @@ class OneHotDiscrete(gym.spaces.Discrete):
 
 
 class OneHotMultiDiscrete(gym.spaces.MultiDiscrete):
-    def __init__(self, nvec: List[int], dtype: DTypeLike = np.int64) -> None:
-        assert np.issubdtype(dtype, (int, np.integer))
+    def __init__(self, nvec: List[int], dtype: DTypeLike = np.float32) -> None:
+        # the dtype is default float32 since that's what torch.OneHotCategorical.sample() returns,
+        # for some reason (presumably to make backprop work).
+        # This is kinda weird tho because then it makes nvec a float32 too.. this superclass really expects an int
+        # But we need self.dtype to be the type that we pass around during rollouts,
+        # since this is where it gets the dtype to use for storing the actions.
+        # One option is to make self.dtype be an integer type, use integers all thru rollouts/inference,
+        # and floats in training. Confusing though.
+        # Another is to always use float, and just patch this class to make it handle that properly.
+        # That's the approach I've gone with for now.
         self.max_categories = max(nvec)
         super().__init__(nvec=nvec, dtype=dtype)
 
     def sample(self, mask: Optional[NDArray] = None) -> NDArray:
         assert mask is None
-        sample = super().sample()
-        return F.one_hot(torch.from_numpy(sample), num_classes=self.max_categories).numpy()
+        sample = (self.np_random.random(self.nvec.shape) * self.nvec).astype(np.int32)
+        return (
+            F.one_hot(torch.from_numpy(sample).long(), num_classes=self.max_categories).to(dtype=torch.float32).numpy()
+        )
 
 
 class OneHotActionWrapper(gym.ActionWrapper):
@@ -234,7 +244,7 @@ class OneHotActionWrapper(gym.ActionWrapper):
         out: dict[str, Any] = copy.copy(action_dict)
         for k, space in self._env.action_space.spaces.items():
             action = action_dict[k]
-            assert isinstance(action, NDArray)
+            assert isinstance(action, np.ndarray)
 
             if isinstance(space, gym.spaces.Discrete):
                 assert action.shape == (1, space.n)
@@ -359,6 +369,7 @@ class ActionRepeat(gym.Wrapper[GenericObservationType, GenericActionType]):
             obs, reward, done, info = self.env.step(action)
             total_reward += reward
             current_step += 1
+        # Note: this will just return the info of the most recent step
         return obs, total_reward, done, info
 
 
@@ -407,3 +418,56 @@ class DictFrameStack(gym.ObservationWrapper):
             # images should be chw, and scalars/vectors should be stacked on dim 0 also
             out[k] = np.concatenate(self.history[k], axis=0)
         return out
+
+
+class Torchify(gym.Wrapper):
+    """Allow the client to use Torch tensors instead of the usual numpy arrays."""
+
+    def to_torch(self, x):
+        return map_structure(lambda x: torch.from_numpy(x) if isinstance(x, np.ndarray) else x, x)
+
+    def to_numpy(self, x):
+        return map_structure(lambda x: x.numpy() if isinstance(x, torch.Tensor) else x, x)
+
+    def step(self, action):
+        action = self.to_numpy(action)
+        obs, reward, done, info = self.env.step(action)
+        return self.to_torch(obs), float(reward), bool(done), self.to_torch(info)
+
+    def reset(self, **kwargs):
+        obs = self.env.reset(**kwargs)
+        obs = self.to_torch(obs)
+        return obs
+
+
+class RecordEpisodeStatistics(gym.Wrapper):
+    """This wrapper will keep track of cumulative rewards and episode lengths.
+
+    At the end of an episode, the statistics of the episode will be added to ``info``
+
+    Frame skipping is currently **NOT** taken into account.
+
+    I use this instead of gym.RecordEpisodeStatistics because that has a nested info key that I didn't
+    want to deal with supporting.
+    And I use this wrapper instead of building it into the worker, because we often want to record the reward
+    before any reward scaling is applied.
+    """
+
+    def __init__(self, env: gym.Env) -> None:
+        super().__init__(env)
+        self.episode_return: float = 0
+        self.episode_length: int = 0
+
+    def reset(self, **kwargs):
+        observations = super().reset(**kwargs)
+        self.episode_return = 0
+        self.episode_length = 0
+        return observations
+
+    def step(self, action):
+        obs, reward, done, info = self.env.step(action)
+        self.episode_return += reward
+        self.episode_length += 1
+        info["cumulative_episode_return"] = self.episode_return
+        info["cumulative_episode_length"] = self.episode_length
+        return obs, reward, done, info

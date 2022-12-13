@@ -93,6 +93,14 @@ def set_all_seeds(seed: int) -> None:
 
 # if training multiple networks, may want to call this before training each!
 def make_deterministic(seed: int, num_intraop_threads: int = 1) -> None:
+    # This bit is necessary to get torch.linalg to be deterministic in some cases, eg
+    # https://github.com/pytorch/pytorch/issues/71222
+    # Used in orthogonal initializer.
+    # This might need to happen before torch loads, though? Not sure.
+    # eg with `export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1`
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
     set_all_seeds(seed)
     # ref: https://github.com/pytorch/pytorch/issues/88718

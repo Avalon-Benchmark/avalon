@@ -65,7 +65,11 @@ def get_valid_agent_env_combos(seed: int) -> Mapping[Tuple[str, str], Tuple[Para
     for env_name, env_params in list(_test_environment_params.items()):
         combos[("ppo", env_name)] = (TestPPOParams(num_workers=1, multiprocessing=False, batch_size=50), env_params)
         combos[("dreamer", env_name)] = (
-            DreamerTestEnvParams(num_workers=1, multiprocessing=False, prefill_eps_per_dataloader=1),
+            DreamerTestEnvParams(
+                num_workers=1,
+                multiprocessing=False,
+                prefill_eps_per_dataloader=1,
+            ),
             attr.evolve(env_params),
         )
 
@@ -84,10 +88,13 @@ def get_valid_agent_env_combos(seed: int) -> Mapping[Tuple[str, str], Tuple[Para
     # )
 
     # Avalon
-    combos[("ppo", "avalon")] = (PPOParams(num_workers=1, multiprocessing=False), GodotEnvironmentParams(seed=seed))
+    combos[("ppo", "avalon")] = (
+        PPOParams(num_workers=1, multiprocessing=False),
+        GodotEnvironmentParams(env_index=seed),
+    )
     combos[("dreamer", "avalon")] = (
         DreamerParams(num_workers=1, multiprocessing=False, prefill_eps_per_dataloader=1),
-        GodotEnvironmentParams(seed=seed),
+        GodotEnvironmentParams(env_index=seed),
     )
 
     return combos

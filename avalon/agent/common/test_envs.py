@@ -23,8 +23,10 @@ class TestEnvironmentParams(EnvironmentParams):
     # act properly as if it's supposed to be infinite.
     long_episode_length: int = 1_000_000
 
+    __test__ = False
 
-def get_env(task, params: TestEnvironmentParams):
+
+def get_env(task, params: TestEnvironmentParams) -> gym.Env:
     if task == "dummy":
         return DummyEnv()
     elif task == "case1":
@@ -33,6 +35,9 @@ def get_env(task, params: TestEnvironmentParams):
         # Expect value estimate to be 4. Value EV=1
         # No episode ends (or just relatively long episodes), reward always 1.
         # Actions should stay random - they are ignored.
+
+        # To test time limit bootstrapping, set a time limit of 5 and a discount of .9.
+        # Value should converge to 10; fails if it converges to 5.
         return Test1(params.long_episode_length, discrete=True)
     elif task == "case1_continuous_action":
         return Test1(params.long_episode_length, discrete=False)
@@ -58,7 +63,7 @@ def get_env(task, params: TestEnvironmentParams):
         assert False
 
 
-class DummyEnv:
+class DummyEnv(gym.Env):
     def __init__(self) -> None:
         self._random = np.random.RandomState(seed=0)
         self._step = None
@@ -90,11 +95,14 @@ class DummyEnv:
         info = {}
         return obs, reward, done, info
 
+    def render(self, mode="human"):
+        raise NotImplementedError
+
     def close(self) -> None:
         pass
 
 
-class Test1:
+class Test1(gym.Env):
     """Agent gets reward of 1 every step for num_steps. Total reward is num_steps.
 
     Ways to use:
@@ -134,11 +142,14 @@ class Test1:
         info = {}
         return obs, reward, done, info
 
+    def render(self, mode="human"):
+        raise NotImplementedError
+
     def close(self) -> None:
         pass
 
 
-class Test2:
+class Test2(gym.Env):
     """Random obs in the set (-1, 1). Binary action. Multiple reward modes."""
 
     __test__ = False
@@ -181,11 +192,14 @@ class Test2:
         self.last_obs = obs
         return obs.astype(dtype=np.float32), reward, done, info
 
+    def render(self, mode="human"):
+        raise NotImplementedError
+
     def close(self) -> None:
         pass
 
 
-class TestHybridAction:
+class TestHybridAction(gym.Env):
     __test__ = False
 
     def __init__(self, num_steps) -> None:
@@ -225,6 +239,9 @@ class TestHybridAction:
         obs = np.random.uniform(-1, 1, size=(1,)).astype(np.float32)
         self.last_obs = obs
         return obs, reward, done, info
+
+    def render(self, mode="human"):
+        raise NotImplementedError
 
     def close(self) -> None:
         pass

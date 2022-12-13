@@ -71,9 +71,12 @@ def log_scalar(
     freq: Optional[int] = None,
     wandb_run: Union[ModuleType, Run, RunDisabled] = wandb,
 ) -> None:
+    global last_step
     freq = SCALAR_FREQ if freq is None else freq
     if step is None:
         step = last_step
+    else:
+        last_step = step
     if not check_log_interval(step, freq):
         return
     if type(value) == torch.Tensor:
@@ -89,11 +92,14 @@ def log_histogram(
     hist_freq: Optional[int] = None,
     log_mean: bool = True,
 ) -> None:
+    global last_step
     mean_freq = SCALAR_FREQ if mean_freq is None else mean_freq
     hist_freq = HIST_FREQ if hist_freq is None else hist_freq
 
     if step is None:
         step = last_step
+    else:
+        last_step = step
 
     # Allow backoff to apply to the scalars
     if log_mean:
@@ -119,10 +125,14 @@ def log_video(
     freq: Optional[int] = None,
     normalize: bool = False,
     num_images_per_row: int = 4,
+    video_format: str = "mp4",  # mp4, webm. webm preferred except it was giving some weird bug
 ) -> None:
+    global last_step
     freq = MEDIA_FREQ if freq is None else freq
     if step is None:
         step = last_step
+    else:
+        last_step = step
     # Expects b, t, c, h, w
     # or t, c, h, w
     if not check_log_interval(step, freq):
@@ -161,12 +171,15 @@ def log_video(
     if shape[1] == 1:
         shape[1] = 3
         frames = frames.expand(shape)
-    wandb.log({tag: wandb.Video(frames, fps=4, format="webm")}, step=step)  # type: ignore
+    wandb.log({tag: wandb.Video(frames, fps=4, format=video_format)}, step=step)  # type: ignore
 
 
 def log_image(tag: str, value: Tensor, step: Optional[int] = None, freq: Optional[int] = None) -> None:
+    global last_step
     if step is None:
         step = last_step
+    else:
+        last_step = step
     freq = MEDIA_FREQ if freq is None else freq
     if not check_log_interval(step, freq):
         return

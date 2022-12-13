@@ -868,7 +868,7 @@ class World(Serializable):  # type: ignore[no-untyped-def]  # mypy bug?
         r = np.sqrt(x_diff * x_diff + y_diff * y_diff)
         traversal_distance = np.sqrt(np.sum((config.center_point - config.traversal_point) ** 2))
         if traversal_distance < safety_radius_min or traversal_distance > safety_radius_max:
-            raise Exception(
+            raise ImpossibleWorldError(
                 f"Impossible to create a ring between {safety_radius_min} and {safety_radius_max} when the traversal point is {traversal_distance} meters away!"
             )
         normalized_r = r / traversal_distance

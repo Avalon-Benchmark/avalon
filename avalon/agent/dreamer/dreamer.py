@@ -29,7 +29,6 @@ from avalon.agent.common.action_model import StraightThroughOneHotCategorical
 from avalon.agent.common.action_model import visualize_action_dists
 from avalon.agent.common.types import ActionBatch
 from avalon.agent.common.types import Algorithm
-from avalon.agent.common.types import AlgorithmInferenceExtraInfoBatch
 from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.types import LatentBatch
 from avalon.agent.common.types import ObservationBatch
@@ -118,9 +117,9 @@ class Dreamer(Algorithm[DreamerParams]):
         self,
         next_obs: ObservationBatch,
         dones: Tensor,
-        indices_to_run: list[bool],
+        indices_to_run: Tensor,
         exploration_mode: str,
-    ) -> Tuple[ActionBatch, AlgorithmInferenceExtraInfoBatch]:
+    ) -> Tuple[ActionBatch, dict]:
         # Only used in the GamePlayer
         # dones should be "did this env give a done signal after the last step".
         # In other words, obs should follow done. o_t, done_{t-1}
@@ -147,7 +146,8 @@ class Dreamer(Algorithm[DreamerParams]):
 
         # We want to set done to false for anything that claims to be done but isn't running this step.
         # This will result in no masking for those states.
-        indices_to_run_torch = torch.tensor(indices_to_run, device=dones.device, dtype=torch.bool)
+        # indices_to_run_torch = torch.tensor(indices_to_run, device=dones.device, dtype=torch.bool)
+        indices_to_run_torch = indices_to_run.to(device=dones.device)
         dones = dones & indices_to_run_torch
         dones = dones.to(dtype=torch.float32)
 
@@ -175,7 +175,7 @@ class Dreamer(Algorithm[DreamerParams]):
                 v2[indices_to_run] = new_state[k1][k2][indices_to_run]
 
         action = map_structure(lambda x: x.cpu(), action)
-        return action, AlgorithmInferenceExtraInfoBatch()
+        return action, {}
 
     def reset_state(self) -> None:
         self.last_rollout_state = None

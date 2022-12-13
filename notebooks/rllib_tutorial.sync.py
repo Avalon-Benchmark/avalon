@@ -15,6 +15,7 @@ from avalon.agent.godot.godot_gym import CurriculumWrapper
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import GodotObsTransformWrapper
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
+from avalon.datagen.world_creation.constants import int_to_avalon_task
 
 # %% [markdown]
 """
@@ -136,7 +137,7 @@ class RayCallbacks(DefaultCallbacks):
         self, *, worker, base_env, policies, episode, env_index: Optional[int] = None, **kwargs
     ) -> None:
         info = episode.last_info_for()
-        task = info["task"]
+        task = int_to_avalon_task[int(info["task"])]
         episode.custom_metrics["success"] = info["success"]
         episode.custom_metrics[f"{task.lower()}_success"] = info["success"]
         episode.custom_metrics[f"{task.lower()}_difficulty"] = info["difficulty"]

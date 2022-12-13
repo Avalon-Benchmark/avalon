@@ -7,7 +7,6 @@ from typing import Dict
 from typing import Generic
 from typing import List
 from typing import Tuple
-from typing import Type
 from typing import TypeVar
 
 import attr
@@ -69,6 +68,10 @@ class BatchData:
 
 @attr.s(auto_attribs=True, frozen=True)
 class StepData:
+    # if obs_first=True, for a given timestep, the order is (observation, action, reward/done/info)
+    # if obs_first=False, for a given timestep, the order is (action, reward/done/info, observation)
+    # if we extend this with extra inference fields, they'll go with the obs, since it's computed from the obs.
+    # So eg for PPO, obs_first=True has ordering (observation/value/policy, action, reward/done/info)
     batch_type = BatchData
     sequence_type = SequenceData
     batch_sequence_type = BatchSequenceData
@@ -87,21 +90,11 @@ class StepData:
         return pack_1d_list(sequence, out_cls=self.sequence_type)  # type: ignore
 
 
-@attr.s(auto_attribs=True, frozen=True)
-class AlgorithmInferenceExtraInfo:
-    pass
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class AlgorithmInferenceExtraInfoBatch:
-    pass
-
-
 ParamsType = TypeVar("ParamsType", bound=Params)
 
 
 class Algorithm(torch.nn.Module, ABC, Generic[ParamsType]):
-    step_data_type: Type = StepData
+    step_data_type: StepData = StepData
 
     def __init__(self, params: ParamsType, obs_space: gym.spaces.Dict, action_space: gym.spaces.Dict) -> None:
         seed_and_run_deterministically_if_enabled()
@@ -116,9 +109,9 @@ class Algorithm(torch.nn.Module, ABC, Generic[ParamsType]):
         self,
         next_obs: Observation,
         dones: Tensor,
-        indices_to_run: List[bool],
+        indices_to_run: Tensor,
         exploration_mode: str,
-    ) -> Tuple[ActionBatch, AlgorithmInferenceExtraInfoBatch]:
+    ) -> Tuple[ActionBatch, dict]:
         raise NotImplementedError
 
     def reset_state(self) -> None:
@@ -128,6 +121,3 @@ class Algorithm(torch.nn.Module, ABC, Generic[ParamsType]):
     def train_step(self, batch_data: BatchSequenceData, step: int) -> int:
         """Returns the new step count (sometimes multiple gradient steps are taken here)."""
         raise NotImplementedError
-
-    def build_algorithm_step_data(self, step_data: StepData, extra_info: AlgorithmInferenceExtraInfo) -> StepData:
-        return self.step_data_type(**attr.asdict(step_data), **attr.asdict(extra_info))  # type: ignore

@@ -29,10 +29,10 @@ ACTIVATION_MODULE_LOOKUP: Dict[str, Callable[[], torch.nn.Module]] = {
 class MLP(torch.nn.Module):
     def __init__(
         self,
-        input_dim: int = 200,
-        hidden_dim: int = 200,
-        output_dim: int = 200,
-        num_layers: int = 2,
+        input_dim: int,
+        hidden_dim: int,
+        output_dim: int,
+        num_layers: int,
         activation_function: ActivationFunction = ActivationFunction.ACTIVATION_RELU,
         is_batch_normalized: bool = False,
     ) -> None:

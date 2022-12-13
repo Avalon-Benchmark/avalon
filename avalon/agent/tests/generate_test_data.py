@@ -18,6 +18,7 @@ from avalon.agent.common.trainer import OffPolicyTrainer
 from avalon.agent.common.trainer import OnPolicyTrainer
 from avalon.agent.common.trainer import Trainer
 from avalon.agent.common.util import hash_model
+from avalon.agent.common.util import setup_new_process
 from avalon.agent.dreamer.params import DreamerParams
 from avalon.agent.ppo.params import PPOParams
 from avalon.agent.tests.fixtures import _make_agent
@@ -117,6 +118,7 @@ def generate_test_output_data(seed: int, test_data_path: Path) -> None:
 
 
 if __name__ == "__main__":
+    setup_new_process()
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=RequestsDependencyWarning)
 

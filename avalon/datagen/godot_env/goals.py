@@ -13,6 +13,7 @@ from avalon.datagen.godot_env.observations import AvalonObservation
 
 # Mapping of feature name to (data_type, shape).
 from avalon.datagen.world_creation.constants import AvalonTask
+from avalon.datagen.world_creation.constants import avalon_task_to_int
 from avalon.datagen.world_creation.world_generator import GenerateAvalonWorldParams
 from avalon.datagen.world_creation.world_generator import GeneratedAvalonWorldParams
 from avalon.datagen.world_creation.world_generator import GeneratedWorldParamsType
@@ -83,7 +84,8 @@ class AvalonGoalEvaluator(GoalEvaluator[AvalonObservation, GeneratedAvalonWorldP
                 "remaining_frames": remaining_frames,
                 "frame_id": observation.frame_id.item(),
                 "difficulty": self.world_params.difficulty,
-                "task": self.world_params.task.value,
+                # make this an int to work with our rollout worker
+                "task": avalon_task_to_int[self.world_params.task.value],
                 "episode_id": observation.episode_id.item(),
                 "world_index": self.world_params.index,
                 "hit_points": observation.hit_points.item(),

@@ -8,8 +8,8 @@ from avalon.contrib.utils import FILESYSTEM_ROOT
 @attr.s(auto_attribs=True, frozen=True)
 class OffPolicyParams(Params):
     worker_managers: int = 1
-    # ratio between these two effects sample efficiency
-    rollout_steps: int = 500  # env steps (per worker) per loop. this is how often we reload a new model and log stats.
+    # ratio between these two affects sample efficiency
+    num_steps: int = 500  # env steps (per worker) per loop. this is how often we reload a new model and log stats.
     train_steps: int = 100  # train steps per training iteration
     min_fragment_len: int = 50  # min length of an episode fragment to train on
     max_fragment_len: int = 50  # max length of an episode fragment to train on
@@ -27,6 +27,7 @@ class OffPolicyParams(Params):
 
     log_rollout_metrics_every: int = 20  # how many rollout episodes between logging stats
     prefill_eps_per_dataloader: int = 5  # how many episodes to load before a dataloader starts serving batches
+    multiprocessing_mode: str = "spawn"  # currently, spawn is necessary for the off policy to work. could be fixed.
 
     @property
     def replay_buffer_size_timesteps_per_manager(self) -> int:

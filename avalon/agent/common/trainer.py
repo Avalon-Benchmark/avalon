@@ -25,20 +25,24 @@ from avalon.agent.common.dataloader import ReplayDataset
 from avalon.agent.common.dataloader import worker_init_fn
 from avalon.agent.common.envs import build_env
 from avalon.agent.common.get_algorithm_cls import get_algorithm_cls
-from avalon.agent.common.storage import InMemoryStorage
+from avalon.agent.common.storage import FragmentStorage
 from avalon.agent.common.storage import ModelStorage
-from avalon.agent.common.storage import StorageMode
 from avalon.agent.common.storage import TrajectoryStorage
 from avalon.agent.common.types import Algorithm
 from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.types import ParamsType
+from avalon.agent.common.types import StepData
 from avalon.agent.common.util import get_checkpoint_file
 from avalon.agent.common.util import pack_1d_list
 from avalon.agent.common.util import postprocess_uint8_to_float
 from avalon.agent.common.worker import AsyncRolloutManager
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import OffPolicyParams
+from avalon.agent.godot.godot_eval import log_rollout_stats_packed
 from avalon.agent.ppo.params import OnPolicyParams
+from avalon.agent.ppo.params import PPOParams
+from avalon.agent.ppo.ppo_types import PPOStepData
+from avalon.contrib.utils import make_deterministic
 
 # Just a temporary reminder to not use <1.11
 assert int(torch.__version__.split(".")[1]) >= 11
@@ -60,10 +64,16 @@ class Trainer(ABC, Generic[ParamsType]):
 
         # Use an explict context to fix this bug: https://github.com/pytorch/pytorch/issues/3492
         # Spawn is less fiddly, but fork launches faster
-        self.multiprocessing_context = torch.multiprocessing.get_context("spawn")
+        self.multiprocessing_context = torch.multiprocessing.get_context(params.multiprocessing_mode)
         # Fixing the bug where torch gets really slow on small fast ops on CPU
         # https://github.com/pytorch/pytorch/issues/80777
         torch.set_num_threads(1)
+
+        # allow tf32 (also need to call this in any subprocesses that may need it, eg inference)
+        # leaving this off for now since it gave issues in PPO
+        # torch.backends.cuda.matmul.allow_tf32 = True
+        # torch.backends.cudnn.allow_tf32 = True
+
         self.params = params
         self.to_cleanup: List[Cleanable] = []
 
@@ -71,14 +81,22 @@ class Trainer(ABC, Generic[ParamsType]):
         self.i = 0
         self.env_step = 0
 
+        if isinstance(params, PPOParams):
+            self.step_data_type = PPOStepData
+        else:
+            self.step_data_type = StepData
+
         self.get_spaces()
-        self.wandb_run = self.wandb_init()
         self.train_storage = self.create_train_storage()
+
+        if params.deterministic:
+            make_deterministic(seed=0)
+
         self.algorithm = self.create_model()
         self.train_rollout_manager = self.create_rollout_manager()
         self.train_dataloader = self.create_dataloader()
         self.wandb_run = self.wandb_init()
-        self.algorithm = self.algorithm.to(self.params.train_device)
+        # wandb.watch(self.algorithm, log=None, log_freq=self.params.log_freq_hist, log_graph=True)
 
     def get_spaces(self) -> None:
         dummy_env = build_env(self.params.env_params)
@@ -92,13 +110,18 @@ class Trainer(ABC, Generic[ParamsType]):
 
     def wandb_init(self):
         # This needs to happen after all other processes launch
-        run_name = self.params.env_params.suite if not self.params.name else self.params.name
+        run_name = (
+            f"{self.params.env_params.suite}:{self.params.env_params.task}"
+            if not self.params.name
+            else self.params.name
+        )
         run = wandb.init(
             name=run_name,
             project=self.params.project,
             config=attr.asdict(self.params),
             tags=self.params.tags,
             group=self.params.group,
+            mode=self.params.wandb_mode,
         )
         wandb_lib.SCALAR_FREQ = self.params.log_freq_scalar
         wandb_lib.HIST_FREQ = self.params.log_freq_hist
@@ -119,6 +142,8 @@ class Trainer(ABC, Generic[ParamsType]):
             checkpoint_path = get_checkpoint_file(self.params.resume_from)
             algorithm.load_state_dict(torch.load(checkpoint_path, map_location=self.params.train_device))
             logger.info("RESUMED MODEL FROM CHECKPOINT")
+
+        algorithm = algorithm.to(self.params.train_device)
 
         logger.info(f"model has {sum(p.numel() for p in algorithm.parameters() if p.requires_grad)} params")
         return algorithm
@@ -148,7 +173,11 @@ class Trainer(ABC, Generic[ParamsType]):
         start = time.time()
         start_i = self.i
         rollouts = map_structure(lambda x: x.to(self.params.train_device, non_blocking=True), rollouts)
-        rollouts = attr.evolve(rollouts, observation=postprocess_uint8_to_float(rollouts.observation))
+        rollouts = attr.evolve(
+            rollouts,
+            observation=postprocess_uint8_to_float(rollouts.observation, center=self.params.center_observations),
+        )
+
         self.i = self.algorithm.train_step(rollouts, self.i)
 
         wandb_lib.log_scalar(
@@ -193,11 +222,17 @@ class Trainer(ABC, Generic[ParamsType]):
         if not self.params.is_train_only:
             raise NotImplementedError
 
-    def shutdown(self) -> None:
+    def shutdown(self, finish_wandb_quietly=False) -> None:
         # The main thread won't join until we close all the processes we have open.
+        # TODO: we don't automatically cleanup the off-policy dataloader(s)
         for item in self.to_cleanup:
+            logger.info(f"shutting down {item}")
             item.shutdown()
         self.to_cleanup = []
+        if finish_wandb_quietly:
+            logger.info("finishing wandb")
+            wandb.finish(quiet=True)
+        logger.info("trainer shutdown is finished")
 
 
 class OffPolicyTrainer(Trainer[OffPolicyParams]):
@@ -275,17 +310,20 @@ class OffPolicyTrainer(Trainer[OffPolicyParams]):
 
 
 class OnPolicyTrainer(Trainer[OnPolicyParams]):
-    def __init__(self, params: OnPolicyParams) -> None:
+    def __init__(
+        self, params: OnPolicyParams, rollout_manager_cls=RolloutManager, storage_cls=FragmentStorage
+    ) -> None:
+        self.rollout_manager_cls = rollout_manager_cls
+        self.storage_cls = storage_cls
         super().__init__(params)
 
     def create_rollout_manager(self):
-        rollout_manager = RolloutManager(
+        rollout_manager = self.rollout_manager_cls(
             params=self.params,
             num_workers=self.params.num_workers,
             is_multiprocessing=self.params.multiprocessing,
             storage=self.train_storage,
             obs_space=self.params.observation_space,
-            storage_mode=StorageMode.FRAGMENT,
             model=self.algorithm,
             rollout_device=self.params.inference_device,
             multiprocessing_context=self.multiprocessing_context,
@@ -294,7 +332,7 @@ class OnPolicyTrainer(Trainer[OnPolicyParams]):
         return rollout_manager
 
     def create_train_storage(self) -> TrajectoryStorage:
-        return InMemoryStorage(self.params)
+        return self.storage_cls(self.params, step_data_type=self.step_data_type, num_workers=self.params.num_workers)
 
     def rollout_step(self) -> None:
         # Run rollouts
@@ -308,14 +346,26 @@ class OnPolicyTrainer(Trainer[OnPolicyParams]):
         self.env_step += self.params.num_workers * self.params.num_steps
 
         if self.params.env_params.suite == "godot":
-            from avalon.agent.godot.godot_eval import log_rollout_stats
-
-            log_rollout_stats(self.train_storage.storage.values(), self.i)
+            log_rollout_stats_packed(self.train_storage.storage, self.i)
         else:
-            # TODO: we don't keep good statistics for on-policy rollouts. no way to compute ep len or reward.
-            # Should make a wrapper that keeps track of these and returns them at the end of the ep in the info.
-            # could also have the storage class keep some stats (number of eps seen, etc).
-            pass
+            # Either use our default worker, or wrap in our (not gym's!) RecordEpisodeStatistics for this to work.
+            try:
+                if "info" in self.train_storage.storage.keys():
+                    rollouts = self.train_storage.storage
+                    cumulative_rewards = []
+                    episode_lengths = []
+                    for worker_id in range(self.params.num_workers):
+                        for t in range(self.params.num_steps):
+                            if rollouts["done"][worker_id, t]:
+                                cumulative_rewards.append(rollouts["info"]["cumulative_episode_return"][worker_id, t])
+                                episode_lengths.append(rollouts["info"]["cumulative_episode_length"][worker_id, t])
+                    if len(cumulative_rewards) > 0:
+                        wandb_lib.log_histogram(f"rollout/cumulative_reward", cumulative_rewards, self.i)
+                        wandb_lib.log_histogram(f"rollout/episode_length", episode_lengths, self.i)
+                    wandb_lib.log_scalar(f"rollout/num_finished_episodes", len(episode_lengths), self.i)
+            except (AttributeError, TypeError):
+                # Storage doesn't support this
+                pass
 
     def create_dataloader(self) -> Iterator[BatchSequenceData]:
         def dataloader():
@@ -325,23 +375,6 @@ class OnPolicyTrainer(Trainer[OnPolicyParams]):
                 rollouts: BatchSequenceData = self.train_storage.to_packed()
                 # go ahead and send to cuda now, will make the next step faster
                 rollouts = map_structure(lambda x: x.to(self.params.train_device, non_blocking=True), rollouts)
-                # TODO: do something about reaching in and grabbing the value like this - not great.
-                # and this won't be correct in the case that we stopped to train at the same time an ep ended -
-                # next_obs will actually be from the next ep. we need the terminal obs in that case.
-                # Although in practice that might actually hurt performance a bit, in some cases.
-                # Is it so bad to slice off one sample at the end here for training?
-                # Could do something like - slice off the last step, and then insert it back in the buffer
-                # to become part of the next rollout.
-                final_observations = map_structure(
-                    lambda x: x.to(self.params.train_device, non_blocking=True),
-                    self.train_rollout_manager.next_obs,
-                )
-                # Add one more observation, to use for value backup.
-                # TODO: this could be optimized, involves an unnecessary memory copy (but it's logically simpler this way)
-                # TODO: shouldn't be mutating an immutable structure here
-                for k, v in final_observations.items():
-                    rollouts.observation[k] = torch.cat((rollouts.observation[k], torch.unsqueeze(v, 1)), dim=1)
-
                 yield rollouts
 
         return iter(dataloader())

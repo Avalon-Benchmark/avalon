@@ -1,17 +1,16 @@
 import time
-import warnings
 
 import attr
 from loguru import logger
 
 from avalon.agent.common.parse_args import parse_args
 from avalon.agent.common.trainer import OffPolicyTrainer
+from avalon.agent.common.util import setup_new_process
 from avalon.agent.dreamer.params import DreamerParams
 from avalon.agent.godot.godot_eval import test
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.common.error_utils import capture_exception
-from avalon.common.log_utils import configure_remote_logger
 from avalon.datagen.godot_env.interactive_godot_process import GODOT_ERROR_LOG_PATH
 
 FRAGMENT_LENGTH = 30
@@ -66,6 +65,7 @@ class DreamerGodotParams(DreamerParams):
     rssm_hidden_size: int = 600
     deter_size: int = 800
     stoch_size: int = 32
+    center_and_clamp_discrete_logits = True
 
 
 def run(params: DreamerParams):
@@ -94,12 +94,15 @@ def run(params: DreamerParams):
                 trainer.wandb_run.save(f"{GODOT_ERROR_LOG_PATH}/*")
             except Exception as e:
                 logger.warning(f"wandb godot tarball save failed: {e}")
-        trainer.shutdown()
+        trainer.shutdown(finish_wandb_quietly=True)
 
 
 if __name__ == "__main__":
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    configure_remote_logger()
-    default_params = DreamerGodotParams()
-    default_params = parse_args(default_params)
-    run(default_params)
+    setup_new_process()
+    try:
+        default_params = DreamerGodotParams()
+        default_params = parse_args(default_params)
+        run(default_params)
+    except Exception as e:
+        logger.exception(e)
+        raise

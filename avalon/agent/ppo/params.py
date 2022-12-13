@@ -3,6 +3,7 @@ from typing import Optional
 import attr
 import torch
 
+from avalon.agent.common.models import ActivationFunction
 from avalon.agent.common.params import Params
 
 
@@ -11,6 +12,7 @@ class ObservationModelParams:
     encoder_output_dim: int = 256
     num_mlp_layers: int = 2
     num_cnn_base_channels: int = 16
+    mlp_activation_fn: ActivationFunction = ActivationFunction.ACTIVATION_RELU
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -40,6 +42,7 @@ class PPOParams(OnPolicyParams):
     clip_range: float = 0.2
     clip_range_vf: Optional[float] = None
     value_loss_coef: float = 0.5
+    baselines_style_vf_loss: bool = False
     entropy_mode: str = "regularized"  # can be "max" or "regularized", same meaning as in `garage` VPG
     entropy_coef: float = 0.0  # entropy coef for use in either entropy mode. set to 0 to disable both.
 
@@ -60,7 +63,6 @@ class PPOParams(OnPolicyParams):
         # These should only be changed with great care.
         assert self.env_params.action_repeat == 1
         assert self.obs_first is True
-        assert self.time_limit_bootstrapping is True
 
     @property
     def num_batches(self) -> int:

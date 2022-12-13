@@ -17,12 +17,11 @@ import torch
 import wandb
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import bar
-from numpy import typing as npt
+from numpy.typing import NDArray
 
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.params import Params
-from avalon.agent.common.storage import LambdaStorage
-from avalon.agent.common.storage import StorageMode
+from avalon.agent.common.storage import EpisodeStorage
 from avalon.agent.common.types import Algorithm
 from avalon.agent.common.types import StepData
 from avalon.agent.common.worker import RolloutManager
@@ -32,38 +31,23 @@ from avalon.contrib.s3_utils import TEMP_BUCKET_NAME
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import TEMP_DIR
 from avalon.contrib.utils import create_temp_file_path
+from avalon.datagen.world_creation.constants import int_to_avalon_task
 
 BIG_SEPARATOR = "-" * 80
 RESULT_TAG = "DATALOADER:0 TEST RESULTS"
 
 
-def log_rollout_stats_packed(
-    packed_rollouts: Dict[str, npt.NDArray], infos: Dict[int, List[Dict[str, npt.NDArray]]], i: int
-) -> None:
+def log_rollout_stats_packed(packed_rollouts: Dict[str, NDArray], i: int) -> None:
+    """Log stats, when rollouts is a dict of packed BatchSequence tensors."""
     successes: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
     keys = ["success", "difficulty"]
-    for worker, timestep in np.argwhere(packed_rollouts["dones"]):
-        info = infos[worker][timestep]
-        task = info["task"].lower()
+    if packed_rollouts["done"].sum() == 0:
+        return
+    for worker, timestep in np.argwhere(packed_rollouts["done"]).T:
+        info = packed_rollouts["info"]
+        task = int_to_avalon_task[int(info["task"][worker, timestep])].lower()
         for field in keys:
-            successes[task][f"final_{field}"].append(info[field])
-    # Data is a dict (task) of dicts (keys) of lists
-    for task, x in successes.items():
-        for field, y in x.items():
-            wandb_lib.log_histogram(f"train/{task}/{field}", y, i, hist_freq=10)
-        wandb_lib.log_scalar(f"train/{task}/num_episodes", len(y), i)
-
-
-def log_rollout_stats(rollouts: List[List[StepData]], i: int) -> None:
-    """Log stats, when rollouts is a collection of episode fragments."""
-    successes: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
-    keys = ["success", "difficulty"]
-    for fragment in rollouts:
-        for timestep in fragment:
-            if timestep.done:
-                task = timestep.info["task"].lower()
-                for field in keys:
-                    successes[task][f"final_{field}"].append(timestep.info[field])
+            successes[task][f"final_{field}"].append(info[field][worker, timestep])
     # Data is a dict (task) of dicts (keys) of lists
     for task, x in successes.items():
         for field, y in x.items():
@@ -174,6 +158,7 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
         lambda: defaultdict(list)
     )
     world_scores = {}
+    video_logging_threads = []
 
     def collect_episode_stats(episode: Episode) -> None:
         world_index = episode[-1].info["world_index"]
@@ -183,7 +168,7 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
             return
         else:
             seen_worlds.add(world_index)
-        task = episode[-1].info["task"].lower()
+        task = int_to_avalon_task[int(episode[-1].info["task"])].lower()
         success = episode[-1].info["success"]
         difficulty_bin = get_episode_difficulty_bin(episode, difficulty_bin_size)
         success_by_task_and_difficulty_bin[task][difficulty_bin].append(success)
@@ -194,6 +179,7 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
                 target=log_video_by_difficulty, args=(episode, difficulty_bin), kwargs={"infix": task}, daemon=True
             )
             thread.start()
+            video_logging_threads.append(thread)
             # log_video_by_difficulty(episode, difficulty_bin, infix=task)
 
         # Stuff for collecting scores
@@ -204,37 +190,43 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
         # episode_length = len(episode)
         # logger.info(f"ep with difficulty {difficulty} had success {success} in {episode_length} steps")
 
-    hooks = (collect_episode_stats,)
-    storage_mode = StorageMode.EPISODE
-    test_storage = LambdaStorage(params, hooks, storage_mode)
+    num_workers = min(params.eval_workers, num_worlds)
+    test_storage = EpisodeStorage(
+        params,
+        StepData,
+        episode_callback=collect_episode_stats,
+        num_workers=num_workers,
+        discard_short_eps=False,
+        in_memory_buffer_size=0,
+    )
 
     # Maybe i should make a "free-running", "n_steps", and "n_episodes" worker.
     # And use the n_episodes version for eval.
     multiprocessing_context = torch.multiprocessing.get_context("spawn")
-    num_workers = params.eval_workers
     assert params.observation_space is not None
     player = RolloutManager(
         params=params,
-        num_workers=min(num_workers, num_worlds),
+        num_workers=num_workers,
         is_multiprocessing=True,
         storage=test_storage,
         obs_space=params.observation_space,
-        storage_mode=storage_mode,
         model=model,
         rollout_device=torch.device("cuda:0"),
         multiprocessing_context=multiprocessing_context,
     )
     test_storage.reset()
 
-    logger.info(f"running {num_worlds} evaluation episodes")
-    # assert num_episodes // num_workers > 0
-    # Will potential run some worlds multiple times
-    player.run_rollout(
-        num_episodes=int(np.ceil(num_worlds / num_workers)), exploration_mode=params.eval_exploration_mode
-    )
-    logger.debug("finished rollout, shutting down workers")
-    player.shutdown()
+    try:
+        logger.info(f"running {num_worlds} evaluation episodes")
+        # Will potentially run some worlds multiple times
+        player.run_rollout(
+            num_episodes=int(np.ceil(num_worlds / num_workers)), exploration_mode=params.eval_exploration_mode
+        )
+        logger.debug("finished rollout, shutting down workers")
+    finally:
+        player.shutdown()
 
+    [thread.join() for thread in video_logging_threads]
     end_time = time.monotonic()
     test_log: dict[str, float] = {"test_time": end_time - start_time}
     if log_extra is not None:

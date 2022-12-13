@@ -1,10 +1,10 @@
-import warnings
-
 import attr
+from loguru import logger
 
 from avalon.agent.common.parse_args import parse_args
 from avalon.agent.common.test_envs import TestEnvironmentParams
 from avalon.agent.common.trainer import OnPolicyTrainer
+from avalon.agent.common.util import setup_new_process
 from avalon.agent.ppo.params import PPOParams
 
 
@@ -21,6 +21,8 @@ class TestPPOParams(PPOParams):
     log_freq_media: int = 25
     entropy_coef: float = 1e-3  # with a small entropy penalty, random actions should stay random unless useful
 
+    __test__ = False
+
 
 def run(params: TestPPOParams) -> None:
     assert params.num_batches == 1
@@ -34,7 +36,11 @@ def run(params: TestPPOParams) -> None:
 
 
 if __name__ == "__main__":
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    default_params = TestPPOParams()
-    default_params = parse_args(default_params)
-    run(default_params)
+    setup_new_process()
+    try:
+        default_params = TestPPOParams()
+        default_params = parse_args(default_params)
+        run(default_params)
+    except Exception as e:
+        logger.exception(e)
+        raise

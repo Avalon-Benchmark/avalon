@@ -36,6 +36,7 @@ from avalon.agent.torchbeast.core.vtrace import from_importance_weights
 from avalon.common.log_utils import logger
 from avalon.contrib.utils import FILESYSTEM_ROOT
 from avalon.datagen.world_creation.constants import AvalonTask
+from avalon.datagen.world_creation.constants import int_to_avalon_task
 from avalon.datagen.world_creation.world_generator import get_world_params_for_task_groups
 
 
@@ -395,9 +396,8 @@ def _destroy_process_tree(parent_pid: int, final_signal: int = signal.SIGKILL) -
 
 
 class CurriculumWrapper(Wrapper):
-    def __init__(
-        self, env, task_difficulty_update: float, meta_difficulty_update: float, is_resume_allowed: bool
-    ) -> None:
+    # TODO: deduplicate this
+    def __init__(self, env, task_difficulty_update: float, meta_difficulty_update: float, is_resume_allowed: bool):
         super().__init__(env)
         self.difficulties = defaultdict(float)
         self.task_difficulty_update = task_difficulty_update
@@ -409,7 +409,7 @@ class CurriculumWrapper(Wrapper):
     def step(self, action: Dict[str, torch.Tensor]):
         observation, reward, done, info = self.env.step(action)
         if done:
-            task = AvalonTask[info["task"]]
+            task = AvalonTask[int_to_avalon_task[int(info["task"])]]
             update_step = self.task_difficulty_update  # * np.random.uniform()
             if info["success"] == 1:
                 self.difficulties[task] += update_step

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Tuple
 from typing import Type
 
@@ -17,57 +18,18 @@ from avalon.agent.common.action_model import DictActionDist
 from avalon.agent.common.action_model import visualize_action_dists
 from avalon.agent.common.types import ActionBatch
 from avalon.agent.common.types import Algorithm
-from avalon.agent.common.types import AlgorithmInferenceExtraInfo
-from avalon.agent.common.types import AlgorithmInferenceExtraInfoBatch
-from avalon.agent.common.types import BatchSequenceData
 from avalon.agent.common.types import ObservationBatch
 from avalon.agent.common.util import explained_variance
-from avalon.agent.common.worker import StepData
 from avalon.agent.ppo.gae import gae
 from avalon.agent.ppo.model import CNNBase
 from avalon.agent.ppo.model import MLPBase
 from avalon.agent.ppo.observation_model import ObservationModel
 from avalon.agent.ppo.observation_model import PPOModel
 from avalon.agent.ppo.params import PPOParams
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class PPOBatchSequenceData(BatchSequenceData):
-    value: Tensor
-    policy_prob: Tensor
-    policy_entropy: Tensor
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class PPOBatchSequenceDataWithGAE(PPOBatchSequenceData):
-    # These get added after GAE computation
-    advantage: Tensor
-    reward_to_go: Tensor
-
-
-PPOBatchDataWithGAE = PPOBatchSequenceDataWithGAE  # these have shape (batch, ...) instead of (batch, timesteps, ...)
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class PPOStepData(StepData):
-    batch_sequence_type = PPOBatchSequenceData  # type: ignore
-    value: float
-    policy_prob: float
-    policy_entropy: float
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class PPOInferenceExtraInfo(AlgorithmInferenceExtraInfo):
-    value: float
-    policy_prob: float
-    policy_entropy: float
-
-
-@attr.s(auto_attribs=True, frozen=True)
-class PPOInferenceExtraInfoBatch(AlgorithmInferenceExtraInfoBatch):
-    value: Tensor  # shape (batch, )
-    policy_prob: Tensor  # shape (batch, )
-    policy_entropy: Tensor
+from avalon.agent.ppo.ppo_types import PPOBatchDataWithGAE
+from avalon.agent.ppo.ppo_types import PPOBatchSequenceDataWithGAE
+from avalon.agent.ppo.ppo_types import PPOStepData
+from avalon.contrib.utils import set_all_seeds
 
 
 class PPO(Algorithm["PPOParams"]):
@@ -88,6 +50,7 @@ class PPO(Algorithm["PPOParams"]):
             assert False
 
         self.optim = torch.optim.Adam(self.model.parameters(), lr=params.lr, eps=1e-5)
+        self.seed_state = defaultdict(int)
 
     def forward(self, obs: ObservationBatch):
         return self.model(obs)
@@ -98,7 +61,7 @@ class PPO(Algorithm["PPOParams"]):
         dones: Tensor,  # shape (batch_size, )
         indices_to_run: list[bool],  # shape (batch_size, )
         exploration_mode: str,
-    ) -> Tuple[ActionBatch, PPOInferenceExtraInfoBatch]:
+    ) -> Tuple[ActionBatch, dict]:
         step_values: Tensor
         dist: DictActionDist
         step_values, dist = self.model(next_obs)
@@ -106,17 +69,38 @@ class PPO(Algorithm["PPOParams"]):
         # Sample actions from the policy distribution
         # This should be a list (of len num_workers) of action dicts
         step_actions = dist.sample()
+
+        if self.params.deterministic:
+            # Determinism here is tricky, since we allow partial batches.
+            # Need to do a separate sample for each worker, setting the seed before each,
+            # otherwise the random "seed" for each sample will differ depending on ordering.
+            # This will overwrite the previous action sample, to avoid having to construct the arrays.
+            for i, should_run in enumerate(indices_to_run):
+                # We do need a new seed for each sample,
+                # otherwise we always sample the same action as long as the probs are roughly uniform
+                # (it's not a chaotic sampling algorithm).
+                # So we construct one based on worker_id that gets incremented in a determinstic way
+                # irrelevant of the ordering of partial batches.
+                if should_run:
+                    if self.seed_state[i] == 0:
+                        self.seed_state[i] = i * 100000
+                    set_all_seeds(self.seed_state[i])
+
+                    def assign(target, source) -> None:
+                        target[i] = source
+
+                    map_structure(assign, step_actions, dist[i].sample())
+                    self.seed_state[i] += 1
+
         step_policy_probs = dist.log_prob(step_actions)
-        policy_entropy = dist.entropy()
+        policy_entropy = dist.entropy().cpu()
 
         # Store data for use in training
         step_actions = map_structure(lambda x: x.detach().cpu(), step_actions)
 
         step_values = step_values.detach().cpu()
         step_policy_probs = step_policy_probs.detach().cpu()
-        to_store = PPOInferenceExtraInfoBatch(
-            value=step_values, policy_prob=step_policy_probs, policy_entropy=policy_entropy
-        )
+        to_store = {"value": step_values, "policy_prob": step_policy_probs, "policy_entropy": policy_entropy}
         return step_actions, to_store
 
     def train_step(self, rollouts: PPOBatchSequenceData, i: int) -> int:  # type: ignore
@@ -197,20 +181,25 @@ class PPO(Algorithm["PPOParams"]):
             )
 
         # NOTE: implementations differ in how they handle this.
-        # this is how I had it previously (presumably pulled from original baselines??)
-        # value_losses = (values_new - rewards_to_go) ** 2
-        # value_losses_clipped = (value_pred_clipped - rewards_to_go) ** 2
-        # value_loss = 0.5 * torch.max(value_losses, value_losses_clipped)
-        # value_loss = value_loss.mean()
-        # but sb3 uses a simpler method:
-        value_loss = F.mse_loss(batch.reward_to_go, value_pred_clipped)
+        if self.params.baselines_style_vf_loss:
+            # this is how it's done in baselines ppo2
+            value_losses = (values_new - batch.reward_to_go) ** 2
+            value_losses_clipped = (value_pred_clipped - batch.reward_to_go) ** 2
+            value_loss = 0.5 * torch.max(value_losses, value_losses_clipped)
+            value_loss = value_loss.mean()
+        else:
+            # but sb3 uses a simpler method:
+            value_loss = F.mse_loss(batch.reward_to_go, value_pred_clipped)
         policy_entropy = torch.mean(dist_new.entropy())
 
-        loss = ppo_loss + self.params.value_loss_coef * value_loss
+        base_loss = ppo_loss + self.params.value_loss_coef * value_loss
         if self.params.entropy_mode == "regularized" and self.params.entropy_coef != 0:
             entropy_loss = -1 * self.params.entropy_coef * policy_entropy
-            loss += entropy_loss
+            loss = base_loss + entropy_loss
             wandb_lib.log_scalar("loss/entropy_loss", entropy_loss, i)
+        else:
+            loss = base_loss
+
         loss.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.params.clip_grad_norm)
         self.optim.step()
@@ -226,6 +215,11 @@ class PPO(Algorithm["PPOParams"]):
         wandb_lib.log_histogram("training/value_target", batch.reward_to_go, i)
         wandb_lib.log_histogram("training/prob_ratio", prob_ratio, i)
         wandb_lib.log_scalar("policy/policy entropy", policy_entropy, i)
+        # Approximate KL divergence between the policy when it was rolled out and now.
+        # Explained in https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/ and
+        # http://joschu.net/blog/kl-approx.html
+        approxkl = 0.5 * ((batch.policy_prob - selected_prob_new) ** 2).mean()
+        wandb_lib.log_scalar("policy/approx_kl", approxkl, i)
 
         # Log actions
         visualize_action_dists(self.action_space, dist_new, prefix="train_policy")
