@@ -196,7 +196,7 @@ class EpisodeStorage(TrajectoryStorage):
                 ep = self.ongoing_episodes[worker_id]
                 self.ongoing_episodes[worker_id] = []
                 ep_len = len(ep)
-                if len(ep) < self.params.min_fragment_len and self.discard_short_eps:
+                if self.discard_short_eps and len(ep) < self.params.min_fragment_len:
                     logger.debug(f"not adding short ep of len {ep_len}")
                     continue
                 self.episode_counter += 1

@@ -26,6 +26,8 @@ from avalon.agent.common.types import Algorithm
 from avalon.agent.common.types import StepData
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
+from avalon.agent.ppo.params import PPOParams
+from avalon.agent.ppo.ppo_types import PPOStepData
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import TEMP_BUCKET_NAME
 from avalon.contrib.s3_utils import SimpleS3Client
@@ -191,9 +193,15 @@ def test(params: Params, model: Algorithm, log: bool = True, log_extra: Optional
         # logger.info(f"ep with difficulty {difficulty} had success {success} in {episode_length} steps")
 
     num_workers = min(params.eval_workers, num_worlds)
+
+    if isinstance(params, PPOParams):
+        step_data_type = PPOStepData
+    else:
+        step_data_type = StepData
+
     test_storage = EpisodeStorage(
         params,
-        StepData,
+        step_data_type,
         episode_callback=collect_episode_stats,
         num_workers=num_workers,
         discard_short_eps=False,
