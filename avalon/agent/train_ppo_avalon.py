@@ -10,6 +10,7 @@ from avalon.agent.godot.godot_eval import test
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.agent.ppo.params import PPOParams
+from avalon.common.log_utils import configure_remote_logger
 
 
 @attr.s(auto_attribs=True, frozen=True)
@@ -71,6 +72,7 @@ def run(params: AvalonPPOParams) -> None:
 
 
 if __name__ == "__main__":
+    configure_remote_logger(level="INFO")
     setup_new_process()
     try:
         default_params = AvalonPPOParams()

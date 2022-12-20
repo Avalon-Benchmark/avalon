@@ -1,3 +1,4 @@
+import json
 import os
 import platform
 import sys
@@ -70,6 +71,7 @@ def configure_local_logger(level: str = "DEBUG", format: Optional[str] = None) -
     except ImportError:
         logger.remove()
         logger.add(sys.stdout, level=level, format="{message}")
+        os.environ["_LOG_CONFIG"] = json.dumps(dict(level=level, format=format))
     else:
         if format is None:
             inner_configure_local_logger(level)
@@ -83,8 +85,23 @@ def configure_remote_logger(level: str = "DEBUG", format: Optional[str] = None) 
     except ImportError:
         logger.remove()
         logger.add(sys.stdout, level=level, format="{message}")
+        os.environ["_LOG_CONFIG"] = json.dumps(dict(level=level, format=format))
     else:
         if format is None:
             inner_configure_remote_logger(level)
         else:
             inner_configure_remote_logger(level, format)
+
+
+def configure_parent_logging() -> None:
+    try:
+        from computronium.common.log_utils import configure_parent_logging as inner_configure_parent_logging
+    except ImportError:
+        if "_LOG_CONFIG" not in os.environ:
+            raise Exception(
+                "No parent process logging configuration specified. You are likely attempting to call configure_parent_logging without having already called configure_remote_logger or configure_local_logger in a parent process. If this is not a spawned subprocess, you should call one of those two functions rather than calling this function."
+            )
+        log_config = json.loads(os.environ["_LOG_CONFIG"])
+        configure_local_logger(**log_config)
+    else:
+        inner_configure_parent_logging()

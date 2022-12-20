@@ -29,6 +29,7 @@ from typing_extensions import TypeGuard
 
 from avalon.agent.common.util import setup_new_process
 from avalon.common.errors import SwitchError
+from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
 from avalon.contrib.serialization import Serializable
 from avalon.datagen.errors import ImpossibleWorldError
@@ -333,7 +334,9 @@ def generate_fixed_worlds(
         logger.error(f"World generation failed! {error}")
         raise error
 
-    with ctx.Pool(processes=min(len(world_params), num_processes)) as worker_pool:
+    with ctx.Pool(
+        processes=min(len(world_params), num_processes), initializer=configure_parent_logging
+    ) as worker_pool:
         for params in world_params:
             worker_pool.apply_async(
                 generate_world,
@@ -454,6 +457,7 @@ class FixedWorldGenerator(AvalonWorldGenerator):
 def disable_sigint() -> None:
     # Disable sigint handler so we can handle cleanup neatly ourselves.
     signal.signal(signal.SIGINT, signal.SIG_IGN)
+    configure_parent_logging()
 
 
 # TODO: this introduces some non-determinism, fix it by anchoring to ids of levels generated

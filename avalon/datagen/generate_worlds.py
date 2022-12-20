@@ -17,6 +17,7 @@ import attr
 import numpy as np
 from loguru import logger
 
+from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
 from avalon.datagen.errors import ImpossibleWorldError
 from avalon.datagen.world_creation.configs.export import get_eval_agent_export_config
@@ -250,7 +251,7 @@ def generate_evaluation_worlds(
             )
             current_seed += 1
 
-    with Pool(processes=num_workers) as worker_pool:
+    with Pool(processes=num_workers, initializer=configure_parent_logging) as worker_pool:
         requests = []
         for params in params_to_generate:
             world_id = params.output_path.name

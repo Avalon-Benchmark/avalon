@@ -24,6 +24,7 @@ from avalon.agent.torchbeast.avalon_helpers import force_cudnn_initialization
 from avalon.agent.torchbeast.avalon_helpers import wrap_evaluation_godot_env
 from avalon.agent.torchbeast.core.environment import Environment
 from avalon.agent.torchbeast.polybeast_learner import Net
+from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
 from avalon.common.wandb_utils import load_checkpoint_from_wandb_run
 from avalon.contrib.s3_utils import SimpleS3Client
@@ -127,7 +128,7 @@ def run_evaluation(worlds_path: Path, data_key: Optional[str], wandb_run: str, c
     start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     ctx = mp.get_context("spawn")
-    with ctx.Pool(processes=num_processes) as worker_pool:
+    with ctx.Pool(processes=num_processes, initializer=configure_parent_logging) as worker_pool:
         requests = []
         for world_ids in process_world_ids:
             request = worker_pool.apply_async(

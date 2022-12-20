@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Tuple
 
+import pytest
 import torch
 
 from avalon.agent.common.envs import build_env
@@ -64,6 +65,9 @@ def test_forward_pass_matches_reference(
         del agent
 
 
+@pytest.mark.skip(
+    reason="This failed in a flaky way (when no related code was changed), so am disabling until maksis can think of a nice way to make deterministic"
+)
 @slow_integration_test
 @use(seed_, agent_and_env_)
 def test_model_matches_reference_after_single_train_step(

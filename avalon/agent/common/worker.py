@@ -34,6 +34,7 @@ from avalon.agent.common.util import seed_and_run_deterministically_if_enabled
 from avalon.agent.common.util import setup_new_process
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.common.error_utils import capture_exception
+from avalon.common.log_utils import configure_parent_logging
 
 
 class AsyncRolloutManager:
@@ -73,6 +74,7 @@ class AsyncRolloutManager:
         # We don't wrap this in a loop because it really shouldn't fail flakily.
         # This is just for debugging a fatal crash.
         try:
+            configure_parent_logging()
             self.entrypoint(shutdown_event, wandb_queue)
         except Exception as e:
             logger.warning("exception in AsyncGamePlayer process")
@@ -508,6 +510,7 @@ class EnvironmentContainerProcess:
 
     def run(self):
         signal.signal(signal.SIGINT, signal.SIG_IGN)
+        configure_parent_logging()
         setup_new_process()
         try:
             while True:

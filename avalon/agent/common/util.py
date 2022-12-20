@@ -21,7 +21,6 @@ from tree import map_structure
 
 from avalon.agent.common import wandb_lib
 from avalon.agent.common.wrappers import OneHotMultiDiscrete
-from avalon.common.log_utils import configure_remote_logger
 from avalon.common.type_utils import assert_not_none
 from avalon.contrib.utils import make_deterministic
 
@@ -281,6 +280,5 @@ def seed_and_run_deterministically_if_enabled() -> None:
 
 
 def setup_new_process() -> None:
-    configure_remote_logger(level="INFO")
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     torch.set_num_threads(1)

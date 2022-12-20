@@ -5,6 +5,7 @@ from avalon.agent.common.test_envs import TestEnvironmentParams
 from avalon.agent.common.trainer import OffPolicyTrainer
 from avalon.agent.common.util import setup_new_process
 from avalon.agent.dreamer.params import DreamerParams
+from avalon.common.log_utils import configure_remote_logger
 
 FRAGMENT_LENGTH = 30
 
@@ -51,6 +52,7 @@ def run(params: DreamerParams) -> None:
 
 
 if __name__ == "__main__":
+    configure_remote_logger(level="INFO")
     setup_new_process()
     default_params = DreamerTestEnvParams()
     default_params = parse_args(default_params)

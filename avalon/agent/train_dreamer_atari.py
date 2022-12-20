@@ -6,6 +6,7 @@ from avalon.agent.common.parse_args import parse_args
 from avalon.agent.common.util import setup_new_process
 from avalon.agent.dreamer.params import DreamerParams
 from avalon.agent.train_dreamer_dmc import DreamerTrainer
+from avalon.common.log_utils import configure_remote_logger
 
 """
 - note: the time limit appears to be applied in agent env steps, not (action-repeated) env_steps.
@@ -64,6 +65,7 @@ def run(params: DreamerAtariParams) -> None:
 
 
 if __name__ == "__main__":
+    configure_remote_logger(level="INFO")
     setup_new_process()
     try:
         default_params = DreamerAtariParams()

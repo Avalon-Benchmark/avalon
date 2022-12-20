@@ -17,6 +17,7 @@ from typing import NamedTuple
 
 from avalon.common.imports import tqdm
 from avalon.common.log_utils import configure_local_logger
+from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
@@ -175,7 +176,7 @@ def get_all_human_scores(root_path: Path) -> HumanScores:
     selected_features = env.observation_context.selected_features
     env.close()
 
-    with Pool(processes=num_processes) as worker_pool:
+    with Pool(processes=num_processes, initializer=configure_parent_logging) as worker_pool:
         requests = []
         for world_path in list(root_path.iterdir()):
             world_id = world_path.name

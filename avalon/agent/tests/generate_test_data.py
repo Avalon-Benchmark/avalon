@@ -27,6 +27,7 @@ from avalon.agent.tests.fixtures import get_valid_agent_env_combos
 from avalon.agent.tests.utils import _dump
 from avalon.agent.tests.utils import _load
 from avalon.agent.tests.utils import run_deterministic_forward_pass
+from avalon.common.log_utils import configure_remote_logger
 from avalon.contrib.utils import make_deterministic
 from avalon.datagen.world_creation.tests.params import CANONICAL_SEED
 
@@ -118,6 +119,7 @@ def generate_test_output_data(seed: int, test_data_path: Path) -> None:
 
 
 if __name__ == "__main__":
+    configure_remote_logger(level="INFO")
     setup_new_process()
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     warnings.filterwarnings("ignore", category=RequestsDependencyWarning)

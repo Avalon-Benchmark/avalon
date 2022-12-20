@@ -14,6 +14,7 @@ from typing import TypedDict
 import requests
 from loguru import logger
 
+from avalon.common.log_utils import configure_parent_logging
 from avalon.contrib.utils import run_local_command
 from avalon.datagen.generate_worlds import GeneratedWorld
 from avalon.datagen.godot_generated_types import AvalonSimSpec
@@ -149,7 +150,7 @@ def generate_apks(
     if not output_path.exists():
         output_path.mkdir(parents=True)
 
-    with Pool(processes=len(participant_ids)) as worker_pool:
+    with Pool(processes=len(participant_ids), initializer=configure_parent_logging) as worker_pool:
         requests = {}
         for participant_id in participant_ids:
             logger.info(f"adding {participant_id} to requests")

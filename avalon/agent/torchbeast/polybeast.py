@@ -29,12 +29,14 @@ from avalon.agent.torchbeast import polybeast_env
 from avalon.agent.torchbeast import polybeast_learner
 from avalon.agent.torchbeast.avalon_helpers import TORCHBEAST_ENV_LOGS_PATH
 from avalon.agent.torchbeast.avalon_helpers import _destroy_process_tree
+from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.contrib.utils import FILESYSTEM_ROOT
 
 
 def run_env(flags, actor_id, exit_event) -> None:
+    configure_parent_logging()
     np.random.seed()  # Get new random seed in forked process.
     polybeast_env.main(flags, exit_event)
 

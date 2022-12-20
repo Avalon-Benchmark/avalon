@@ -11,6 +11,7 @@ from avalon.agent.common.trainer import OnPolicyTrainer
 from avalon.agent.common.util import setup_new_process
 from avalon.agent.ppo.params import ObservationModelParams
 from avalon.agent.ppo.params import PPOParams
+from avalon.common.log_utils import configure_remote_logger
 
 NUM_WORKERS = 64
 NUM_STEPS = 256
@@ -67,6 +68,7 @@ def run(params: ProcgenPPOParams) -> None:
 
 
 if __name__ == "__main__":
+    configure_remote_logger(level="INFO")
     setup_new_process()
     try:
         default_params = ProcgenPPOParams()

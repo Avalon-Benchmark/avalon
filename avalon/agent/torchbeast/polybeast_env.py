@@ -28,6 +28,7 @@ from avalon.agent.torchbeast import atari_wrappers
 from avalon.agent.torchbeast import avalon_helpers
 from avalon.agent.torchbeast.avalon_helpers import create_godot_env
 from avalon.agent.torchbeast.avalon_helpers import godot_config_from_flags
+from avalon.common.log_utils import configure_parent_logging
 
 parser = argparse.ArgumentParser(description='Remote Environment Server')
 
@@ -99,6 +100,7 @@ def create_env(env_name, config):
 
 
 def serve(env_name, server_address, config) -> None:
+    configure_parent_logging()
     logging.info(f"serve called with config {config}")
     init = Env if env_name == "Mock" else lambda: create_env(env_name, config)
     server = libtorchbeast.Server(init, server_address=server_address)

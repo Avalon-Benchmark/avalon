@@ -44,6 +44,7 @@ from avalon.agent.torchbeast.core import environment
 from avalon.agent.torchbeast.core import file_writer
 from avalon.agent.torchbeast.core import prof
 from avalon.agent.torchbeast.model import DictActionHead
+from avalon.common.log_utils import configure_parent_logging
 from avalon.datagen.godot_env.godot_env import _randint_of_size
 
 os.environ["OMP_NUM_THREADS"] = "1"  # Necessary for multithreading.
@@ -151,6 +152,7 @@ def act(
     initial_agent_state_buffers,
 ):
     try:
+        configure_parent_logging()
         logging.info("Actor %i started.", actor_index)
         timings = prof.Timings()  # Keep track of how fast things are.
 

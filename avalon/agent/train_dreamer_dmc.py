@@ -25,6 +25,7 @@ from avalon.agent.common.util import setup_new_process
 from avalon.agent.common.worker import RolloutManager
 from avalon.agent.dreamer.params import DreamerParams
 from avalon.agent.dreamer.params import OffPolicyParams
+from avalon.common.log_utils import configure_remote_logger
 
 
 class DreamerTrainer(Trainer[OffPolicyParams]):
@@ -152,6 +153,7 @@ def run(params: DreamerDMCParams) -> None:
 
 
 if __name__ == "__main__":
+    configure_remote_logger(level="INFO")
     setup_new_process()
     try:
         default_params = DreamerDMCParams()
