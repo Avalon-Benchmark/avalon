@@ -82,6 +82,7 @@ If you're looking to use our RL code, you'll need additionally:
 On Mac, a Nvidia GPU is not required, but the environment rendering is not headless - you'll see a godot window pop up for each environment you have open.
 
 ```
+brew install coreutils
 pip install avalon-rl
 python -m avalon.install_godot_binary
 python -m avalon.common.check_install
