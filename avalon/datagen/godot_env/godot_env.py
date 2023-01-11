@@ -19,8 +19,8 @@ import gym
 import numpy as np
 from loguru import logger
 from numpy import typing as npt
-from sentry_sdk import capture_exception
 
+from avalon.common.error_utils import capture_exception
 from avalon.common.utils import only
 from avalon.contrib.s3_utils import SimpleS3Client
 from avalon.datagen.errors import GodotError
@@ -349,7 +349,7 @@ class GodotEnv(gym.Env, Generic[ObservationType, ActionType, GeneratedWorldParam
         try:
             self.process.check_for_errors()
         except GodotError as ge:
-            capture_exception(ge)
+            capture_exception(ge, is_thrown_without_sentry=False)
 
             tar_path = self.process.save_artifacts(self.recent_worlds)
             logger.warning(f"Godot failed! Saved recent godot levels and logs to {tar_path}")

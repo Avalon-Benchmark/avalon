@@ -9,11 +9,12 @@ from typing import Dict
 
 import attr
 import flask
-import sentry_sdk
 from flask import send_from_directory
 from flask import url_for
 from sentry_sdk.integrations.flask import FlaskIntegration
 from werkzeug.utils import secure_filename
+
+from avalon.common.error_utils import setup_sentry
 
 # note: using relative imports because this server runs independent from the rest of standalone/avalon
 from .server_state import RunID
@@ -25,8 +26,6 @@ from .server_state import get_current_server_state
 from .server_state import get_world_root_path
 from .server_state import read_world_metadata
 
-IS_SENTRY_ENABLED = True
-
 API_VERSION: str = os.getenv("API_VERSION")
 assert API_VERSION is not None
 ENV_ROOT_PATH = os.getenv("ROOT_PATH", None)
@@ -36,23 +35,15 @@ ROOT_PATH = Path(ENV_ROOT_PATH) / API_VERSION
 APK_DIR = Path(ENV_ROOT_PATH) / "apks" / API_VERSION
 APK_DIR.mkdir(parents=True, exist_ok=True)
 
-if IS_SENTRY_ENABLED:
-    # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
-    sentry_sdk.init(
-        integrations=[FlaskIntegration()],
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=1.0,
-    )
+setup_sentry(integrations=[FlaskIntegration()], percent_of_traces_to_capture=1.0)
 
 
 def create_app():
-    app = flask.Flask("avalon_server")
+    flask_app = flask.Flask("avalon_server")
 
     if ROOT_PATH and not Path(ROOT_PATH).exists():
         Path(ROOT_PATH).mkdir(parents=True)
-    return app
+    return flask_app
 
 
 app = create_app()
@@ -158,11 +149,11 @@ def users():
 def time_played_by_user():
     with lock:
         state = get_current_server_state(ROOT_PATH, API_VERSION)
-        time_played_by_user, _ = get_active_time_played_by_users(server_state=state)
+        hours_played_by_user, _ = get_active_time_played_by_users(server_state=state)
     return flask.jsonify(
         {
             "headers": dict(flask.request.headers),
-            "time_in_hours_by_user": time_played_by_user,
+            "time_in_hours_by_user": hours_played_by_user,
         }
     )
 

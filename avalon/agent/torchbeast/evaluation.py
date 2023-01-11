@@ -24,6 +24,7 @@ from avalon.agent.torchbeast.avalon_helpers import force_cudnn_initialization
 from avalon.agent.torchbeast.avalon_helpers import wrap_evaluation_godot_env
 from avalon.agent.torchbeast.core.environment import Environment
 from avalon.agent.torchbeast.polybeast_learner import Net
+from avalon.common.error_utils import setup_sentry
 from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
 from avalon.common.wandb_utils import load_checkpoint_from_wandb_run
@@ -75,13 +76,7 @@ def run_evaluation(worlds_path: Path, data_key: Optional[str], wandb_run: str, c
     s3_client = SimpleS3Client()
     result_key = get_wandb_result_key(wandb_run, checkpoint_filename, data_key)
 
-    # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
-    sentry_sdk.init(
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=1.0,
-    )
+    setup_sentry(percent_of_traces_to_capture=1.0)
 
     if data_key is None:
         assert worlds_path.is_dir()

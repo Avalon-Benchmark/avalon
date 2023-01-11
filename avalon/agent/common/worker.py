@@ -9,7 +9,6 @@ from typing import Tuple
 
 import attr
 import gym
-import sentry_sdk
 import torch
 from loguru import logger
 from torch import Tensor
@@ -34,6 +33,7 @@ from avalon.agent.common.util import seed_and_run_deterministically_if_enabled
 from avalon.agent.common.util import setup_new_process
 from avalon.agent.dreamer.params import OffPolicyParams
 from avalon.common.error_utils import capture_exception
+from avalon.common.error_utils import setup_sentry
 from avalon.common.log_utils import configure_parent_logging
 
 
@@ -484,13 +484,7 @@ class EnvironmentContainerProcess:
 
     def lazy_init_env(self) -> None:
         if self.env is None:
-            # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
-            sentry_sdk.init(  # type: ignore[abstract]
-                # Set traces_sample_rate to 1.0 to capture 100%
-                # of transactions for performance monitoring.
-                # We recommend adjusting this value in production.
-                # traces_sample_rate=1.0,
-            )
+            setup_sentry()
             self.env = build_env(env_params=self.env_params)
             self.next_obs = self.env.reset()
             self.next_obs = {k: v * 0 for k, v in self.next_obs.items()}

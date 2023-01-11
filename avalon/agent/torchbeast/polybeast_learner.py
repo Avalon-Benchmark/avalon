@@ -30,7 +30,6 @@ from typing import Set
 import libtorchbeast
 import nest
 import numpy as np
-import sentry_sdk
 import torch
 import wandb
 from gym import spaces
@@ -55,6 +54,7 @@ from avalon.agent.torchbeast.avalon_helpers import unflatten_tensor
 from avalon.agent.torchbeast.avalon_helpers import vtrace_from_dist
 from avalon.agent.torchbeast.core.environment import Environment
 from avalon.agent.torchbeast.model import DictActionHead
+from avalon.common.error_utils import setup_sentry
 from avalon.common.log_utils import logger
 from avalon.common.visual_utils import encode_video
 from avalon.common.wandb_utils import get_latest_checkpoint_filename
@@ -683,13 +683,7 @@ def main(flags):
     if not flags.pipes_basename.startswith("unix:"):
         raise Exception("--pipes_basename has to be of the form unix:/some/path.")
 
-    # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
-    sentry_sdk.init(
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=1.0,
-    )
+    setup_sentry(percent_of_traces_to_capture=1.0)
 
     os.makedirs(GODOT_ERROR_LOG_PATH, exist_ok=True)
     wandb.save(

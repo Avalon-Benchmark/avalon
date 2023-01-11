@@ -14,6 +14,7 @@ import torch
 
 from avalon.agent.godot.godot_gym import AvalonEnv
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
+from avalon.common.error_utils import setup_sentry
 from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import configure_remote_logger
 from avalon.common.log_utils import logger
@@ -83,13 +84,7 @@ def run_evaluation(worlds_path: Path, data_key: str, seed: int) -> None:
 
     s3_client = SimpleS3Client()
 
-    # Uses the SENTRY_DSN environment variable. No events are sent if the variable is not set.
-    sentry_sdk.init(  # type: ignore
-        # Set traces_sample_rate to 1.0 to capture 100%
-        # of transactions for performance monitoring.
-        # We recommend adjusting this value in production.
-        traces_sample_rate=1.0,
-    )
+    setup_sentry(percent_of_traces_to_capture=1.0)
 
     if data_key is None:
         assert worlds_path.is_dir()
