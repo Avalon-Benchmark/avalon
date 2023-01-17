@@ -4,6 +4,7 @@ import shutil
 import signal
 import time
 import uuid
+import warnings
 from multiprocessing import Lock
 from multiprocessing import Pool
 from pathlib import Path
@@ -27,7 +28,6 @@ import numpy as np
 from godot_parser import Node as GDNode
 from typing_extensions import TypeGuard
 
-from avalon.agent.common.util import setup_new_process
 from avalon.common.errors import SwitchError
 from avalon.common.log_utils import configure_parent_logging
 from avalon.common.log_utils import logger
@@ -609,7 +609,7 @@ MAX_NOISE_SCALE = 0.3
 
 
 def generate_world(params: GenerateAvalonWorldParams) -> GeneratedAvalonWorldParams:
-    setup_new_process()
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
     output_path = Path(params.output)
     output_path.mkdir(parents=True)
     rand = np.random.default_rng([params.seed, params.index])
