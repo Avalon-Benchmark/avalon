@@ -608,6 +608,7 @@ GENERATION_FUNCTION_BY_TASK: Final[Dict[AvalonTask, TaskGenerationFunction]] = {
 MAX_NOISE_SCALE = 0.3
 
 
+@logger.catch(reraise=True)
 def generate_world(params: GenerateAvalonWorldParams) -> GeneratedAvalonWorldParams:
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     output_path = Path(params.output)
