@@ -5,6 +5,14 @@ and `avalon-rl` adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Unreleased changes can be installed via `pip install git+https://github.com/Avalon-Benchmark/avalon.git`.
 
+## [1.0.1]
+
+### Fixed
+- Sentry usage is now configurable via `SENTRY_DSN` and the sdk version is bumped to `1.12.1`
+- Removed requirement of dm-tree from core avalon code.
+- Disallowed broken version of scipy
+- Fixes check install script on mac
+
 
 ## [1.0.0]
 

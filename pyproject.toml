@@ -3,7 +3,7 @@ requires = ["setuptools >= 62.4.0", "setuptools_scm[toml] >= 7.0.5"]
 
 [project]
 name = "avalon-rl"
-version = "1.0.0"
+version = "1.0.1"
 readme = "README.md"
 license = {"file" = "LICENSE"}
 description = "Avalon: A Benchmark for RL Generalization Using Procedurally Generated Worlds"
