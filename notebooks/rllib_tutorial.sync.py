@@ -104,7 +104,7 @@ def env_creator(env_config):
         training_protocol=TrainingProtocolChoice.MULTI_TASK_EASY,
         task_difficulty_update=3e-4,
         energy_cost_coefficient=1e-8,
-        seed=seed,
+        env_index=seed,
     )
 
     # This is the core Avalon environment
