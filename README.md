@@ -112,7 +112,8 @@ You can use the `dev` image to explore the bundled notebooks or to build on top 
 ```bash
 docker build -f ./docker/Dockerfile . --target dev --tag=avalon/dev
 
-# by default, this starts a jupyter notebook with your local repo copy mapped into the container
+# The default dev image command starts a jupyter notebook and exposes it on port 8888.
+# A typical dev setup is to expose that notebook and map the local repo to the project repo as a volume:
 docker run -it -p 8888:8888 -v $(pwd):/opt/projects/avalon --gpus 'all,"capabilities=compute,utility,graphics"' avalon/dev 
 ```
 
@@ -149,7 +150,7 @@ Building on Avalon or creating new tasks:
 * [Human observations](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon__all_observations__935781fe-267d-4dcd-9698-714cc891e985.tar.gz)
 * [Human normalized actions](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon__all_actions__935781fe-267d-4dcd-9698-714cc891e985.tar.gz)
 * [Human raw inputs](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon__all_human_inputs__935781fe-267d-4dcd-9698-714cc891e985.tar.gz)
-* [Evaluation worlds](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon_worlds__2f788115-ea32-4041-8cae-6e7cd33091b7.tar.gz)
+* [Evaluation worlds](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon_worlds__benchmark_evaluation_worlds.tar.gz)
 * [Custom Godot engine build](https://github.com/Avalon-Benchmark/godot/releases/)
 
 Final baseline model weights can be found in the [results notebook](notebooks/avalon_results.sync.ipynb).

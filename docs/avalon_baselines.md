@@ -40,21 +40,37 @@ If you only have one GPU and want to train Dreamer (which defaults to using 2):
 python -m avalon.agent.train_dreamer_avalon --train_gpu 0 --inference_gpus 0,
 ```
 
-Logging uses [Weights and Biases](https://wandb.ai/site), so you'll need to create a (free) account to get logging (or you can disable it, with env variable `WANDB_MODE=offline`).
+Logging uses [Weights and Biases](https://wandb.ai/site), so you'll need to create a (free) account to get logging.
+Alternatively, remote collection can be disabled via the env variable `WANDB_MODE=offline` or `wandb offline`.
 
 ## Reproducing our paper results
 
 The training commands above should replicate something very similar to what was run for our paper results. The hyperparameters should be the same as those used in the paper.
 
-The commands above will train the model, and by default will evaluate it on a set of randomly generated evaluation worlds. Checkpoints of the model should be automatically uploaded to Weights and Biases. In our paper, we evaluated the models instead on the same set of 1000 worlds that were used for our human play-tester baseline, in order to be able to directly compare human and agent performance on the exact same worlds.
+The commands above will train the model, and by default will evaluate it on a set of randomly generated evaluation worlds.
+Checkpoints of the model should be automatically uploaded to Weights and Biases if configured.
+In our paper, we evaluated the models on the same set of 1000 worlds that were used for our human play-tester baseline, in order to be able to directly compare human and agent performance on the exact same worlds.
 
-To run evaluation on this set of fixed worlds:
-- download the [set of evaluation worlds](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon_worlds__2f788115-ea32-4041-8cae-6e7cd33091b7.tar.gz) to `/mnt/private/avalon/worlds/viewable_worlds/` (it must be this path, as the world files contain absolute paths to resources that they'll try to load which are also in this folder).
-- get the checkpoint of a trained model. you can use one of our [pretrained checkpoints](./docs/checkpoints.md), or your own trained model.
-- run a command like this (exchanging `ppo` for `dreamer` or whatever algorithm your model was trained with):
-```python -m avalon.agent.train_ppo_avalon --resume_from file://CHECKPOINT_ABS_PATH --is_training False --is_testing True --env_params.fixed_worlds_load_from_path /mnt/private/avalon/worlds/viewable_worlds/```
-- the results will be in the wandb run. the key `test/overall_success_rate` contains the summary metric that we reported in our paper, which is the percent of the worlds that the agent succeeded on (ie successfully at the food). detailed metrics for the success of each task, and histograms of success by task and task difficulty are also presented in order to better understand the agent's capabilities.
+Once you have a trained model checkpoint, you can validate it on the 
+[set of evaluation worlds](https://avalon-benchmark.s3.us-west-2.amazonaws.com/avalon_worlds__benchmark_evaluation_worlds.tar.gz)
+like so:
+```sh
+CHECKPOINT_ABSOLUTE_PATH=/path/to/checkpoint
 
+# NOTE: If you move the worlds directory after downloading,
+# or downloaded manually to a directory other than /tmp/avalon_worlds/benchmark_evaluation_worlds,
+# you'll need to patch the references with `python -m avalon.for_humans patch_paths_in_evaluation_worlds` before running
+EVAL_WORLDS_PATH=/tmp/avalon_worlds/benchmark_evaluation_worlds
+python -m avalon.for_humans download_evaluation_worlds "$EVAL_WORLDS_PATH" --patch_path_references
+
+python -m avalon.agent.train_ppo_avalon --is_training False --is_testing True \
+  --resume_from "file://$CHECKPOINT_ABSOLUTE_PATH"  \
+  --env_params.fixed_worlds_load_from_path "$EVAL_WORLDS_PATH"
+```
+
+The results will be saved to the wandb run.
+The key `test/overall_success_rate` contains the summary metric that we reported in our paper, which is the percent of the worlds that the agent succeeded on (ie successfully at the food).
+detailed metrics for the success of each task, and histograms of success by task and task difficulty are also presented in order to better understand the agent's capabilities.
 
 If you find that our code isn't reproducing a result from our paper, please open an issue with details of what you've tried and we'll be happy to help figure out what's going on!
 

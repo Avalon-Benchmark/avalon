@@ -70,6 +70,7 @@ train = [
   "dm-tree >= 0.1.7",
   "torch >= 1.12.0",
   "torchvision >= 0.13.0",
+  "numba >= 0.56.4"
 ]
 
 

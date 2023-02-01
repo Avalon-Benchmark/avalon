@@ -2,12 +2,15 @@ import os
 import re
 import shutil
 import sys
+from fileinput import FileInput
+from glob import glob
 from pathlib import Path
 from textwrap import dedent
 from textwrap import indent
 from typing import Dict
 from typing import Final
 from typing import Iterable
+from typing import Mapping
 from typing import Optional
 from typing import Sequence
 from typing import Union
@@ -18,6 +21,8 @@ import fire
 
 import avalon.install_godot_binary as binary
 from avalon.common.utils import AVALON_PACKAGE_DIR
+from avalon.contrib.s3_utils import SimpleS3Client
+from avalon.contrib.s3_utils import download_tar_from_s3_and_unpack
 from avalon.contrib.utils import run_local_command
 from avalon.datagen.generate_worlds import generate_evaluation_worlds
 from avalon.datagen.godot_env.interactive_godot_process import AVALON_GODOT_PROJECT_PATH
@@ -37,6 +42,13 @@ GODOT_SOURCE_PATH: Final = Path(AVALON_GODOT_PROJECT_PATH)
 GODOT_PROJECT_FILE_PATH: Final = f"{AVALON_GODOT_PROJECT_PATH}/project.godot"
 OPENXR_PLUGIN_RELEASE: Final = "https://github.com/GodotVR/godot_openxr/releases/download/1.3.0/godot-openxr.zip"
 OPENXR_PLUGIN_PATH: Final = GODOT_SOURCE_PATH / "addons/godot-openxr"
+
+BENCHMARK_BUCKET_NAME: Final = "avalon-benchmark"
+
+
+# Originals: avalon_worlds__2f788115-ea32-4041-8cae-6e7cd33091b7.tar.gz, /tmp/avalon_worlds/2f788115-ea32-4041-8cae-6e7cd33091b7
+BENCHMARK_EVALUATION_WORLDS_TARBALL_NAME: Final = "avalon_worlds__benchmark_evaluation_worlds.tar.gz"
+BENCHMARK_EVALUATION_WORLD_BASE_PATH: Final = "/tmp/avalon_worlds/benchmark_evaluation_worlds"
 
 
 def _parse_task_groups(task_group_list: Union[str, Sequence[str]]) -> Iterable[AvalonTaskGroup]:
@@ -66,6 +78,22 @@ def _edit_project_settings(replacements: Dict[str, str]) -> None:
         project_file.seek(0)
         project_file.write(settings)
         project_file.truncate()
+
+
+def _replace_in_all_files_in_place(file_glob: str, replacements: Mapping[str, str]) -> None:
+    assert (
+        len([find for find in replacements if "\n" in find]) == 0
+    ), f"multi-line find strings are unsupported: {list(replacements.keys())}"
+    files_to_operate_on = glob(file_glob, recursive=True)
+    assert len(files_to_operate_on) > 0, f"{file_glob} contains no files"
+
+    linewise_file_stream = FileInput(files_to_operate_on, inplace=True)
+    for line in linewise_file_stream:
+        for find, replace in replacements.items():
+            line = line.replace(find, replace)
+        # fileinput binds sys.stdout to the current output file.
+        # this is a super non-pythonic approach for something in the std lib but ok for small utils I guess
+        print(line, end="")
 
 
 class VRHelperCLI:
@@ -194,6 +222,52 @@ class VRHelperCLI:
                 index=index,
             )
         )
+
+    def download_evaluation_worlds(self, target_dir: Union[str, Path], patch_path_references: bool = False) -> None:
+        """Download the evaluation worlds to target_dir, and optionally patch_path_references using the target_dir name.
+
+        If patch_path_references is set to false,
+        you must either ensure the worlds are downloaded to `/tmp/avalon_worlds/benchmark_evaluation_worlds`
+        or patch the paths later with `patch_paths_in_evaluation_worlds`
+
+        This can take a few minutes.
+        """
+        s3_file_name = BENCHMARK_EVALUATION_WORLDS_TARBALL_NAME
+        client = SimpleS3Client(bucket_name=BENCHMARK_BUCKET_NAME)
+        target_dir = Path(target_dir)
+        target_dir.mkdir(exist_ok=True, parents=True)
+        print(f"Downloading {s3_file_name} and unpacking into {target_dir}...")
+        output_path = download_tar_from_s3_and_unpack(target_dir / s3_file_name, client)
+        is_downloaded_to_original_path = target_dir.as_posix() == BENCHMARK_EVALUATION_WORLD_BASE_PATH
+        if (not patch_path_references) or is_downloaded_to_original_path:
+            if not is_downloaded_to_original_path:
+                print(
+                    f"WARNING: Downloaded to {target_dir} without patching paths."
+                    f"\n"
+                    f"Worlds will not work unless moved to {BENCHMARK_EVALUATION_WORLD_BASE_PATH} "
+                    f"or patched later with `patch_paths_in_evaluation_worlds`"
+                )
+            return
+        return self.patch_paths_in_evaluation_worlds(output_path)
+
+    def patch_paths_in_evaluation_worlds(
+        self,
+        worlds_path: Union[str, Path],
+        new_path_reference: Optional[str] = None,
+        old_path_reference: str = BENCHMARK_EVALUATION_WORLD_BASE_PATH,
+    ) -> None:
+        """Patch the internal absolute paths in all godot scenes in the given path.
+
+        :param worlds_path: Path to the directory of all evaluation worlds.
+        :param new_path_reference: The new reference to add to the scenes. Defaults to the absolute worlds_path.
+        :param old_path_reference: The path to replace. Defaults to the original base path used in the s3 bucket.
+        """
+        if new_path_reference is None:
+            new_path_reference = Path(worlds_path).absolute().resolve().as_posix()
+        assert os.path.isabs(new_path_reference), f"new path reference must be absolute"
+        assert os.path.isabs(old_path_reference), f"old path reference must be absolute"
+        print(f"Replacing references to {old_path_reference} with {new_path_reference} in {worlds_path}...")
+        _replace_in_all_files_in_place(f"{worlds_path}/**/*.tscn", {old_path_reference: new_path_reference})
 
     def print_godot_project_path(self) -> None:
         print(GODOT_SOURCE_PATH)
