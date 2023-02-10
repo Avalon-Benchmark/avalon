@@ -22,7 +22,10 @@ Use Avalon just like you would any other [`gym`](https://github.com/openai/gym) 
 from avalon.agent.godot.godot_gym import GodotEnvironmentParams
 from avalon.agent.godot.godot_gym import TrainingProtocolChoice
 from avalon.agent.godot.godot_gym import AvalonEnv
+from avalon.common.log_utils import configure_local_logger
 from avalon.datagen.env_helper import display_video
+
+configure_local_logger()
 
 env_params = GodotEnvironmentParams(
     resolution=256,
