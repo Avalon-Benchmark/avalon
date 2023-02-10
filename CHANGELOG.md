@@ -5,6 +5,19 @@ and `avalon-rl` adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 Unreleased changes can be installed via `pip install git+https://github.com/Avalon-Benchmark/avalon.git`.
 
+
+## [1.0.2]
+
+### Added
+- `python -m avalon.for_humans download_evaluation_worlds` and `python -m avalon.for_humans patch_paths_in_evaluation_worlds` for working with evaluation worlds. Latter patches the path references in the given path and can be automatically called after the former with `--patch_path_references`
+- missing `numba` dependency to train extras
+
+### Fixed
+- broken path references to `res://Shaders` in evaluation worlds, made the path the more legible `/tmp/avalon_worlds/benchmark_evaluation_worlds`, and uploaded to `avalon_worlds__benchmark_evaluation_worlds.tar.gz`
+- overshadowed godot path in documented dev container using `ENV GODOT_BINARY_PATH=/usr/local/bin/godot`
+- Add `configure_local_logger` to quickstart
+
+
 ## [1.0.1]
 
 ### Fixed
