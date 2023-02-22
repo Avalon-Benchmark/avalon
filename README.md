@@ -128,7 +128,7 @@ Using Avalon in your own RL code:
   an example of how to create random worlds, take actions as an agent, and display the resulting observations.
 - [**Training a PPO Agent on Avalon using RLlib**](./notebooks/rllib_tutorial.sync.ipynb):
   an example of how to use Avalon with an external RL library/codebase.
-- [**Inspecting Test Worlds**](./noebooks/inspecting_test_worlds.sync.ipynb):
+- [**Inspecting Test Worlds**](./notebooks/inspecting_test_worlds.sync.ipynb):
   Generate and view Avalon worlds using `env.debug_act` and the godot editor.
 
 
