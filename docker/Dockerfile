@@ -28,7 +28,7 @@ ENV PYTHONHASHSEED=0
 RUN pip install -U pip wheel
 RUN pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 torch==1.12.0+cu113 torchvision==0.13.0+cu113
 
-COPY ./docker/gl_setup.sh /tmp/
+COPY ./gl_setup.sh /tmp/
 RUN bash /tmp/gl_setup.sh
 
 COPY . /opt/projects/avalon
