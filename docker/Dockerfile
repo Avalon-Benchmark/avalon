@@ -28,18 +28,18 @@ ENV PYTHONHASHSEED=0
 RUN pip install -U pip wheel
 RUN pip install --no-cache --extra-index-url https://download.pytorch.org/whl/cu113 torch==1.12.0+cu113 torchvision==0.13.0+cu113
 
-COPY ./docker/gl_setup.sh /tmp/
+COPY ./gl_setup.sh /tmp/
 RUN bash /tmp/gl_setup.sh
 
-COPY . /opt/projects/avalon
-RUN pip install -e /opt/projects/avalon
+COPY .. /opt/projects/avalon
+RUN pip install -e git+https://github.com/Avalon-Benchmark/avalon.git#egg=avalon-rl
 
 ENV GODOT_BINARY_PATH=/usr/local/bin/godot
 RUN python -m avalon.install_godot_binary
 
 FROM base as dev
 
-RUN pip install -e /opt/projects/avalon[dev]
+RUN pip install -e git+https://github.com/Avalon-Benchmark/avalon.git#egg=avalon[dev]
 WORKDIR /opt/projects/avalon
 
 CMD jupyter notebook --ip 0.0.0.0 --allow-root
@@ -47,5 +47,5 @@ CMD jupyter notebook --ip 0.0.0.0 --allow-root
 
 FROM base as train
 
-RUN pip install -e /opt/projects/avalon[train]
+RUN pip install -e git+https://github.com/Avalon-Benchmark/avalon.git#egg=avalon-rl[train]
 WORKDIR /opt/projects/avalon
