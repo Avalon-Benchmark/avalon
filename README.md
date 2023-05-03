@@ -67,7 +67,7 @@ python -m avalon.install_godot_binary
 
 ### Ubuntu
 
-Avalon requires NVIDIA GPU on Linux, as we set up the Linux builds for headless GPU rendering.
+Avalon requires NVIDIA GPU on Linux, as we set up the Linux builds for headless GPU rendering. It requires [pytorch>=1.12.0](https://pytorch.org/get-started/locally/) with CUDA to be installed.
 
 ```
 sudo apt install --no-install-recommends libegl-dev libglew-dev libglfw3-dev libnvidia-gl libopengl-dev libosmesa6 mesa-utils-extra
@@ -76,9 +76,7 @@ python -m avalon.install_godot_binary
 python -m avalon.common.check_install
 ```
 
-If you're looking to use our RL code, you'll need additionally:
-- [pytorch>=1.12.0](https://pytorch.org/get-started/locally/) with CUDA
-- the `avalon-rl[train]` extras package: `pip install avalon-rl[train]`
+If you're looking to use our RL code, you'll additionally need the `avalon-rl[train]` extras package: `pip install avalon-rl[train]`
 
 ### Mac
 
